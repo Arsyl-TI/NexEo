@@ -12,7 +12,7 @@ NexEo adalah aplikasi server media personal berbasis web untuk jaringan lokal (L
 * **Streaming Ringan**: Pengodean dinamis dan pemutaran video lancar di berbagai perangkat dalam jaringan LAN yang sama.
 
 ### 2. Pustaka Novel & Scraper Premium
-* **Scraper Otomatis**: Mengunduh bab-bab novel langsung dari sumber target (`dreamy-translations.com`) beserta ilustrasi gambarnya secara otomatis.
+* **Scraper Otomatis**: Mengunduh bab-bab novel langsung dari sumber target (``) beserta ilustrasi gambarnya secara otomatis.
 * **Pembaca Premium**: 
   - Panel kustomisasi pembaca: Tema Terang (Light), Gelap (Dark), Sepia, serta ukuran font yang bisa disesuaikan.
   - Fitur **Lanjutkan Membaca** yang otomatis mengingat progres halaman bab terakhir Anda untuk setiap novel.
