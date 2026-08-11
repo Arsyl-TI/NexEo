@@ -41,4 +41,6 @@ module.exports = {
   NOVEL_DIR: path.join(__dirname, 'data', 'novels'),
   NOVEL_THUMBNAILS_DIR: path.join(__dirname, 'data', 'novels', 'thumbnails'),
   GEMINI_API_KEY: process.env.GEMINI_API_KEY || 'YOUR_GEMINI_API_KEY',
+  LIBRE_TRANSLATE_URL: process.env.LIBRE_TRANSLATE_URL || '',
+  LIBRE_TRANSLATE_KEY: process.env.LIBRE_TRANSLATE_KEY || '',
 };

@@ -12,6 +12,11 @@ const ffmpeg = require('fluent-ffmpeg');
 const ffmpegStatic = require('ffmpeg-static');
 ffmpeg.setFfmpegPath(ffmpegStatic);
 
+const { importEpub } = require('./scripts/epub_importer');
+const { translateBatch } = require('./scripts/translator');
+const { getSourceManager } = require('./server/sources/SourceManager');
+
+const sourceManager = getSourceManager();
 const app = express();
 
 // ============================================================
@@ -204,10 +209,9 @@ function refreshCache(force = false) {
   folderCache = Array.from(folderMap.values()).sort((a, b) => a.name.localeCompare(b.name));
 
   cacheTimestamp = now;
-  console.log(`  ✓ Cache refreshed: ${videoCache.length} videos, ${folderCache.length} folders`);
+  // Cache refresh log removed for cleaner logs
   
   if (thumbnailQueue.length > 0) {
-    console.log(`  ✓ Added ${thumbnailQueue.length} videos to thumbnail processing queue`);
     processThumbnailQueue();
   }
 }
@@ -233,6 +237,27 @@ if (fs.existsSync(config.NOVEL_DIR)) {
 // Novel API Routes
 // ============================================================
 
+const multerEpub = require('multer');
+const epubUpload = multerEpub({ dest: path.join(__dirname, 'scratch', 'epub_temp') });
+
+app.post('/api/novels/import-epub', epubUpload.single('file'), async (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'No EPUB file uploaded' });
+  
+  try {
+    const result = await importEpub(req.file.path, req.file.originalname);
+    
+    // Hapus file temporary setelah berhasil diekstrak
+    try { fs.unlinkSync(req.file.path); } catch (e) {}
+    
+    res.json(result);
+  } catch (err) {
+    // Hapus file temporary jika gagal
+    try { fs.unlinkSync(req.file.path); } catch (e) {}
+    console.error('EPUB Import failed:', err);
+    res.status(500).json({ error: err.message || 'Gagal memproses file EPUB' });
+  }
+});
+
 app.get('/api/novels/library', (req, res) => {
   const libraryPath = path.join(config.NOVEL_DIR, 'library.json');
   if (fs.existsSync(libraryPath)) {
@@ -249,6 +274,126 @@ app.get('/api/novels/:slug/index', (req, res) => {
     res.sendFile(indexPath);
   } else {
     res.json([]);
+  }
+});
+
+// ============================================================
+// Novel Sources API (Multi-Source Plugin System)
+// ============================================================
+
+app.get('/api/novels/sources', (req, res) => {
+  res.json(sourceManager.getAllSources());
+});
+
+app.get('/api/novels/sources/:sourceId/search', async (req, res) => {
+  try {
+    const sourceId = req.params.sourceId;
+    const query = req.query.q || '';
+    const page = parseInt(req.query.page) || 1;
+    
+    const results = await sourceManager.search(sourceId, query, page);
+    res.json({ source: sourceId, query, page, results });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/novels/sources/:sourceId/novel/:slug', async (req, res) => {
+  try {
+    const sourceId = req.params.sourceId;
+    const slug = req.params.slug;
+    
+    const detail = await sourceManager.getNovelDetail(sourceId, slug);
+    res.json(detail);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/novels/sources/:sourceId/novel/:slug/chapter/:chapterFile', async (req, res) => {
+  try {
+    const sourceId = req.params.sourceId;
+    const slug = req.params.slug;
+    const chapterFile = req.params.chapterFile;
+    
+    const content = await sourceManager.getChapterContent(sourceId, slug, chapterFile);
+    res.json({ slug, chapterFile, content });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/novels/:slug/translate-all', async (req, res) => {
+  const safeSlug = path.basename(req.params.slug);
+  const indexPath = path.join(config.NOVEL_DIR, safeSlug, 'master_index.json');
+  
+  if (!fs.existsSync(indexPath)) {
+    return res.status(404).json({ error: 'Novel index not found' });
+  }
+
+  // Lakukan proses ini secara asinkron di latar belakang
+  res.json({ message: 'Terjemahan latar belakang dimulai' });
+
+  try {
+    const chapters = JSON.parse(fs.readFileSync(indexPath, 'utf-8'));
+    
+    for (const chapter of chapters) {
+      const chapterPath = path.join(config.NOVEL_DIR, safeSlug, chapter.file);
+      if (!fs.existsSync(chapterPath)) continue;
+
+      let chapData;
+      try {
+        chapData = JSON.parse(fs.readFileSync(chapterPath, 'utf-8'));
+      } catch (e) {
+        continue;
+      }
+
+      // Periksa apakah bab ini punya teks yang belum diterjemahkan
+      const needsTranslation = chapData.content.some(item => 
+        item.type === 'text' && (!item.translatedValue || item.translatedValue === item.value)
+      );
+
+      if (!needsTranslation) continue; // Skip jika sudah diterjemahkan
+
+      // Ekstrak teks
+      const textElements = chapData.content.filter(item => item.type === 'text');
+      const textsToTranslate = textElements.map(item => item.value);
+
+      console.log(`Translating ${chapter.title} (${textElements.length} blocks)...`);
+      
+      const batchSize = 50; // batch translation API limit
+      const translatedArray = [];
+      
+      for (let i = 0; i < textsToTranslate.length; i += batchSize) {
+        const batch = textsToTranslate.slice(i, i + batchSize);
+        try {
+           const result = await translateBatch(batch, config);
+           translatedArray.push(...result);
+        } catch (e) {
+           console.error("Translation batch failed", e);
+           // Fallback ke teks asli jika error
+           translatedArray.push(...batch);
+        }
+      }
+
+      // Gabungkan kembali
+      let tIndex = 0;
+      chapData.content = chapData.content.map(item => {
+        if (item.type === 'text') {
+          const translated = translatedArray[tIndex] || item.value;
+          tIndex++;
+          return { ...item, translatedValue: translated };
+        }
+        return item;
+      });
+
+      // Tulis ulang file JSON
+      fs.writeFileSync(chapterPath, JSON.stringify(chapData, null, 2));
+      console.log(`Finished translating ${chapter.title}`);
+    }
+    console.log(`Translate All completed for ${safeSlug}`);
+  } catch (err) {
+    console.error("Error in background translate:", err);
   }
 });
 

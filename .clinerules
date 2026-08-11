@@ -1,0 +1,9 @@
+# ATURAN WAJIB SISTEM (SYSTEM RULES)
+
+1. **Prioritas Konteks**: 
+   Sebelum melakukan analisis atau penulisan kode, SELALU baca file `PROJECT_CONTEXT.md` terlebih dahulu. Jangan membaca/scan seluruh file di dalam folder jika informasinya sudah terwakili di `PROJECT_CONTEXT.md`.
+
+2. **Aturan Kelayakan Selesai (Definition of Done)**:
+   Setiap kali kamu menambah fitur baru, mengubah logika yang ada, atau menghapus file:
+   - Kamu **WAJIB** memperbarui (update) bagian terkait di `PROJECT_CONTEXT.md` sebelum memberikan laporan akhir.
+   - Pastikan peta folder, daftar API/route, dan alur data di `PROJECT_CONTEXT.md` tetap 100% akurat dengan kondisi kode terbaru.
