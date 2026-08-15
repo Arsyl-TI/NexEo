@@ -613,6 +613,11 @@ const _routes = [
     component: () => import("./_nuxt/share-DaWtyIYX.js")
   },
   {
+    name: "library",
+    path: "/library",
+    component: () => import("./_nuxt/library-B-iC759z.js")
+  },
+  {
     name: "video-id",
     path: "/video/:id()",
     component: () => import("./_nuxt/_id_-D6YP_0A_.js")
@@ -1004,7 +1009,7 @@ const plugins = [
   pinia_Ab1D_QMMf_egrzVdVYpZ5xs6QSwaKU60pkFvRWVq_9Y
 ];
 const layouts = {
-  default: defineAsyncComponent(() => import("./_nuxt/default-Cb-C6D90.js").then((m) => m.default || m))
+  default: defineAsyncComponent(() => import("./_nuxt/default-D-9G0Yxl.js").then((m) => m.default || m))
 };
 const routeRulesMatcher = _routeRulesMatcher;
 const LayoutLoader = defineComponent({

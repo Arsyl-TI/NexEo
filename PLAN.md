@@ -1,27 +1,22 @@
-# Technical Execution Plan: Video Playback Continue Watching Carousel
+# Technical Execution Plan: Personal Novel Library & Reading History Manager
 
 Target Files:
-- `apps/frontend-nuxt/pages/video/[id].vue`
-- `apps/frontend-nuxt/pages/index.vue`
+- `apps/frontend-nuxt/pages/library.vue`
+- `apps/frontend-nuxt/components/Layout/Navbar.vue`
 
 ## Step-by-Step Execution Steps
 
-1. **Update Video History Tracker (`pages/video/[id].vue`)**:
-   - Save rich watch history object into `localStorage.getItem('recent_videos_history')` whenever video timestamp updates.
-   - History item schema: `{ id, name, title, format, folder, timestamp, duration, timestampFormatted, percent, updatedAt }`.
+1. **Create Personal Library & Reading History Page (`pages/library.vue`)**:
+   - Tab 1: **Koleksi Favorit** (Lists bookmarked novels with cover, author, total chapters, and 1-click read link).
+   - Tab 2: **Riwayat Baca Terakhir** (Scans `localStorage` reading progress, displays novel titles with last read chapter file & timestamp, and 1-click continue reading button).
+   - Clear history button & search input.
 
-2. **Build "Lanjutkan Menonton" Carousel Component (`pages/index.vue`)**:
-   - Read `recent_videos_history` array on mounted in `pages/index.vue`.
-   - Render a horizontal scrollable card carousel above category selection.
-   - Each card features:
-     - Video thumbnail with hover zoom.
-     - Play button overlay with watch progress percentage bar.
-     - Saved timestamp (e.g. `🍿 Lanjutkan di 14:32`).
-     - 1-Click navigation back into video player.
+2. **Add Navbar Navigation Item (`components/Layout/Navbar.vue`)**:
+   - Add 📚 **Pustaka** route link (`/library`) alongside Video, Novel, Share, and Downloader links.
 
 3. **Testing & Build Verification**:
    - Run `pnpm turbo run typecheck` and `pnpm turbo run build`.
 
 4. **Git Commit & Progress Log**:
    - Append log entry in `PROGRESS.md`.
-   - Execute `git add . && git commit -m "feat(video): add Continue Watching playback carousel to video homepage"`.
+   - Execute `git add . && git commit -m "feat(library): add Personal Novel Library & Reading History page"`.

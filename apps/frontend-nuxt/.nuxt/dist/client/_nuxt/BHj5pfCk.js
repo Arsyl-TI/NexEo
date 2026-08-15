@@ -1,0 +1,1 @@
+import{I as o}from"./mwRE3YBO.js";function p(){const t=o().public.apiBase||"/api";return{get:e=>$fetch(e,{baseURL:t}),post:(e,s)=>$fetch(e,{method:"post",body:s,baseURL:t}),put:(e,s)=>$fetch(e,{method:"put",body:s,baseURL:t}),del:e=>$fetch(e,{method:"delete",baseURL:t})}}export{p as u};

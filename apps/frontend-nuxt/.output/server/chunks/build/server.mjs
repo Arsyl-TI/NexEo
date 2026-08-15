@@ -621,6 +621,11 @@ const _routes = [
     component: () => import('./share-DaWtyIYX.mjs')
   },
   {
+    name: "library",
+    path: "/library",
+    component: () => import('./library-B-iC759z.mjs')
+  },
+  {
     name: "video-id",
     path: "/video/:id()",
     component: () => import('./_id_-D6YP_0A_.mjs')
@@ -1012,7 +1017,7 @@ const plugins = [
   pinia_Ab1D_QMMf_egrzVdVYpZ5xs6QSwaKU60pkFvRWVq_9Y
 ];
 const layouts = {
-  default: defineAsyncComponent(() => import('./default-Cb-C6D90.mjs').then((m) => m.default || m))
+  default: defineAsyncComponent(() => import('./default-D-9G0Yxl.mjs').then((m) => m.default || m))
 };
 const routeRulesMatcher = _routeRulesMatcher;
 const LayoutLoader = defineComponent({

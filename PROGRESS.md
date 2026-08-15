@@ -19,3 +19,14 @@
   - Automatically captures rich video watch history (timestamp, duration, percentage, format, folder) into `localStorage.recent_videos_history`.
   - Built a horizontal scrollable **"🍿 Lanjutkan Menonton"** card carousel on the video homepage (`pages/index.vue`).
   - Each card displays video thumbnail, progress bar, watch percentage, saved timestamp, and 1-click resume link.
+
+---
+
+## Feature 3: Personal Novel Library & Reading History Manager
+- **Files Modified**:
+  - `apps/frontend-nuxt/pages/library.vue`
+  - `apps/frontend-nuxt/components/Layout/Navbar.vue`
+- **Implementation Highlights**:
+  - Built a dedicated **"📚 Pustaka & Riwayat Baca Saya"** page (`pages/library.vue`).
+  - Features 2 dynamic tabs: **⏱️ Riwayat Terakhir** (scans reading progress across all novels with 1-click continue reading button) and **📌 Koleksi Favorit** (displays bookmarked novels with quick removal controls).
+  - Added 📚 **Pustaka** navigation link in `Navbar.vue`.

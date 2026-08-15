@@ -6,7 +6,8 @@
       </NuxtLink>
       <nav class="hidden md:flex items-center space-x-1 text-xs font-semibold">
         <NuxtLink to="/" class="px-3 py-1.5 rounded-lg text-gray-300 hover:text-white hover:bg-gray-800/60 transition-all">🎬 Video</NuxtLink>
-        <NuxtLink to="/novels" class="px-3 py-1.5 rounded-lg text-gray-300 hover:text-white hover:bg-gray-800/60 transition-all">📚 Novels</NuxtLink>
+        <NuxtLink to="/novels" class="px-3 py-1.5 rounded-lg text-gray-300 hover:text-white hover:bg-gray-800/60 transition-all">📖 Novels</NuxtLink>
+        <NuxtLink to="/library" class="px-3 py-1.5 rounded-lg text-gray-300 hover:text-white hover:bg-gray-800/60 transition-all">📚 Pustaka</NuxtLink>
         <NuxtLink to="/novel-browser" class="px-3 py-1.5 rounded-lg text-gray-300 hover:text-white hover:bg-gray-800/60 transition-all">🌐 Browser</NuxtLink>
         <NuxtLink to="/share" class="px-3 py-1.5 rounded-lg text-gray-300 hover:text-white hover:bg-gray-800/60 transition-all">📤 Share</NuxtLink>
         <NuxtLink to="/downloader" class="px-3 py-1.5 rounded-lg text-gray-300 hover:text-white hover:bg-gray-800/60 transition-all">⚡ Downloader</NuxtLink>
