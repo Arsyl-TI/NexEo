@@ -8,12 +8,13 @@ export const useMangaStore = defineStore('manga', {
     currentChapterPages: [] as string[],
     loading: false,
     error: null as string | null,
-    readerMode: 'webtoon' as 'webtoon' | 'flip',
-    fitMode: 'width' as 'width' | 'height' | 'full'
+    readerMode: 'webtoon' as 'webtoon' | 'flip' | 'double',
+    fitMode: 'width' as 'width' | 'height' | 'full',
+    readingDirection: 'rtl' as 'rtl' | 'ltr'
   }),
 
   actions: {
-    setReaderMode(mode: 'webtoon' | 'flip') {
+    setReaderMode(mode: 'webtoon' | 'flip' | 'double') {
       this.readerMode = mode
       if (typeof window !== 'undefined') {
         localStorage.setItem('manga_reader_mode', mode)
@@ -27,15 +28,26 @@ export const useMangaStore = defineStore('manga', {
       }
     },
 
+    setReadingDirection(dir: 'rtl' | 'ltr') {
+      this.readingDirection = dir
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('manga_reading_dir', dir)
+      }
+    },
+
     initPreferences() {
       if (typeof window !== 'undefined') {
         const savedMode = localStorage.getItem('manga_reader_mode')
-        if (savedMode === 'webtoon' || savedMode === 'flip') {
+        if (savedMode === 'webtoon' || savedMode === 'flip' || savedMode === 'double') {
           this.readerMode = savedMode
         }
         const savedFit = localStorage.getItem('manga_fit_mode')
         if (savedFit === 'width' || savedFit === 'height' || savedFit === 'full') {
           this.fitMode = savedFit
+        }
+        const savedDir = localStorage.getItem('manga_reading_dir')
+        if (savedDir === 'rtl' || savedDir === 'ltr') {
+          this.readingDirection = savedDir
         }
       }
     },

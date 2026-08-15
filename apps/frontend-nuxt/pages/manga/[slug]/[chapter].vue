@@ -8,17 +8,26 @@
 
     <!-- Reader Header Controls Bar -->
     <header v-if="!immersive" class="sticky top-1 z-30 backdrop-blur-xl py-2.5 mb-4 border border-border/80 bg-card/90 flex flex-wrap items-center justify-between px-3 md:px-6 max-w-5xl mx-auto gap-2.5 rounded-2xl shadow-2xl">
-      <NuxtLink :to="`/manga/${slug}`" class="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-background border border-border text-foreground hover:bg-border/60 flex items-center gap-1.5">
+      <NuxtLink :to="`/manga/${slug}`" class="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-background border border-border text-foreground hover:bg-border/60 flex items-center gap-1.5 shadow-sm">
         ← Detail
       </NuxtLink>
 
       <div class="flex items-center gap-2 flex-wrap">
-        <!-- Mode Switcher: Webtoon vs Flip -->
+        <!-- Mode Switcher: Webtoon vs Single vs Double Spread -->
+        <select v-model="readerMode" @change="mangaStore.setReaderMode(readerMode)" class="bg-background border border-border rounded-full px-3 py-1 text-xs font-semibold text-foreground focus:outline-none focus:border-primary">
+          <option value="webtoon">📜 Webtoon (Vertikal)</option>
+          <option value="flip">📄 1 Halaman (Single)</option>
+          <option value="double">📖 2 Halaman (Buku)</option>
+        </select>
+
+        <!-- Reading Direction (for Flip / Double Mode) -->
         <button 
-          @click="toggleReaderMode" 
-          class="px-3 py-1.5 rounded-full text-xs font-bold transition-all bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white flex items-center gap-1.5 shadow-md active:scale-95"
+          v-if="readerMode !== 'webtoon'"
+          @click="toggleReadingDirection" 
+          class="px-2.5 py-1 rounded-full text-xs font-semibold bg-background border border-border text-foreground hover:bg-border/60 flex items-center gap-1 shadow-sm"
+          :title="readingDir === 'rtl' ? 'Arah Baca: Kanan ke Kiri (Jepang)' : 'Arah Baca: Kiri ke Kanan (Barat)'"
         >
-          <span>{{ readerMode === 'webtoon' ? '📜 Mode Webtoon (Vertical)' : '📄 Mode Manga (Flip)' }}</span>
+          <span>{{ readingDir === 'rtl' ? '🇯🇵 Kanan-ke-Kiri' : '🌐 Kiri-ke-Kanan' }}</span>
         </button>
 
         <!-- Fit Width / Height Selector -->
@@ -37,7 +46,7 @@
           <span>📥</span> <span class="hidden sm:inline">CBZ</span>
         </a>
 
-        <button @click="immersive = !immersive" class="px-3 py-1.5 rounded-full text-xs font-semibold bg-background border border-border text-foreground hover:bg-border/60">
+        <button @click="immersive = !immersive" class="px-3 py-1.5 rounded-full text-xs font-semibold bg-background border border-border text-foreground hover:bg-border/60 shadow-sm">
           {{ immersive ? 'Normal' : 'Immersive' }}
         </button>
       </div>
@@ -69,7 +78,7 @@
     </div>
 
     <!-- MAIN MANGA READER CANVAS -->
-    <main class="max-w-5xl mx-auto px-2 sm:px-4 pb-12">
+    <main :class="readerMode === 'double' ? 'max-w-7xl mx-auto px-2 sm:px-4 pb-12' : 'max-w-5xl mx-auto px-2 sm:px-4 pb-12'">
       <div v-if="loading" class="py-20 flex justify-center"><div class="spinner"></div></div>
       <div v-else-if="pages.length === 0" class="py-20 text-center text-muted-foreground">Tidak ada gambar halaman di chapter ini.</div>
 
@@ -92,7 +101,7 @@
 
       <!-- MODE 2: MANGA FLIP (SINGLE PAGE MODE) -->
       <div v-else-if="readerMode === 'flip'" class="flex flex-col items-center justify-center min-h-[70vh]">
-        <div class="relative max-w-full flex justify-center mb-4">
+        <div class="relative max-w-full flex justify-center mb-4 cursor-pointer" @click="handlePageClick">
           <img 
             :src="pages[currentPageIndex]" 
             :alt="`Halaman ${currentPageIndex + 1}`" 
@@ -107,7 +116,7 @@
             :disabled="currentPageIndex === 0" 
             class="px-4 py-2 rounded-xl bg-background border border-border text-xs font-bold hover:bg-border/60 disabled:opacity-30"
           >
-            ← Halaman Sebelum
+            {{ readingDir === 'rtl' ? 'Halaman Berikut →' : '← Halaman Sebelum' }}
           </button>
 
           <span class="text-xs font-mono font-bold text-amber-400">
@@ -119,7 +128,75 @@
             :disabled="currentPageIndex === pages.length - 1" 
             class="px-4 py-2 rounded-xl bg-background border border-border text-xs font-bold hover:bg-border/60 disabled:opacity-30"
           >
-            Halaman Berikut →
+            {{ readingDir === 'rtl' ? '← Halaman Sebelum' : 'Halaman Berikut →' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- MODE 3: DUAL-PAGE SPREAD (BOOK SIMULATION 2 PAGES SIDE BY SIDE) -->
+      <div v-else-if="readerMode === 'double'" class="flex flex-col items-center justify-center min-h-[70vh]">
+        <!-- Double Spread Canvas -->
+        <div class="flex items-center justify-center gap-1 sm:gap-2 max-w-full mb-4 cursor-pointer" @click="handlePageClick">
+          <!-- Page Slot 1 (Left on LTR, Right on RTL) -->
+          <template v-if="readingDir === 'rtl'">
+            <!-- Left page (next page in RTL) -->
+            <div v-if="doublePages.left" class="flex-1 flex justify-end">
+              <img 
+                :src="doublePages.left" 
+                alt="Left Page"
+                class="rounded-r-none rounded-l-xl shadow-2xl object-contain max-h-[85vh] max-w-full border-r border-border/20"
+              />
+            </div>
+            <!-- Right page (current page in RTL) -->
+            <div v-if="doublePages.right" class="flex-1 flex justify-start">
+              <img 
+                :src="doublePages.right" 
+                alt="Right Page"
+                class="rounded-l-none rounded-r-xl shadow-2xl object-contain max-h-[85vh] max-w-full"
+              />
+            </div>
+          </template>
+
+          <template v-else>
+            <!-- Left page (current page in LTR) -->
+            <div v-if="doublePages.left" class="flex-1 flex justify-end">
+              <img 
+                :src="doublePages.left" 
+                alt="Left Page"
+                class="rounded-r-none rounded-l-xl shadow-2xl object-contain max-h-[85vh] max-w-full border-r border-border/20"
+              />
+            </div>
+            <!-- Right page (next page in LTR) -->
+            <div v-if="doublePages.right" class="flex-1 flex justify-start">
+              <img 
+                :src="doublePages.right" 
+                alt="Right Page"
+                class="rounded-l-none rounded-r-xl shadow-2xl object-contain max-h-[85vh] max-w-full"
+              />
+            </div>
+          </template>
+        </div>
+
+        <!-- Double Page Navigation Toolbar -->
+        <div class="flex items-center gap-4 bg-card/90 border border-border/80 px-6 py-3 rounded-2xl shadow-xl backdrop-blur-md">
+          <button 
+            @click="prevPageDouble" 
+            :disabled="currentPageIndex === 0" 
+            class="px-4 py-2 rounded-xl bg-background border border-border text-xs font-bold hover:bg-border/60 disabled:opacity-30"
+          >
+            {{ readingDir === 'rtl' ? 'Halaman Berikut →' : '← Halaman Sebelum' }}
+          </button>
+
+          <span class="text-xs font-mono font-bold text-amber-400">
+            Hal {{ currentPageIndex + 1 }} - {{ Math.min(currentPageIndex + 2, pages.length) }} dari {{ pages.length }}
+          </span>
+
+          <button 
+            @click="nextPageDouble" 
+            :disabled="currentPageIndex >= pages.length - 2" 
+            class="px-4 py-2 rounded-xl bg-background border border-border text-xs font-bold hover:bg-border/60 disabled:opacity-30"
+          >
+            {{ readingDir === 'rtl' ? '← Halaman Sebelum' : 'Halaman Berikut →' }}
           </button>
         </div>
       </div>
@@ -169,8 +246,9 @@ const readPercent = ref(0)
 const currentPageIndex = ref(0)
 const chaptersList = ref<any[]>([])
 
-const readerMode = computed(() => mangaStore.readerMode)
+const readerMode = ref<'webtoon' | 'flip' | 'double'>('webtoon')
 const fitMode = ref<'width' | 'height' | 'full'>('width')
+const readingDir = ref<'rtl' | 'ltr'>('rtl')
 
 const pages = computed(() => mangaStore.currentChapterPages)
 
@@ -180,14 +258,56 @@ const fitClasses = computed(() => {
   return 'max-w-3xl w-full'
 })
 
-function toggleReaderMode() {
-  const next = readerMode.value === 'webtoon' ? 'flip' : 'webtoon'
-  mangaStore.setReaderMode(next)
+const doublePages = computed(() => {
+  const p = pages.value
+  const idx = currentPageIndex.value
+  if (readingDir.value === 'rtl') {
+    // Right page is first, Left is next
+    return {
+      right: p[idx] || null,
+      left: p[idx + 1] || null
+    }
+  } else {
+    // Left is first, Right is next
+    return {
+      left: p[idx] || null,
+      right: p[idx + 1] || null
+    }
+  }
+})
+
+function toggleReadingDirection() {
+  const next = readingDir.value === 'rtl' ? 'ltr' : 'rtl'
+  readingDir.value = next
+  mangaStore.setReadingDirection(next)
+}
+
+function handlePageClick(e: MouseEvent) {
+  const width = window.innerWidth
+  const clickX = e.clientX
+  if (readerMode.value === 'double') {
+    if (readingDir.value === 'rtl') {
+      if (clickX < width / 2) nextPageDouble()
+      else prevPageDouble()
+    } else {
+      if (clickX < width / 2) prevPageDouble()
+      else nextPageDouble()
+    }
+  } else if (readerMode.value === 'flip') {
+    if (readingDir.value === 'rtl') {
+      if (clickX < width / 2) nextPage()
+      else prevPage()
+    } else {
+      if (clickX < width / 2) prevPage()
+      else nextPage()
+    }
+  }
 }
 
 function prevPage() {
   if (currentPageIndex.value > 0) {
     currentPageIndex.value--
+    updateReadPercent()
   } else if (prevChapter.value) {
     goToPrevChapter()
   }
@@ -196,64 +316,94 @@ function prevPage() {
 function nextPage() {
   if (currentPageIndex.value < pages.value.length - 1) {
     currentPageIndex.value++
+    updateReadPercent()
   } else if (nextChapter.value) {
     goToNextChapter()
   }
 }
 
-const currentIndex = computed(() => {
-  if (!chaptersList.value.length) return -1
-  const currentFileName = chapter.replace(/\\/g, '/').split('/').pop() || chapter
-  return chaptersList.value.findIndex(c => {
-    const fn = (c.file || c.id || '').replace(/\\/g, '/').split('/').pop()
-    return fn === currentFileName || c.file === chapter || c.title === chapter
-  })
+function prevPageDouble() {
+  if (currentPageIndex.value >= 2) {
+    currentPageIndex.value -= 2
+  } else {
+    currentPageIndex.value = 0
+  }
+  updateReadPercent()
+}
+
+function nextPageDouble() {
+  if (currentPageIndex.value + 2 < pages.value.length) {
+    currentPageIndex.value += 2
+  }
+  updateReadPercent()
+}
+
+function updateReadPercent() {
+  if (pages.value.length === 0) return
+  readPercent.value = Math.round(((currentPageIndex.value + 1) / pages.value.length) * 100)
+}
+
+const currentChapterIndex = computed(() => {
+  return chaptersList.value.findIndex((c: any) => c.file === chapter || c.id === chapter)
 })
 
 const prevChapter = computed(() => {
-  if (currentIndex.value > 0) {
-    return chaptersList.value[currentIndex.value - 1]
-  }
+  const idx = currentChapterIndex.value
+  if (idx > 0) return chaptersList.value[idx - 1]
   return null
 })
 
 const nextChapter = computed(() => {
-  if (currentIndex.value >= 0 && currentIndex.value < chaptersList.value.length - 1) {
-    return chaptersList.value[currentIndex.value + 1]
-  }
+  const idx = currentChapterIndex.value
+  if (idx >= 0 && idx < chaptersList.value.length - 1) return chaptersList.value[idx + 1]
   return null
 })
 
 function goToPrevChapter() {
   if (prevChapter.value) {
-    const targetFile = prevChapter.value.file || prevChapter.value.id
-    router.push(`/manga/${slug}/${encodeURIComponent(targetFile)}`)
+    router.push(`/manga/${slug}/${prevChapter.value.file}`)
   }
 }
 
 function goToNextChapter() {
   if (nextChapter.value) {
-    const targetFile = nextChapter.value.file || nextChapter.value.id
-    router.push(`/manga/${slug}/${encodeURIComponent(targetFile)}`)
-  }
-}
-
-function handleKeyDown(e: KeyboardEvent) {
-  if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
-  if (e.key === 'ArrowLeft') {
-    if (readerMode.value === 'flip') prevPage()
-    else goToPrevChapter()
-  } else if (e.key === 'ArrowRight') {
-    if (readerMode.value === 'flip') nextPage()
-    else goToNextChapter()
+    router.push(`/manga/${slug}/${nextChapter.value.file}`)
   }
 }
 
 function handleScroll() {
-  if (typeof window === 'undefined') return
-  const total = document.documentElement.scrollHeight - window.innerHeight
-  if (total > 0) {
-    readPercent.value = Math.min(100, Math.max(0, Math.round((window.scrollY / total) * 100)))
+  if (readerMode.value !== 'webtoon') return
+  const scrollTop = window.scrollY
+  const docHeight = document.documentElement.scrollHeight - window.innerHeight
+  if (docHeight > 0) {
+    readPercent.value = Math.min(100, Math.round((scrollTop / docHeight) * 100))
+  }
+}
+
+function handleKeyDown(e: KeyboardEvent) {
+  const tag = (e.target as HTMLElement)?.tagName?.toLowerCase()
+  if (tag === 'input' || tag === 'textarea' || tag === 'select') return
+
+  if (readerMode.value === 'webtoon') {
+    if (e.key === 'ArrowLeft' && prevChapter.value) goToPrevChapter()
+    else if (e.key === 'ArrowRight' && nextChapter.value) goToNextChapter()
+    else if (e.key === 'f' || e.key === 'F') immersive.value = !immersive.value
+  } else if (readerMode.value === 'flip') {
+    if (readingDir.value === 'rtl') {
+      if (e.key === 'ArrowLeft' || e.key === 'a') nextPage()
+      else if (e.key === 'ArrowRight' || e.key === 'd') prevPage()
+    } else {
+      if (e.key === 'ArrowLeft' || e.key === 'a') prevPage()
+      else if (e.key === 'ArrowRight' || e.key === 'd') nextPage()
+    }
+  } else if (readerMode.value === 'double') {
+    if (readingDir.value === 'rtl') {
+      if (e.key === 'ArrowLeft' || e.key === 'a') nextPageDouble()
+      else if (e.key === 'ArrowRight' || e.key === 'd') prevPageDouble()
+    } else {
+      if (e.key === 'ArrowLeft' || e.key === 'a') prevPageDouble()
+      else if (e.key === 'ArrowRight' || e.key === 'd') nextPageDouble()
+    }
   }
 }
 
@@ -261,28 +411,28 @@ async function loadChapter() {
   loading.value = true
   currentPageIndex.value = 0
   try {
-    const api = useApi()
-    if (!chaptersList.value.length) {
-      const listRes = await api.get<{ success?: boolean; data?: any[] }>(`/manga/${slug}/chapters`)
-      if (listRes?.data) {
-        chaptersList.value = listRes.data
-      }
+    await mangaStore.fetchMangaDetail(slug)
+    if (mangaStore.currentManga?.chapters) {
+      chaptersList.value = mangaStore.currentManga.chapters
     }
-
     await mangaStore.fetchChapterPages(slug, chapter)
     if (typeof window !== 'undefined') {
       localStorage.setItem(`resume_manga_${slug}`, chapter)
     }
-  } catch (e) {
-    console.error('Failed to load manga chapter', e)
+  } catch (err) {
+    console.error('Failed to load manga chapter', err)
   } finally {
     loading.value = false
+    updateReadPercent()
   }
 }
 
 onMounted(() => {
   mangaStore.initPreferences()
+  readerMode.value = mangaStore.readerMode
   fitMode.value = mangaStore.fitMode
+  readingDir.value = mangaStore.readingDirection
+
   void loadChapter()
   if (typeof window !== 'undefined') {
     window.addEventListener('scroll', handleScroll)
@@ -297,10 +447,12 @@ onBeforeUnmount(() => {
   }
 })
 
-watch(() => route.params.chapter, (next) => { if (typeof next === 'string') void loadChapter() })
+watch(() => route.params.chapter, (next) => {
+  if (typeof next === 'string') void loadChapter()
+})
 </script>
 
 <style scoped>
-.spinner { width: 1.5rem; height: 1.5rem; border: 3px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin .8s linear infinite; }
+.spinner { width: 2.5rem; height: 2.5rem; border: 3px solid #8b5cf6; border-right-color: transparent; border-radius: 50%; animation: spin .8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 </style>

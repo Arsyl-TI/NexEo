@@ -135,3 +135,14 @@
   - **Batch Multi-URL Insertion Mode**: Added tab switcher to paste 10+ direct download links at once with line-by-line parsing and smart filename auto-detection.
   - **Status Filter Tabs**: Added quick tabs `Semua`, `⚡ Aktif (Downloading/Pending)`, `✓ Selesai`, and `❌ Gagal/Batal`.
   - **1-Click Retry & Batch Clear**: Added `🔄 Ulangi` button on failed tasks to quickly restart downloads, and `🗑️ Bersihkan Selesai` to prune completed tasks from history.
+
+---
+
+## Feature 13: Manga Dual-Page Spread Reader Mode (Book Simulation)
+- **Files Modified**:
+  - `apps/frontend-nuxt/stores/manga.ts`
+  - `apps/frontend-nuxt/pages/manga/[slug]/[chapter].vue`
+- **Implementation Highlights**:
+  - **2-Page Double Spread Book View (`double`)**: Simulates reading an open physical manga tankobon book with 2 pages side-by-side.
+  - **Japanese Right-to-Left (RTL) Reading Direction**: Faithful right-to-left page ordering and left-to-right (LTR) toggle support.
+  - **Click & Keyboard Arrow Navigation**: Clicking on the left/right half of the screen or pressing `←`/`→` (or `A`/`D`) advances pages by pairs naturally.
