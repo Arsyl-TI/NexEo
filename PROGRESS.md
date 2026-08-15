@@ -101,3 +101,14 @@
   - Interactive timer modal with presets (15m, 25m Pomodoro, 45m, 60m 1 Jam) and quick extend (`+5 Menit`).
   - **Gentle Musical Chime**: Synthesizes a soft 3-tone harmonic chime (C5-E5-G5) via Web Audio API on timer completion.
   - **Sleep Mode Auto-Pause**: Automatically shuts off active Audiobook Speech synthesis and Ambient Sound generators when the timer expires to prevent overnight battery/audio drain.
+
+---
+
+## Feature 10: Video Subtitle Sync, External Track Loader, & Theater/PiP Suite
+- **Files Modified**:
+  - `apps/frontend-nuxt/pages/video/[id].vue`
+- **Implementation Highlights**:
+  - **External Subtitle Loader**: Integrated 1-click file selector to load external `.srt` or `.vtt` subtitles with client-side SRT to WebVTT conversion on-the-fly.
+  - **Subtitle Delay Offset Controller**: Added live sub-second subtitle sync adjuster (`-0.5s`, `-0.1s`, `+0.1s`, `+0.5s`, and `Reset`) to fix out-of-sync audio & subtitles.
+  - **Theater Mode (Cinema Width Expansion)**: Added 🎭 **Mode Bioskop** toggle button to expand video canvas width for an immersive viewing experience.
+  - **Picture-in-Picture & Keyboard Shortcuts**: Added 📺 **PiP** button and ⌨️ pintasan keyboard modal (`Space/K`, `J/L`, `F`, `T`, `M`, `P`).

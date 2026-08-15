@@ -1,5 +1,5 @@
 <template>
-  <div class="video-player-page min-h-screen bg-background">
+  <div class="video-player-page min-h-screen bg-background pb-16">
     <div v-if="loading" class="flex justify-center items-center min-h-[50vh]">
       <div class="spinner"></div>
     </div>
@@ -14,13 +14,45 @@
       </div>
     </div>
     
-    <div v-else-if="video" class="max-w-6xl mx-auto p-4 lg:p-6">
-      <button @click="$router.back()" class="mb-4 px-4 py-2 flex items-center gap-2 text-muted-foreground bg-card/60 hover:bg-border/60 rounded-full text-xs font-medium w-max transition border border-border/50">
-        <span>←</span> Kembali
-      </button>
+    <div v-else-if="video" :class="isTheaterMode ? 'w-full px-2 sm:px-4' : 'max-w-6xl mx-auto p-4 lg:p-6'">
+      <!-- Navigation & Mode Controls -->
+      <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+        <button @click="$router.back()" class="px-4 py-2 flex items-center gap-2 text-muted-foreground bg-card/60 hover:bg-border/60 rounded-full text-xs font-medium transition border border-border/50 shadow-sm">
+          <span>←</span> Kembali
+        </button>
+
+        <div class="flex items-center gap-2">
+          <!-- Theater Mode Toggle -->
+          <button 
+            @click="isTheaterMode = !isTheaterMode" 
+            :class="['px-3 py-1.5 rounded-full text-xs font-semibold border transition-all flex items-center gap-1.5 shadow-sm', isTheaterMode ? 'bg-primary text-white border-primary shadow-md' : 'bg-card border-border text-foreground hover:bg-border/60']"
+            title="Mode Bioskop (Theater Mode)"
+          >
+            <span>🎭</span> {{ isTheaterMode ? 'Mode Normal' : 'Mode Bioskop' }}
+          </button>
+
+          <!-- Picture in Picture Button -->
+          <button 
+            @click="togglePictureInPicture" 
+            class="px-3 py-1.5 bg-card hover:bg-border border border-border rounded-full text-xs font-semibold text-foreground transition-all flex items-center gap-1.5 shadow-sm"
+            title="Picture in Picture (Floating Video)"
+          >
+            <span>📺</span> PiP
+          </button>
+
+          <!-- Keyboard Shortcuts Modal Trigger -->
+          <button 
+            @click="showShortcutsModal = true" 
+            class="px-2.5 py-1.5 bg-card hover:bg-border border border-border rounded-full text-xs font-semibold text-muted-foreground hover:text-foreground transition-all shadow-sm"
+            title="Pintasan Keyboard"
+          >
+            ⌨️
+          </button>
+        </div>
+      </div>
 
       <!-- Resume Watch Banner Prompt -->
-      <div v-if="showResumeBanner" class="mb-4 p-4 rounded-2xl bg-purple-900/30 border border-purple-500/40 text-purple-200 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xl backdrop-blur-md">
+      <div v-if="showResumeBanner" class="mb-4 p-4 rounded-2xl bg-purple-900/30 border border-purple-500/40 text-purple-200 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xl backdrop-blur-md animate-fade-in">
         <div class="flex items-center gap-3">
           <span class="text-xl">⏯️</span>
           <span class="text-sm font-medium">Anda sebelumnya menonton sampai <b>{{ formatTime(savedTime) }}</b>. Lanjutkan?</span>
@@ -31,6 +63,7 @@
         </div>
       </div>
 
+      <!-- Main Video Player Canvas -->
       <div class="aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl mb-4 relative border border-border/80">
         <video 
           ref="videoElement" 
@@ -41,8 +74,42 @@
           @timeupdate="onTimeUpdate"
         >
           <source :src="`/api/video/${encodeURIComponent(video.id)}/stream`" :type="mimeType">
+          <track 
+            v-if="customSubtitleUrl" 
+            :src="customSubtitleUrl" 
+            kind="subtitles" 
+            srclang="id" 
+            :label="customSubtitleLabel || 'External Subtitle'" 
+            default
+          />
           Browser Anda tidak mendukung video tag.
         </video>
+      </div>
+
+      <!-- Subtitle Sync & Custom Subtitle Loader Toolbar -->
+      <div class="bg-card/60 border border-border/60 p-4 rounded-2xl shadow-lg backdrop-blur-xl mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <!-- Subtitle Loader -->
+        <div class="flex items-center gap-3 flex-wrap">
+          <label class="px-3 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 rounded-xl text-xs font-semibold cursor-pointer transition-all flex items-center gap-1.5 shadow-sm">
+            <span>💬</span> Muat Subtitle (.srt / .vtt)
+            <input type="file" accept=".srt,.vtt" class="hidden" @change="handleSubtitleUpload" />
+          </label>
+
+          <span v-if="customSubtitleLabel" class="text-xs font-mono bg-card border border-border text-foreground px-2.5 py-1 rounded-lg truncate max-w-xs">
+            ✓ {{ customSubtitleLabel }}
+          </span>
+        </div>
+
+        <!-- Subtitle Delay Sync Controller -->
+        <div v-if="customSubtitleUrl" class="flex items-center gap-2 flex-wrap">
+          <span class="text-xs text-muted-foreground font-medium">⏱️ Sinkron Subtitle:</span>
+          <button @click="adjustSubtitleDelay(-0.5)" class="px-2 py-1 bg-background border border-border rounded-lg text-xs font-mono hover:bg-card">-0.5s</button>
+          <button @click="adjustSubtitleDelay(-0.1)" class="px-2 py-1 bg-background border border-border rounded-lg text-xs font-mono hover:bg-card">-0.1s</button>
+          <span class="text-xs font-mono font-bold text-primary px-1">{{ subtitleDelay >= 0 ? `+${subtitleDelay.toFixed(1)}s` : `${subtitleDelay.toFixed(1)}s` }}</span>
+          <button @click="adjustSubtitleDelay(0.1)" class="px-2 py-1 bg-background border border-border rounded-lg text-xs font-mono hover:bg-card">+0.1s</button>
+          <button @click="adjustSubtitleDelay(0.5)" class="px-2 py-1 bg-background border border-border rounded-lg text-xs font-mono hover:bg-card">+0.5s</button>
+          <button @click="resetSubtitleDelay" class="px-2 py-1 bg-card border border-border rounded-lg text-[10px] text-muted-foreground hover:text-foreground">Reset</button>
+        </div>
       </div>
 
       <!-- Quick Control Speed Toolbar & Download -->
@@ -100,6 +167,45 @@
         </div>
       </div>
     </div>
+
+    <!-- Keyboard Shortcuts Modal -->
+    <div v-if="showShortcutsModal" @click.self="showShortcutsModal = false" class="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
+      <div class="bg-card border border-border rounded-3xl max-w-sm w-full p-6 shadow-2xl relative">
+        <button @click="showShortcutsModal = false" class="absolute top-4 right-4 text-muted-foreground hover:text-foreground text-sm p-1 rounded-lg">✕</button>
+
+        <h3 class="text-base font-bold text-foreground mb-1 flex items-center gap-2">
+          <span>⌨️</span> Pintasan Keyboard
+        </h3>
+        <p class="text-xs text-muted-foreground mb-4">Kontrol pemutaran video dengan cepat</p>
+
+        <div class="space-y-2 text-xs">
+          <div class="flex items-center justify-between p-2 rounded-xl bg-background border border-border/60">
+            <span class="text-muted-foreground">Putar / Jeda</span>
+            <kbd class="px-2 py-0.5 bg-card border border-border rounded text-foreground font-mono font-bold">Space / K</kbd>
+          </div>
+          <div class="flex items-center justify-between p-2 rounded-xl bg-background border border-border/60">
+            <span class="text-muted-foreground">Mundur 10 Detik</span>
+            <kbd class="px-2 py-0.5 bg-card border border-border rounded text-foreground font-mono font-bold">J / ←</kbd>
+          </div>
+          <div class="flex items-center justify-between p-2 rounded-xl bg-background border border-border/60">
+            <span class="text-muted-foreground">Maju 10 Detik</span>
+            <kbd class="px-2 py-0.5 bg-card border border-border rounded text-foreground font-mono font-bold">L / →</kbd>
+          </div>
+          <div class="flex items-center justify-between p-2 rounded-xl bg-background border border-border/60">
+            <span class="text-muted-foreground">Layar Penuh (Fullscreen)</span>
+            <kbd class="px-2 py-0.5 bg-card border border-border rounded text-foreground font-mono font-bold">F</kbd>
+          </div>
+          <div class="flex items-center justify-between p-2 rounded-xl bg-background border border-border/60">
+            <span class="text-muted-foreground">Mode Bioskop</span>
+            <kbd class="px-2 py-0.5 bg-card border border-border rounded text-foreground font-mono font-bold">T</kbd>
+          </div>
+          <div class="flex items-center justify-between p-2 rounded-xl bg-background border border-border/60">
+            <span class="text-muted-foreground">Mute Suara</span>
+            <kbd class="px-2 py-0.5 bg-card border border-border rounded text-foreground font-mono font-bold">M</kbd>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -107,6 +213,7 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useVideoStore } from '~/stores/video'
+import { useToast } from '~/composables/useToast'
 import type { VideoItem } from '@nexeo/shared/types/video'
 import Plyr from 'plyr'
 import 'plyr/dist/plyr.css'
@@ -114,6 +221,7 @@ import 'plyr/dist/plyr.css'
 const route = useRoute()
 const router = useRouter()
 const videoStore = useVideoStore()
+const { success, error: showError } = useToast()
 
 const videoId = computed(() => {
   const id = route.params.id
@@ -129,6 +237,14 @@ let player: Plyr | null = null
 const savedTime = ref(0)
 const showResumeBanner = ref(false)
 const currentSpeed = ref(1)
+const isTheaterMode = ref(false)
+const showShortcutsModal = ref(false)
+
+// Custom Subtitle State
+const customSubtitleUrl = ref<string | null>(null)
+const customSubtitleLabel = ref<string | null>(null)
+const subtitleDelay = ref(0)
+let rawVttContent = ''
 
 const mimeType = computed(() => {
   if (!video.value) return 'video/mp4'
@@ -213,7 +329,139 @@ function setPlaybackSpeed(s: number) {
   }
 }
 
+async function togglePictureInPicture() {
+  if (!videoElement.value) return
+  try {
+    if (document.pictureInPictureElement) {
+      await document.exitPictureInPicture()
+    } else {
+      await videoElement.value.requestPictureInPicture()
+    }
+  } catch (err: any) {
+    showError('Browser Anda tidak mengizinkan mode Picture-in-Picture.')
+  }
+}
+
+// Convert .SRT subtitles to WebVTT format
+function srtToVtt(srt: string): string {
+  let vtt = 'WEBVTT\n\n'
+  const normalized = srt.replace(/\r\n/g, '\n').replace(/\r/g, '\n')
+  const blocks = normalized.split('\n\n')
+  for (const block of blocks) {
+    const lines = block.trim().split('\n')
+    if (lines.length >= 2) {
+      let timeIndex = 0
+      if (!lines[0].includes('-->') && lines[1] && lines[1].includes('-->')) {
+        timeIndex = 1
+      }
+      if (lines[timeIndex] && lines[timeIndex].includes('-->')) {
+        const timeLine = lines[timeIndex].replace(/,/g, '.')
+        const textLines = lines.slice(timeIndex + 1).join('\n')
+        vtt += `${timeLine}\n${textLines}\n\n`
+      }
+    }
+  }
+  return vtt
+}
+
+function handleSubtitleUpload(e: Event) {
+  const target = e.target as HTMLInputElement
+  if (!target.files || target.files.length === 0) return
+  const file = target.files[0]
+  const reader = new FileReader()
+
+  reader.onload = (event) => {
+    const content = event.target?.result as string
+    if (!content) return
+
+    rawVttContent = file.name.endsWith('.srt') ? srtToVtt(content) : content
+    subtitleDelay.value = 0
+    createSubtitleBlob(rawVttContent)
+    customSubtitleLabel.value = file.name
+    success(`Subtitle "${file.name}" berhasil dimuat!`)
+  }
+
+  reader.readAsText(file)
+}
+
+function parseVttTimestamp(timeStr: string): number {
+  const parts = timeStr.trim().split(':')
+  if (parts.length === 3) {
+    const hours = parseFloat(parts[0])
+    const minutes = parseFloat(parts[1])
+    const seconds = parseFloat(parts[2])
+    return hours * 3600 + minutes * 60 + seconds
+  } else if (parts.length === 2) {
+    const minutes = parseFloat(parts[0])
+    const seconds = parseFloat(parts[1])
+    return minutes * 60 + seconds
+  }
+  return 0
+}
+
+function formatVttTimestamp(sec: number): string {
+  const s = Math.max(0, sec)
+  const hours = Math.floor(s / 3600)
+  const minutes = Math.floor((s % 3600) / 60)
+  const seconds = (s % 60).toFixed(3)
+  const padH = hours.toString().padStart(2, '0')
+  const padM = minutes.toString().padStart(2, '0')
+  const padS = seconds.padStart(6, '0')
+  return `${padH}:${padM}:${padS}`
+}
+
+function createSubtitleBlob(vttText: string) {
+  if (customSubtitleUrl.value) {
+    URL.revokeObjectURL(customSubtitleUrl.value)
+  }
+  const blob = new Blob([vttText], { type: 'text/vtt' })
+  customSubtitleUrl.value = URL.createObjectURL(blob)
+}
+
+function adjustSubtitleDelay(offsetSec: number) {
+  if (!rawVttContent) return
+  subtitleDelay.value += offsetSec
+
+  // Shift all VTT timestamps by delay
+  const lines = rawVttContent.split('\n')
+  const adjustedLines = lines.map(line => {
+    if (line.includes('-->')) {
+      const [startStr, endStr] = line.split('-->')
+      if (startStr && endStr) {
+        const start = parseVttTimestamp(startStr) + subtitleDelay.value
+        const end = parseVttTimestamp(endStr) + subtitleDelay.value
+        return `${formatVttTimestamp(start)} --> ${formatVttTimestamp(end)}`
+      }
+    }
+    return line
+  })
+
+  createSubtitleBlob(adjustedLines.join('\n'))
+}
+
+function resetSubtitleDelay() {
+  subtitleDelay.value = 0
+  if (rawVttContent) {
+    createSubtitleBlob(rawVttContent)
+  }
+}
+
+function handleGlobalKeydown(e: KeyboardEvent) {
+  const tag = (e.target as HTMLElement)?.tagName?.toLowerCase()
+  if (tag === 'input' || tag === 'textarea' || tag === 'select') return
+
+  if (e.key === 't' || e.key === 'T') {
+    isTheaterMode.value = !isTheaterMode.value
+  } else if (e.key === 'p' || e.key === 'P') {
+    togglePictureInPicture()
+  }
+}
+
 onMounted(async () => {
+  if (typeof window !== 'undefined') {
+    window.addEventListener('keydown', handleGlobalKeydown)
+  }
+
   if (!videoId.value) {
     error.value = 'ID Video tidak valid'
     loading.value = false
@@ -249,6 +497,12 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
+  if (typeof window !== 'undefined') {
+    window.removeEventListener('keydown', handleGlobalKeydown)
+  }
+  if (customSubtitleUrl.value) {
+    URL.revokeObjectURL(customSubtitleUrl.value)
+  }
   if (player) {
     player.destroy()
   }
