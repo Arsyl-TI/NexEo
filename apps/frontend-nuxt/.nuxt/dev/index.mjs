@@ -2147,15 +2147,15 @@ _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw
 const assets = {
   "/index.mjs": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"41673-5QV6NWVAx90XhtZqilal+tMVdfI\"",
-    "mtime": "2026-08-15T16:48:58.412Z",
+    "etag": "\"41673-K/nEQ2I+i9eiJMcxZmRQj7YsrbY\"",
+    "mtime": "2026-08-15T16:49:14.833Z",
     "size": 267891,
     "path": "index.mjs"
   },
   "/index.mjs.map": {
     "type": "application/json",
     "etag": "\"f4b50-YVLKeHLYv/ou0YHgx0Lttt/MieM\"",
-    "mtime": "2026-08-15T16:48:58.413Z",
+    "mtime": "2026-08-15T16:49:14.833Z",
     "size": 1002320,
     "path": "index.mjs.map"
   }
@@ -4159,7 +4159,7 @@ const detailCache = /* @__PURE__ */ new Map();
 const CACHE_TTL = 15 * 60 * 1e3;
 const DEFAULT_HEADERS = {
   "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-  "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+  "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
   "Accept-Language": "id,en-US;q=0.9,en;q=0.8"
 };
 async function searchMangaDex(query, lang = "id") {
@@ -4348,165 +4348,7 @@ async function getMangaDexChapterPages(chapterId) {
     return [];
   }
 }
-const WESTMANGA_BASE = "https://westmanga.fun";
-async function searchWestManga(query) {
-  const cacheKey = `westmanga_${query.trim().toLowerCase()}`;
-  const now = Date.now();
-  if (searchCache.has(cacheKey)) {
-    const cached = searchCache.get(cacheKey);
-    if (cached.expiry > now) return cached.data;
-  }
-  try {
-    const url = query && query.trim() ? `${WESTMANGA_BASE}/?s=${encodeURIComponent(query.trim())}` : `${WESTMANGA_BASE}/manga/`;
-    const res = await axios.get(url, {
-      timeout: 12e3,
-      headers: { ...DEFAULT_HEADERS, "Referer": WESTMANGA_BASE }
-    });
-    const $ = cheerio.load(res.data);
-    const results = [];
-    $(".listupd .bs, .listupd .bsx").each((_, el) => {
-      const a = $(el).find("a").first();
-      const link = a.attr("href") || "";
-      const title = $(el).find(".tt, .bigor .tt, h4").first().text().trim() || a.attr("title") || "";
-      const img = $(el).find("img").first();
-      const cover = img.attr("data-src") || img.attr("src") || null;
-      const status = $(el).find(".status, .type").first().text().trim() || "Ongoing";
-      if (title && link) {
-        const id = Buffer.from(link).toString("base64url");
-        const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || id;
-        results.push({
-          id,
-          title,
-          slug,
-          cover,
-          author: "WestManga Team",
-          description: "Komik terjemahan Bahasa Indonesia dari WestManga.",
-          status,
-          tags: ["Manhwa", "Indonesia", "WestManga"],
-          provider: "westmanga",
-          availableLanguages: ["id"],
-          url: link
-        });
-      }
-    });
-    searchCache.set(cacheKey, { data: results, expiry: now + CACHE_TTL });
-    return results;
-  } catch (err) {
-    console.error("[WestManga Search Error]", err.message);
-    return [];
-  }
-}
-async function getWestMangaDetail(mangaIdOrUrl) {
-  const cacheKey = `westmanga_detail_${mangaIdOrUrl}`;
-  const now = Date.now();
-  if (detailCache.has(cacheKey)) {
-    const cached = detailCache.get(cacheKey);
-    if (cached.expiry > now) return cached.data;
-  }
-  try {
-    let url = mangaIdOrUrl;
-    if (!url.startsWith("http")) {
-      url = Buffer.from(mangaIdOrUrl, "base64url").toString("utf-8");
-    }
-    const res = await axios.get(url, {
-      timeout: 12e3,
-      headers: { ...DEFAULT_HEADERS, "Referer": WESTMANGA_BASE }
-    });
-    const $ = cheerio.load(res.data);
-    const title = $(".entry-title, .infox h1, h1.title").first().text().trim() || "Unknown Manga";
-    const imgEl = $(".thumb img, .infox img").first();
-    const cover = imgEl.attr("data-src") || imgEl.attr("src") || null;
-    const desc = $(".desc, .sinopsis, .entry-content p").first().text().trim() || "Sinopsis belum tersedia.";
-    const author = $('.infotable tr:contains("Author"), .spe span:contains("Author")').text().replace(/Author\s*:/i, "").trim() || "WestManga";
-    const tags = [];
-    $(".genres a, .mgen a, .seriestagenre a").each((_, el) => {
-      const t = $(el).text().trim();
-      if (t) tags.push(t);
-    });
-    const chapters = [];
-    $(".clx li, .eplister li, #chapterlist li").each((_, el) => {
-      const a = $(el).find("a").first();
-      const chUrl = a.attr("href") || "";
-      const chTitle = $(el).find(".chapternum, .epl-num").first().text().trim() || a.text().trim();
-      const date = $(el).find(".chapterdate, .epl-date").first().text().trim() || "";
-      if (chUrl && chTitle) {
-        const numMatch = chTitle.match(/\d+(\.\d+)?/);
-        const chapterNum = numMatch ? numMatch[0] : String(chapters.length + 1);
-        const chId = Buffer.from(chUrl).toString("base64url");
-        chapters.push({
-          id: chId,
-          chapter: chapterNum,
-          title: chTitle,
-          language: "id",
-          publishDate: date,
-          scanlationGroup: "WestManga",
-          url: chUrl
-        });
-      }
-    });
-    chapters.sort((a, b) => parseFloat(a.chapter || "0") - parseFloat(b.chapter || "0"));
-    const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || mangaIdOrUrl;
-    const manga = {
-      id: mangaIdOrUrl,
-      title,
-      slug,
-      cover,
-      author,
-      description: desc,
-      status: "ongoing",
-      tags,
-      provider: "westmanga",
-      availableLanguages: ["id"],
-      chapterCount: chapters.length,
-      url
-    };
-    const result = { manga, chapters };
-    detailCache.set(cacheKey, { data: result, expiry: now + CACHE_TTL });
-    return result;
-  } catch (err) {
-    console.error("[WestManga Detail Error]", err.message);
-    return null;
-  }
-}
-async function getWestMangaChapterPages(chapterIdOrUrl) {
-  var _a, _b;
-  try {
-    let url = chapterIdOrUrl;
-    if (!url.startsWith("http")) {
-      url = Buffer.from(chapterIdOrUrl, "base64url").toString("utf-8");
-    }
-    const res = await axios.get(url, {
-      timeout: 12e3,
-      headers: { ...DEFAULT_HEADERS, "Referer": WESTMANGA_BASE }
-    });
-    const $ = cheerio.load(res.data);
-    const images = [];
-    const scriptContent = $('script:contains("ts_reader")').html() || "";
-    if (scriptContent) {
-      const match = scriptContent.match(/ts_reader\.run\((.*?)\);/s);
-      if (match && match[1]) {
-        try {
-          const json = JSON.parse(match[1]);
-          if ((_b = (_a = json.sources) == null ? void 0 : _a[0]) == null ? void 0 : _b.images) {
-            return json.sources[0].images;
-          }
-        } catch {
-        }
-      }
-    }
-    $("#readerarea img").each((_, el) => {
-      const src = $(el).attr("data-src") || $(el).attr("src") || "";
-      if (src && src.startsWith("http") && !src.includes("banner") && !src.includes("iklan")) {
-        images.push(src.trim());
-      }
-    });
-    return images;
-  } catch (err) {
-    console.error("[WestManga Pages Error]", err.message);
-    return [];
-  }
-}
-const KOMIKU_BASE = "https://komiku.id";
+const KOMIKU_HOST = "https://komiku.org";
 async function searchKomiku(query) {
   const cacheKey = `komiku_${query.trim().toLowerCase()}`;
   const now = Date.now();
@@ -4515,21 +4357,23 @@ async function searchKomiku(query) {
     if (cached.expiry > now) return cached.data;
   }
   try {
-    const url = query && query.trim() ? `https://api.komiku.id/manga/page/1/?s=${encodeURIComponent(query.trim())}` : `https://komiku.id/daftar-komik/`;
-    const res = await axios.get(url, {
+    const searchUrl = query && query.trim() ? `https://api.komiku.org/?s=${encodeURIComponent(query.trim())}` : `https://komiku.org/pustaka/?orderby=date`;
+    const res = await axios.get(searchUrl, {
       timeout: 12e3,
-      headers: { ...DEFAULT_HEADERS, "Referer": KOMIKU_BASE }
+      headers: { ...DEFAULT_HEADERS, "Referer": KOMIKU_HOST }
     });
     const $ = cheerio.load(res.data);
     const results = [];
-    $(".bvl, .animepost").each((_, el) => {
-      const a = $(el).find("a").first();
-      const link = a.attr("href") || "";
-      const title = $(el).find("h3, .title, h4").first().text().trim() || a.attr("title") || "";
+    $(".bge, .bvl").each((_, el) => {
+      const a = $(el).find(".kan a, .bgei a, a").first();
+      let link = a.attr("href") || "";
+      const title = $(el).find("h3, .title").first().text().trim() || a.attr("title") || "";
       const img = $(el).find("img").first();
       const cover = img.attr("data-src") || img.attr("src") || null;
+      const desc = $(el).find("p").first().text().trim() || "Komik Bahasa Indonesia";
       if (title && link) {
-        const id = Buffer.from(link.startsWith("http") ? link : `${KOMIKU_BASE}${link}`).toString("base64url");
+        if (!link.startsWith("http")) link = `${KOMIKU_HOST}${link}`;
+        const id = Buffer.from(link).toString("base64url");
         const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || id;
         results.push({
           id,
@@ -4537,12 +4381,12 @@ async function searchKomiku(query) {
           slug,
           cover,
           author: "Komiku Author",
-          description: "Manga terjemahan Bahasa Indonesia dari Komiku.id.",
+          description: desc,
           status: "Ongoing",
-          tags: ["Manga", "Komiku.id", "Indonesia"],
+          tags: ["Manga", "Komiku", "Bahasa Indonesia"],
           provider: "komiku",
           availableLanguages: ["id"],
-          url: link.startsWith("http") ? link : `${KOMIKU_BASE}${link}`
+          url: link
         });
       }
     });
@@ -4567,37 +4411,37 @@ async function getKomikuDetail(mangaIdOrUrl) {
     }
     const res = await axios.get(url, {
       timeout: 12e3,
-      headers: { ...DEFAULT_HEADERS, "Referer": KOMIKU_BASE }
+      headers: { ...DEFAULT_HEADERS, "Referer": KOMIKU_HOST }
     });
     const $ = cheerio.load(res.data);
-    const title = $("#Judul h1, h1.entry-title").first().text().trim() || "Unknown Manga";
+    const title = $("#Judul h1, h1.entry-title, h1").first().text().trim() || "Unknown Manga";
     const imgEl = $(".ims img, .thumb img").first();
     const cover = imgEl.attr("data-src") || imgEl.attr("src") || null;
-    const desc = $(".desc, .sinopsis, p.desc").first().text().trim() || "Sinopsis belum tersedia.";
+    const desc = $(".desc, .sinopsis, p.desc").first().text().trim() || "Sinopsis komik Bahasa Indonesia.";
     const author = $('.informasi table tr:contains("Penulis") td:last-child').text().trim() || "Komiku";
     const tags = [];
-    $(".genre li a").each((_, el) => {
+    $(".genre li a, .genres a").each((_, el) => {
       const t = $(el).text().trim();
       if (t) tags.push(t);
     });
     const chapters = [];
-    $("#Daftar_Chapter tbody tr, .chapter-list li").each((_, el) => {
-      const a = $(el).find("a").first();
-      const chUrl = a.attr("href") || "";
-      const chTitle = a.text().trim() || $(el).find(".judulseries").text().trim();
+    $("#Daftar_Chapter tr, .judulseries").each((_, el) => {
+      const chA = $(el).find("a").first();
+      const chUrl = chA.attr("href") || "";
+      const chTitle = chA.text().trim() || chA.attr("title") || $(el).text().trim();
       const date = $(el).find(".tanggal, .date").text().trim();
-      if (chUrl && chTitle) {
-        const fullChUrl = chUrl.startsWith("http") ? chUrl : `${KOMIKU_BASE}${chUrl}`;
+      if (chUrl && chTitle && !chUrl.includes("iklan")) {
+        const fullChUrl = chUrl.startsWith("http") ? chUrl : `${KOMIKU_HOST}${chUrl}`;
         const numMatch = chTitle.match(/\d+(\.\d+)?/);
         const chapterNum = numMatch ? numMatch[0] : String(chapters.length + 1);
         const chId = Buffer.from(fullChUrl).toString("base64url");
         chapters.push({
           id: chId,
           chapter: chapterNum,
-          title: chTitle,
+          title: chTitle.replace(/\s+/g, " "),
           language: "id",
           publishDate: date,
-          scanlationGroup: "Komiku.id",
+          scanlationGroup: "Komiku.org",
           url: fullChUrl
         });
       }
@@ -4634,13 +4478,13 @@ async function getKomikuChapterPages(chapterIdOrUrl) {
     }
     const res = await axios.get(url, {
       timeout: 12e3,
-      headers: { ...DEFAULT_HEADERS, "Referer": KOMIKU_BASE }
+      headers: { ...DEFAULT_HEADERS, "Referer": KOMIKU_HOST }
     });
     const $ = cheerio.load(res.data);
     const images = [];
-    $("#Baca_Komik img, .main-reading-area img").each((_, el) => {
+    $("#Baca_Komik img, .main-reading-area img, .chapter-image img").each((_, el) => {
       const src = $(el).attr("src") || $(el).attr("data-src") || "";
-      if (src && src.startsWith("http") && !src.includes("banner")) {
+      if (src && src.startsWith("http") && !src.includes("banner") && !src.includes("iklan")) {
         images.push(src.trim());
       }
     });
@@ -4649,6 +4493,150 @@ async function getKomikuChapterPages(chapterIdOrUrl) {
     console.error("[Komiku Pages Error]", err.message);
     return [];
   }
+}
+const WESTMANGA_MIRRORS = [
+  "https://westmanga.co",
+  "https://v1.westmanga.my",
+  "https://v1.westmanga.top"
+];
+async function searchWestManga(query) {
+  const cacheKey = `westmanga_${query.trim().toLowerCase()}`;
+  const now = Date.now();
+  if (searchCache.has(cacheKey)) {
+    const cached = searchCache.get(cacheKey);
+    if (cached.expiry > now) return cached.data;
+  }
+  for (const mirror of WESTMANGA_MIRRORS) {
+    try {
+      const url = query && query.trim() ? `${mirror}/contents?q=${encodeURIComponent(query.trim())}` : `${mirror}/contents`;
+      const res = await axios.get(url, {
+        timeout: 8e3,
+        headers: { ...DEFAULT_HEADERS, "Referer": `${mirror}/` }
+      });
+      const $ = cheerio.load(res.data);
+      const results = [];
+      $("article, .card, .grid > div, .bs, .bsx, .listupd > div").each((_, el) => {
+        const a = $(el).find("a").first();
+        let link = a.attr("href") || "";
+        const title = $(el).find("h2, h3, h4, .tt, .title").first().text().trim() || a.attr("title") || "";
+        const img = $(el).find("img").first();
+        const cover = img.attr("data-src") || img.attr("src") || null;
+        if (title && link) {
+          if (!link.startsWith("http")) link = `${mirror}${link}`;
+          const id = Buffer.from(link).toString("base64url");
+          const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || id;
+          results.push({
+            id,
+            title,
+            slug,
+            cover,
+            author: "WestManga",
+            description: "Komik Manhwa/Manga Bahasa Indonesia dari WestManga.",
+            status: "Ongoing",
+            tags: ["Manhwa", "WestManga", "Bahasa Indonesia"],
+            provider: "westmanga",
+            availableLanguages: ["id"],
+            url: link
+          });
+        }
+      });
+      if (results.length > 0) {
+        searchCache.set(cacheKey, { data: results, expiry: now + CACHE_TTL });
+        return results;
+      }
+    } catch {
+    }
+  }
+  return searchKomiku(query);
+}
+async function getWestMangaDetail(mangaIdOrUrl) {
+  let url = mangaIdOrUrl;
+  if (!url.startsWith("http")) {
+    url = Buffer.from(mangaIdOrUrl, "base64url").toString("utf-8");
+  }
+  for (const mirror of WESTMANGA_MIRRORS) {
+    try {
+      const res = await axios.get(url, {
+        timeout: 8e3,
+        headers: { ...DEFAULT_HEADERS, "Referer": `${mirror}/` }
+      });
+      const $ = cheerio.load(res.data);
+      const title = $(".entry-title, .infox h1, h1").first().text().trim();
+      if (!title) continue;
+      const imgEl = $(".thumb img, .infox img").first();
+      const cover = imgEl.attr("data-src") || imgEl.attr("src") || null;
+      const desc = $(".desc, .sinopsis, p").first().text().trim();
+      const chapters = [];
+      $(".clx li, .eplister li, #chapterlist li, .chapter-list li").each((_, el) => {
+        const a = $(el).find("a").first();
+        const chUrl = a.attr("href") || "";
+        const chTitle = $(el).find(".chapternum, .epl-num").first().text().trim() || a.text().trim();
+        const date = $(el).find(".chapterdate, .epl-date").first().text().trim() || "";
+        if (chUrl && chTitle) {
+          const numMatch = chTitle.match(/\d+(\.\d+)?/);
+          const chapterNum = numMatch ? numMatch[0] : String(chapters.length + 1);
+          const chId = Buffer.from(chUrl).toString("base64url");
+          chapters.push({
+            id: chId,
+            chapter: chapterNum,
+            title: chTitle,
+            language: "id",
+            publishDate: date,
+            scanlationGroup: "WestManga",
+            url: chUrl
+          });
+        }
+      });
+      if (chapters.length > 0) {
+        chapters.sort((a, b) => parseFloat(a.chapter || "0") - parseFloat(b.chapter || "0"));
+        const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || mangaIdOrUrl;
+        return {
+          manga: {
+            id: mangaIdOrUrl,
+            title,
+            slug,
+            cover,
+            author: "WestManga",
+            description: desc || "Komik Bahasa Indonesia",
+            status: "ongoing",
+            tags: ["Manhwa", "WestManga"],
+            provider: "westmanga",
+            availableLanguages: ["id"],
+            chapterCount: chapters.length,
+            url
+          },
+          chapters
+        };
+      }
+    } catch {
+    }
+  }
+  return getKomikuDetail(mangaIdOrUrl);
+}
+async function getWestMangaChapterPages(chapterIdOrUrl) {
+  let url = chapterIdOrUrl;
+  if (!url.startsWith("http")) {
+    url = Buffer.from(chapterIdOrUrl, "base64url").toString("utf-8");
+  }
+  for (const mirror of WESTMANGA_MIRRORS) {
+    try {
+      const res = await axios.get(url, {
+        timeout: 8e3,
+        headers: { ...DEFAULT_HEADERS, "Referer": `${mirror}/` }
+      });
+      const $ = cheerio.load(res.data);
+      const images = [];
+      $("#readerarea img, .chapter-image img, .reading-content img").each((_, el) => {
+        const src = $(el).attr("data-src") || $(el).attr("src") || "";
+        if (src && src.startsWith("http") && !src.includes("banner")) {
+          images.push(src.trim());
+        }
+      });
+      if (images.length > 0) return images;
+    } catch {
+    }
+  }
+  return getKomikuChapterPages(chapterIdOrUrl);
 }
 async function searchUniversalManga(query, provider = "mangadex", lang = "id") {
   if (provider === "westmanga") {
@@ -4691,7 +4679,7 @@ async function downloadWorker(urls, concurrency = 4) {
             timeout: 2e4,
             headers: {
               "User-Agent": DEFAULT_HEADERS["User-Agent"],
-              "Referer": current.referer || "https://mangadex.org/"
+              "Referer": current.referer || "https://komiku.org/"
             }
           });
           fs.writeFileSync(current.dest, Buffer.from(res.data));
@@ -4742,7 +4730,7 @@ async function downloadChapterToLocal(options) {
     if (!fs.existsSync(chapterDir)) {
       fs.mkdirSync(chapterDir, { recursive: true });
     }
-    const referer = provider === "westmanga" ? WESTMANGA_BASE : provider === "komiku" ? KOMIKU_BASE : "https://mangadex.org/";
+    const referer = provider === "westmanga" ? "https://westmanga.co/" : provider === "komiku" ? "https://komiku.org/" : "https://mangadex.org/";
     const tasks = pageUrls.map((pageUrl, i) => {
       const ext = path.extname(pageUrl.split("?")[0]) || ".jpg";
       const pageFileName = `${(i + 1).toString().padStart(3, "0")}${ext}`;
