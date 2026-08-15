@@ -146,3 +146,19 @@
   - **2-Page Double Spread Book View (`double`)**: Simulates reading an open physical manga tankobon book with 2 pages side-by-side.
   - **Japanese Right-to-Left (RTL) Reading Direction**: Faithful right-to-left page ordering and left-to-right (LTR) toggle support.
   - **Click & Keyboard Arrow Navigation**: Clicking on the left/right half of the screen or pressing `←`/`→` (or `A`/`D`) advances pages by pairs naturally.
+
+---
+
+## Feature 14: Manga Online Search & Auto-Downloader Suite (MangaDex Direct API)
+- **Files Modified**:
+  - `apps/frontend-nuxt/server/utils/manga/online.ts`
+  - `apps/frontend-nuxt/server/api/manga/online/search.get.ts`
+  - `apps/frontend-nuxt/server/api/manga/online/detail.get.ts`
+  - `apps/frontend-nuxt/server/api/manga/online/download.post.ts`
+  - `apps/frontend-nuxt/pages/manga/browse.vue`
+  - `apps/frontend-nuxt/pages/manga/index.vue`
+- **Implementation Highlights**:
+  - **MangaDex Official API Integration**: Full search across thousands of manga/manhwa titles with direct Indonesian translation filter (`lang=id`).
+  - **Interactive Manga Detail & Chapter Explorer**: Displays cover, tags, authors, and real-time chapter feed with scanlation group credits.
+  - **1-Click Chapter Downloader to Local Library**: Downloads and saves all high-resolution chapter images directly into the server's `data/manga/[slug]/[chapter]/` storage disk so they become immediately readable locally/offline across LAN.
+  - **Batch Chapter Downloader**: Added "📥 Unduh Semua Bab" action to queue sequential chapter downloads automatically.

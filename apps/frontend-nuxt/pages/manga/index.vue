@@ -11,14 +11,23 @@
           <p class="text-xs text-muted-foreground mt-1">Pembaca komik digital lokal (Webtoon & Manga Mode) dalam jaringan LAN</p>
         </div>
 
-        <div class="relative w-full sm:w-72">
-          <input 
-            v-model="searchQuery" 
-            type="text" 
-            placeholder="Cari judul komik..." 
-            class="w-full bg-background border border-border rounded-xl pl-9 pr-4 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
-          />
-          <span class="absolute left-3 top-2.5 text-xs text-muted-foreground">🔍</span>
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+          <NuxtLink 
+            to="/manga/browse" 
+            class="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold shadow-md transition-all flex items-center gap-1.5 shrink-0"
+          >
+            <span>🌐</span> Cari Manga Online
+          </NuxtLink>
+
+          <div class="relative w-full sm:w-64">
+            <input 
+              v-model="searchQuery" 
+              type="text" 
+              placeholder="Cari komik lokal..." 
+              class="w-full bg-background border border-border rounded-xl pl-9 pr-4 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
+            />
+            <span class="absolute left-3 top-2.5 text-xs text-muted-foreground">🔍</span>
+          </div>
         </div>
       </div>
 
