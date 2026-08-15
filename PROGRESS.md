@@ -30,3 +30,15 @@
   - Built a dedicated **"📚 Pustaka & Riwayat Baca Saya"** page (`pages/library.vue`).
   - Features 2 dynamic tabs: **⏱️ Riwayat Terakhir** (scans reading progress across all novels with 1-click continue reading button) and **📌 Koleksi Favorit** (displays bookmarked novels with quick removal controls).
   - Added 📚 **Pustaka** navigation link in `Navbar.vue`.
+
+---
+
+## Feature 4: Global Quick Search Command Palette Modal (`Ctrl+K`)
+- **Files Modified**:
+  - `apps/frontend-nuxt/components/CommandPalette.vue`
+  - `apps/frontend-nuxt/layouts/default.vue`
+  - `apps/frontend-nuxt/components/Layout/Navbar.vue`
+- **Implementation Highlights**:
+  - Built a universal Command Palette modal triggered by pressing `Ctrl+K`, `Cmd+K`, or clicking `🔍 Cari` button on Navbar.
+  - Searches across 3 media sources simultaneously: 🎬 Videos, 📖 Novels, and 📤 Shared Files.
+  - Keyboard navigation (`↑`/`↓` and `Enter`) to jump directly to search results.

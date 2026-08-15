@@ -14,6 +14,7 @@ type HydrationStrategies = {
 type LazyComponent<T> = DefineComponent<HydrationStrategies, {}, {}, {}, {}, {}, {}, { hydrated: () => void }> & T
 
 interface _GlobalComponents {
+  CommandPalette: typeof import("../../components/CommandPalette.vue")['default']
   LayoutMobileNavigation: typeof import("../../components/Layout/MobileNavigation.vue")['default']
   LayoutNavbar: typeof import("../../components/Layout/Navbar.vue")['default']
   LayoutSidebar: typeof import("../../components/Layout/Sidebar.vue")['default']
@@ -40,6 +41,7 @@ interface _GlobalComponents {
   Html: typeof import("../../../../node_modules/.pnpm/nuxt@3.21.11_@oxc-project+t_3a6e6a4a92f6df0081e292eb4e7a9fff/node_modules/nuxt/dist/head/runtime/components")['Html']
   Body: typeof import("../../../../node_modules/.pnpm/nuxt@3.21.11_@oxc-project+t_3a6e6a4a92f6df0081e292eb4e7a9fff/node_modules/nuxt/dist/head/runtime/components")['Body']
   NuxtIsland: typeof import("../../../../node_modules/.pnpm/nuxt@3.21.11_@oxc-project+t_3a6e6a4a92f6df0081e292eb4e7a9fff/node_modules/nuxt/dist/app/components/nuxt-island")['default']
+  LazyCommandPalette: LazyComponent<typeof import("../../components/CommandPalette.vue")['default']>
   LazyLayoutMobileNavigation: LazyComponent<typeof import("../../components/Layout/MobileNavigation.vue")['default']>
   LazyLayoutNavbar: LazyComponent<typeof import("../../components/Layout/Navbar.vue")['default']>
   LazyLayoutSidebar: LazyComponent<typeof import("../../components/Layout/Sidebar.vue")['default']>

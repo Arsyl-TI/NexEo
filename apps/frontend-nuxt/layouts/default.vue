@@ -13,6 +13,7 @@
     </div>
 
     <MobileNavigation />
+    <CommandPalette />
   </div>
 </template>
 
@@ -20,5 +21,5 @@
 import Navbar from '~/components/Layout/Navbar.vue'
 import Sidebar from '~/components/Layout/Sidebar.vue'
 import MobileNavigation from '~/components/Layout/MobileNavigation.vue'
+import CommandPalette from '~/components/CommandPalette.vue'
 </script>
-

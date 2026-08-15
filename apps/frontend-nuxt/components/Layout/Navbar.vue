@@ -15,6 +15,16 @@
     </div>
 
     <div class="flex items-center space-x-3">
+      <!-- Global Search Command Palette Button -->
+      <button 
+        @click="openCommandPalette" 
+        class="bg-card hover:bg-border/60 border border-border/80 text-muted-foreground hover:text-foreground px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm"
+      >
+        <span>🔍</span>
+        <span class="hidden sm:inline">Cari</span>
+        <kbd class="hidden sm:inline-block text-[10px] bg-background border border-border text-muted-foreground px-1.5 py-0.2 rounded font-mono">Ctrl+K</kbd>
+      </button>
+
       <!-- LAN IP Address Badge for Offline Local Network -->
       <div v-if="lanUrl" @click="copyLanUrl" class="cursor-pointer bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 px-3 py-1 rounded-full text-xs font-mono font-bold flex items-center gap-1.5 transition-all shadow-sm" title="Klik untuk menyalin alamat IP LAN untuk perangkat HP / Komputer lain">
         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -52,6 +62,12 @@ function copyLanUrl() {
   if (typeof window !== 'undefined' && lanUrl.value) {
     navigator.clipboard.writeText(lanUrl.value)
     success(`Alamat LAN ${lanUrl.value} berhasil disalin! Buka di HP / perangkat lain di jaringan Wi-Fi yang sama.`)
+  }
+}
+
+function openCommandPalette() {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }))
   }
 }
 

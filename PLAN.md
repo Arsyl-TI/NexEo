@@ -1,22 +1,25 @@
-# Technical Execution Plan: Personal Novel Library & Reading History Manager
+# Technical Execution Plan: Global Quick Search Command Palette (`Ctrl+K`)
 
 Target Files:
-- `apps/frontend-nuxt/pages/library.vue`
+- `apps/frontend-nuxt/components/CommandPalette.vue`
 - `apps/frontend-nuxt/components/Layout/Navbar.vue`
+- `apps/frontend-nuxt/layouts/default.vue`
 
 ## Step-by-Step Execution Steps
 
-1. **Create Personal Library & Reading History Page (`pages/library.vue`)**:
-   - Tab 1: **Koleksi Favorit** (Lists bookmarked novels with cover, author, total chapters, and 1-click read link).
-   - Tab 2: **Riwayat Baca Terakhir** (Scans `localStorage` reading progress, displays novel titles with last read chapter file & timestamp, and 1-click continue reading button).
-   - Clear history button & search input.
+1. **Create Command Palette Component (`components/CommandPalette.vue`)**:
+   - Keyboard listener for `Ctrl+K`, `Cmd+K`, and `Escape`.
+   - Real-time search query execution across videos, novels, and shared files.
+   - Results grouped by type with visual icons (🎬 Video, 📖 Novel, 📤 Shared File).
+   - Keyboard arrow keys (`↑` / `↓`) and `Enter` key to navigate straight to the selected result.
 
-2. **Add Navbar Navigation Item (`components/Layout/Navbar.vue`)**:
-   - Add 📚 **Pustaka** route link (`/library`) alongside Video, Novel, Share, and Downloader links.
+2. **Integrate into Global Layout & Navbar (`layouts/default.vue` & `Navbar.vue`)**:
+   - Mount `<CommandPalette />` globally in `layouts/default.vue`.
+   - Add a clickable `🔍 Cari (Ctrl+K)` button in `Navbar.vue`.
 
 3. **Testing & Build Verification**:
    - Run `pnpm turbo run typecheck` and `pnpm turbo run build`.
 
 4. **Git Commit & Progress Log**:
    - Append log entry in `PROGRESS.md`.
-   - Execute `git add . && git commit -m "feat(library): add Personal Novel Library & Reading History page"`.
+   - Execute `git add . && git commit -m "feat(search): add Global Quick Search Command Palette (Ctrl+K)"`.
