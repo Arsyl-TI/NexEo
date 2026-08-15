@@ -193,3 +193,15 @@
   - **Hands-Free Auto-Scroll Loop**: Smooth 60fps continuous auto-scroll engine for vertical Webtoons and Manhwa.
   - **Floating Controls Widget**: Bottom glassmorphic widget with Play/Pause button, speed pills (`0.5x`, `1.0x`, `2.0x`, `3.0x`, `5.0x`), and Spacebar hotkey toggle.
   - **Smart End Detection**: Automatically detects when the reader reaches the end of the chapter and stops scrolling smoothly.
+
+---
+
+## Feature 18: Shared Files Zip Multi-File Batch Downloader
+- **Files Modified**:
+  - `apps/frontend-nuxt/server/api/shared-files/download-zip.post.ts`
+  - `apps/frontend-nuxt/pages/share.vue`
+- **Implementation Highlights**:
+  - **Nitro Batch ZIP Endpoint (`POST /api/shared-files/download-zip`)**: Accepts a payload of filenames, validates paths, and streams an `adm-zip` compressed archive (`nexeo-shared-files.zip`) directly to the client.
+  - **Multi-File Selection Checkboxes**: Added `☑` checkbox selection for every file card in the LAN Sharing File Manager.
+  - **Master Select All Button**: Added `☑ Pilih Semua` / `✓ Pembatalan Pilih` toggle button in the toolbar.
+  - **Floating Action Bar**: Displays selected file count and a 📦 **"Unduh Terpilih (.zip)"** button with loading feedback.

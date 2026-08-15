@@ -109,6 +109,9 @@ declare module "nitropack/types" {
     '/api/shared-files/:filename': {
       'delete': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/shared-files/[filename].delete').default>>>>
     }
+    '/api/shared-files/download-zip': {
+      'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/shared-files/download-zip.post').default>>>>
+    }
     '/api/shared-files/download/:filename': {
       'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/shared-files/download/[filename].get').default>>>>
     }

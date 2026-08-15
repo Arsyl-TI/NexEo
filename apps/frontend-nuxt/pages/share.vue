@@ -90,9 +90,18 @@
       </div>
     </div>
 
-    <!-- Category Filter & Search Bar -->
+    <!-- Category Filter, Select All, & Search Bar -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
       <div class="flex items-center gap-1.5 overflow-x-auto pb-1">
+        <!-- Select All Button -->
+        <button 
+          v-if="filteredFiles.length > 0"
+          @click="toggleSelectAll"
+          :class="['px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5 shadow-sm', isAllSelected ? 'bg-amber-500 text-black font-bold' : 'bg-card/80 border border-border text-foreground hover:bg-border/60']"
+        >
+          <span>{{ isAllSelected ? '✓ Pembatalan Pilih' : '☑ Pilih Semua' }}</span>
+        </button>
+
         <button 
           v-for="cat in ['all', 'image', 'video', 'document', 'archive']" 
           :key="cat"
@@ -114,6 +123,33 @@
       </div>
     </div>
 
+    <!-- Floating Batch Download Action Bar -->
+    <div v-if="selectedFileNames.length > 0" class="fixed bottom-6 left-4 right-4 max-w-xl mx-auto z-40 bg-card/95 border border-primary/50 rounded-2xl p-4 shadow-2xl backdrop-blur-xl flex items-center justify-between gap-3 animate-fade-in">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-primary/20 text-primary border border-primary/30 flex items-center justify-center text-lg shrink-0">
+          📦
+        </div>
+        <div>
+          <h4 class="text-xs font-bold text-foreground">{{ selectedFileNames.length }} Berkas Terpilih</h4>
+          <p class="text-[10px] text-muted-foreground">Siap dikemas ke satu arsip ZIP instan</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button @click="selectedFileNames = []" class="px-3 py-1.5 rounded-xl border border-border text-xs text-muted-foreground hover:text-foreground">
+          Batal
+        </button>
+        <button 
+          @click="downloadSelectedAsZip" 
+          :disabled="isZipping"
+          class="px-4 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-bold text-xs shadow-md transition-all flex items-center gap-1.5 disabled:opacity-50"
+        >
+          <span v-if="isZipping" class="spinner border-2 w-3.5 h-3.5 border-black"></span>
+          <span>{{ isZipping ? 'Mengemas ZIP...' : 'Unduh Terpilih (.zip)' }}</span>
+        </button>
+      </div>
+    </div>
+
     <!-- Files List -->
     <div>
       <div v-if="loading" class="flex justify-center py-16">
@@ -129,9 +165,16 @@
         <div 
           v-for="file in filteredFiles" 
           :key="file.name" 
-          class="bg-card/70 border border-border/80 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-primary/50 transition-all shadow-md group"
+          :class="['bg-card/70 border rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all shadow-md group', selectedFileNames.includes(file.name) ? 'border-amber-500/60 bg-amber-500/5' : 'border-border/80 hover:border-primary/50']"
         >
           <div class="flex items-center overflow-hidden">
+            <!-- Checkbox -->
+            <input 
+              type="checkbox" 
+              :checked="selectedFileNames.includes(file.name)" 
+              @change="toggleFileSelection(file.name)"
+              class="w-4 h-4 mr-3 rounded accent-amber-500 cursor-pointer shrink-0"
+            />
             <div class="w-11 h-11 bg-primary/10 border border-primary/20 rounded-xl flex items-center justify-center text-primary text-xl mr-3.5 shrink-0 shadow-sm">
               {{ getFileIcon(file.name) }}
             </div>
@@ -300,6 +343,59 @@ const fileInput = ref<HTMLInputElement | null>(null)
 
 const selectedCategory = ref('all')
 const searchQuery = ref('')
+
+// Batch ZIP Selection State
+const selectedFileNames = ref<string[]>([])
+const isZipping = ref(false)
+
+const isAllSelected = computed(() => {
+  return filteredFiles.value.length > 0 && selectedFileNames.value.length === filteredFiles.value.length
+})
+
+function toggleSelectAll() {
+  if (isAllSelected.value) {
+    selectedFileNames.value = []
+  } else {
+    selectedFileNames.value = filteredFiles.value.map(f => f.name)
+  }
+}
+
+function toggleFileSelection(name: string) {
+  const idx = selectedFileNames.value.indexOf(name)
+  if (idx >= 0) {
+    selectedFileNames.value.splice(idx, 1)
+  } else {
+    selectedFileNames.value.push(name)
+  }
+}
+
+async function downloadSelectedAsZip() {
+  if (selectedFileNames.value.length === 0) return
+  isZipping.value = true
+  try {
+    const blob = await $fetch<Blob>('/api/shared-files/download-zip', {
+      method: 'POST',
+      body: { filenames: selectedFileNames.value },
+      responseType: 'blob'
+    })
+
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `nexeo-shared-files-${new Date().toISOString().slice(0, 10)}.zip`
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    window.URL.revokeObjectURL(url)
+
+    success(`Berhasil mengemas ${selectedFileNames.value.length} berkas ke ZIP!`)
+  } catch (e: any) {
+    console.error('[Download ZIP Error]', e)
+    error('Gagal mengunduh berkas ZIP: ' + (e.message || 'Error server'))
+  } finally {
+    isZipping.value = false
+  }
+}
 
 // QR Modal & Preview State
 const showQrModal = ref(false)
