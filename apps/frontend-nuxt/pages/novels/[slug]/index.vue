@@ -381,7 +381,8 @@ async function executeBatchTranslation() {
         deeplApiKey: transConfig.value.deeplApiKey,
         libreUrl: transConfig.value.libreUrl,
         libreApiKey: transConfig.value.libreApiKey
-      }
+      },
+      timeout: 180000
     })
 
     if (res?.success) {
@@ -390,7 +391,8 @@ async function executeBatchTranslation() {
       await loadNovelDetail()
     }
   } catch (err: any) {
-    error(err?.statusMessage || 'Gagal menerjemahkan semua chapter novel.')
+    console.error('Batch translation error:', err)
+    error(err?.data?.statusMessage || err?.statusMessage || err?.message || 'Gagal menerjemahkan semua chapter novel.')
   } finally {
     isBatchTranslating.value = false
   }

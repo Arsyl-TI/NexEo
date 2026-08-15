@@ -17,51 +17,99 @@ export default defineEventHandler(async (event) => {
   }
 
   const files = fs.readdirSync(novelDir)
-  const txtFiles = files.filter(f => f.toLowerCase().endsWith('.txt')).sort((a, b) => {
+  // Support both .txt and .json chapter files
+  const chapterFiles = files.filter(f => {
+    const l = f.toLowerCase()
+    return (l.endsWith('.txt') || l.endsWith('.json')) && !l.includes('meta') && !l.includes('index') && !l.includes('cover')
+  }).sort((a, b) => {
     const numA = parseInt(a.replace(/\D/g, '') || '0', 10)
     const numB = parseInt(b.replace(/\D/g, '') || '0', 10)
     return numA - numB
   })
 
-  if (txtFiles.length === 0) {
-    throw createError({ statusCode: 400, statusMessage: 'Tidak ada berkas chapter .txt dalam novel ini' })
+  if (chapterFiles.length === 0) {
+    throw createError({ statusCode: 400, statusMessage: 'Tidak ada berkas chapter (.txt / .json) dalam novel ini' })
   }
 
   let translatedCount = 0
 
-  for (let i = 0; i < txtFiles.length; i++) {
-    const fileName = txtFiles[i]
+  for (let i = 0; i < chapterFiles.length; i++) {
+    const fileName = chapterFiles[i]
     if (!fileName) continue
 
     const filePath = path.join(novelDir, fileName)
-    const content = fs.readFileSync(filePath, 'utf-8')
-    const paragraphs = content.split(/\r?\n/).filter(p => p.trim().length > 0)
+    const ext = path.extname(fileName).toLowerCase()
 
-    if (paragraphs.length > 0) {
-      try {
-        const translatedParagraphs = await translateBatch(paragraphs, {
-          engine,
-          geminiApiKey,
-          deeplApiKey,
-          libreUrl,
-          libreApiKey
-        })
+    try {
+      if (ext === '.txt') {
+        const content = fs.readFileSync(filePath, 'utf-8')
+        const paragraphs = content.split(/\r?\n/).filter(p => p.trim().length > 0)
 
-        if (translatedParagraphs && translatedParagraphs.length > 0) {
-          const newContent = translatedParagraphs.join('\n\n')
-          fs.writeFileSync(filePath, newContent, 'utf-8')
-          translatedCount++
+        if (paragraphs.length > 0) {
+          const translatedParagraphs = await translateBatch(paragraphs, {
+            engine,
+            geminiApiKey,
+            deeplApiKey,
+            libreUrl,
+            libreApiKey
+          })
+
+          if (translatedParagraphs && translatedParagraphs.length > 0) {
+            fs.writeFileSync(filePath, translatedParagraphs.join('\n\n'), 'utf-8')
+            translatedCount++
+          }
         }
-      } catch (err) {
-        console.error(`Failed to translate chapter ${fileName}:`, err)
+      } else if (ext === '.json') {
+        const rawJson = fs.readFileSync(filePath, 'utf-8')
+        const jsonData = JSON.parse(rawJson)
+
+        let paragraphsToTranslate: string[] = []
+
+        if (Array.isArray(jsonData)) {
+          paragraphsToTranslate = jsonData.filter(p => typeof p === 'string' && p.trim().length > 0)
+        } else if (jsonData && typeof jsonData === 'object') {
+          if (Array.isArray(jsonData.paragraphs)) {
+            paragraphsToTranslate = jsonData.paragraphs.filter((p: any) => typeof p === 'string' && p.trim().length > 0)
+          } else if (Array.isArray(jsonData.content)) {
+            paragraphsToTranslate = jsonData.content.filter((p: any) => typeof p === 'string' && p.trim().length > 0)
+          }
+        }
+
+        if (paragraphsToTranslate.length > 0) {
+          const translatedParagraphs = await translateBatch(paragraphsToTranslate, {
+            engine,
+            geminiApiKey,
+            deeplApiKey,
+            libreUrl,
+            libreApiKey
+          })
+
+          if (translatedParagraphs && translatedParagraphs.length > 0) {
+            if (Array.isArray(jsonData)) {
+              fs.writeFileSync(filePath, JSON.stringify(translatedParagraphs, null, 2), 'utf-8')
+            } else if (jsonData && typeof jsonData === 'object') {
+              if (Array.isArray(jsonData.paragraphs)) {
+                jsonData.paragraphs = translatedParagraphs
+              } else if (Array.isArray(jsonData.content)) {
+                jsonData.content = translatedParagraphs
+              } else {
+                jsonData.paragraphs = translatedParagraphs
+              }
+              fs.writeFileSync(filePath, JSON.stringify(jsonData, null, 2), 'utf-8')
+            }
+            translatedCount++
+          }
+        }
       }
+    } catch (err) {
+      console.error(`Failed to translate chapter ${fileName}:`, err)
     }
   }
 
   return {
     success: true,
-    totalChapters: txtFiles.length,
+    totalChapters: chapterFiles.length,
     translatedCount,
-    message: `Berhasil menerjemahkan ${translatedCount} dari ${txtFiles.length} chapter secara permanen!`
+    message: `Berhasil menerjemahkan ${translatedCount} dari ${chapterFiles.length} chapter secara permanen!`
   }
 })
