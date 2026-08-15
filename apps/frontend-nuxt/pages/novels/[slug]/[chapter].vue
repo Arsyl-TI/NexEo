@@ -62,14 +62,41 @@
       </div>
 
       <!-- In-Chapter Text Search Bar -->
-      <div v-if="showTextSearch" class="w-full pt-2 flex items-center gap-2 border-t border-border/50">
-        <input 
-          v-model="searchQuery" 
-          type="text" 
-          placeholder="Ketik kata kunci untuk dicari di bab ini..." 
-          class="flex-1 bg-background border border-border rounded-xl px-4 py-1.5 text-xs text-foreground focus:outline-none focus:border-primary"
-        />
-        <span v-if="searchQuery" class="text-xs font-mono text-muted-foreground">{{ matchCount }} hasil</span>
+      <div v-if="showTextSearch" class="w-full pt-2 flex items-center gap-2 border-t border-border/50 flex-wrap">
+        <div class="relative flex-1 min-w-[200px]">
+          <input 
+            v-model="searchQuery" 
+            @input="onSearchQueryChange"
+            type="text" 
+            placeholder="Ketik kata kunci untuk dicari di bab ini..." 
+            class="w-full bg-background border border-border rounded-xl pl-8 pr-4 py-1.5 text-xs text-foreground focus:outline-none focus:border-amber-400"
+          />
+          <span class="absolute left-2.5 top-1.5 text-xs text-muted-foreground">🔍</span>
+        </div>
+
+        <div v-if="searchQuery.trim()" class="flex items-center gap-1.5 text-xs">
+          <span class="font-mono text-amber-300 font-bold px-2 py-0.5 bg-amber-500/10 border border-amber-500/30 rounded-lg">
+            {{ matchCount > 0 ? `${activeMatchIndex + 1} / ${matchCount}` : '0 hasil' }}
+          </span>
+
+          <button 
+            @click="prevMatch" 
+            :disabled="matchCount === 0" 
+            class="p-1 rounded-lg bg-card border border-border hover:bg-border text-foreground disabled:opacity-40"
+            title="Hasil Sebelumnya (Shift+Enter)"
+          >
+            ▲
+          </button>
+          <button 
+            @click="nextMatch" 
+            :disabled="matchCount === 0" 
+            class="p-1 rounded-lg bg-card border border-border hover:bg-border text-foreground disabled:opacity-40"
+            title="Hasil Selanjutnya (Enter)"
+          >
+            ▼
+          </button>
+        </div>
+
         <button @click="searchQuery = ''; showTextSearch = false" class="text-xs text-muted-foreground hover:text-foreground px-2 py-1">Tutup</button>
       </div>
     </header>
@@ -917,6 +944,9 @@ const themeClasses = computed(() => ({
   reader: uiStore.readerTheme === 'sepia' ? 'bg-[#f9f1df] border-[#d8c59a] text-[#2f2416]' : uiStore.readerTheme === 'light' ? 'bg-white border-slate-200 text-slate-900' : 'bg-[#131b2e] border-slate-800 text-gray-200'
 }))
 
+// In-Chapter Search & Highlight Navigation State
+const activeMatchIndex = ref(0)
+
 const matchCount = computed(() => {
   if (!searchQuery.value.trim()) return 0
   const baseHtml = rawRenderedHtml.value
@@ -927,6 +957,39 @@ const matchCount = computed(() => {
 
 function escapeRegExp(string: string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+function onSearchQueryChange() {
+  activeMatchIndex.value = 0
+  setTimeout(() => scrollToActiveMatch(), 50)
+}
+
+function nextMatch() {
+  if (matchCount.value === 0) return
+  activeMatchIndex.value = (activeMatchIndex.value + 1) % matchCount.value
+  scrollToActiveMatch()
+}
+
+function prevMatch() {
+  if (matchCount.value === 0) return
+  activeMatchIndex.value = (activeMatchIndex.value - 1 + matchCount.value) % matchCount.value
+  scrollToActiveMatch()
+}
+
+function scrollToActiveMatch() {
+  if (typeof document === 'undefined') return
+  const marks = document.querySelectorAll('.search-highlight')
+  if (!marks || marks.length === 0) return
+
+  // Update active CSS class
+  marks.forEach((el, i) => {
+    if (i === activeMatchIndex.value) {
+      el.classList.add('active-match')
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    } else {
+      el.classList.remove('active-match')
+    }
+  })
 }
 
 const rawRenderedHtml = computed(() => {
@@ -963,10 +1026,15 @@ const renderedHtml = computed(() => {
 
   // Highlight matches in text nodes safely
   const regex = new RegExp(`(${escapeRegExp(q)})`, 'gi')
+  let count = 0
   return html.replace(/(<[^>]+>)|([^<]+)/g, (match: string, tag?: string, text?: string) => {
     if (tag) return tag
     if (text) {
-      return text.replace(regex, '<mark class="search-highlight">$1</mark>')
+      return text.replace(regex, () => {
+        const isActive = count === activeMatchIndex.value
+        count++
+        return `<mark class="search-highlight ${isActive ? 'active-match' : ''}">$1</mark>`
+      })
     }
     return match
   })
@@ -1100,5 +1168,20 @@ watch(() => route.params.chapter, (next) => { if (typeof next === 'string') void
 .spinner { width: 1.5rem; height: 1.5rem; border: 3px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin .8s linear infinite; }
 .prose :deep(p) { margin-bottom: 1.25rem; line-height: 1.8; }
 .prose :deep(p:last-child) { margin-bottom: 0; }
+.prose :deep(.search-highlight) {
+  background-color: rgba(245, 158, 11, 0.3);
+  color: #f59e0b;
+  border-bottom: 2px solid #f59e0b;
+  border-radius: 3px;
+  padding: 0 2px;
+  transition: all 0.2s ease;
+}
+.prose :deep(.search-highlight.active-match) {
+  background-color: #f59e0b;
+  color: #000;
+  font-weight: bold;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.9);
+  border-radius: 4px;
+}
 @keyframes spin { to { transform: rotate(360deg); } }
 </style>

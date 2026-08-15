@@ -173,3 +173,13 @@
   - **Visual Scrubber Marker Pins**: Interactive visual bookmark pins displayed along the player timeline bar relative to `time / duration * 100%`.
   - **Bookmarks List & 1-Click Jump**: Interactive side drawer showing all saved timestamp bookmarks with timestamp badge, note label, 1-click seek button (`▶`), and delete button (`✕`).
   - **Markdown Export**: Added **"📋 Salin Catatan"** button to copy all timestamps and notes formatted as Markdown to the clipboard.
+
+---
+
+## Feature 16: Novel Text Keyword In-Chapter Search & Highlighter
+- **Files Modified**:
+  - `apps/frontend-nuxt/pages/novels/[slug]/[chapter].vue`
+- **Implementation Highlights**:
+  - **Interactive Search Toolbar**: Added 🔍 **Cari Teks** search bar with live text input and result counter (`X / Y`).
+  - **Luminous Keyword Highlighting**: Automatically wraps matching query occurrences with glowing amber `<mark class="search-highlight">` elements without breaking HTML tags.
+  - **Previous / Next Match Navigation**: Added `▲` and `▼` navigation buttons that smoothly scroll the current active match into view (`scrollIntoView({ behavior: 'smooth', block: 'center' })`) with a vivid pulsing active ring (`.search-highlight.active-match`).
