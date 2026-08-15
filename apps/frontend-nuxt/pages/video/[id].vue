@@ -216,15 +216,42 @@
           </div>
         </div>
 
-        <!-- Quick Speed Toolbar -->
-        <div class="mt-4 pt-4 border-t border-border/50 flex flex-wrap items-center justify-between gap-3">
-          <div class="flex items-center gap-2">
-            <span class="text-xs text-muted-foreground font-medium">⚡ Kecepatan:</span>
+        <!-- Fine-Grained Custom Speed & Pitch Preservation Toolbar -->
+        <div class="mt-4 pt-4 border-t border-border/50 space-y-3">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex items-center gap-3 flex-1 max-w-xs">
+              <span class="text-xs text-muted-foreground font-medium shrink-0">⚡ Kecepatan:</span>
+              <input 
+                type="range" 
+                min="0.25" 
+                max="3.0" 
+                step="0.05" 
+                v-model.number="currentSpeed" 
+                @input="updatePlaybackSpeed"
+                class="w-full h-1.5 bg-background rounded-lg appearance-none cursor-pointer accent-primary"
+              />
+              <span class="text-xs font-mono font-bold text-primary w-12 text-right bg-card px-2 py-0.5 rounded border border-border">
+                {{ currentSpeed.toFixed(2) }}x
+              </span>
+            </div>
+
+            <!-- Pitch Preservation Toggle -->
             <button 
-              v-for="s in [0.5, 0.75, 1, 1.25, 1.5, 2]" 
+              @click="togglePitchPreservation" 
+              :class="['px-3 py-1.5 rounded-xl text-xs font-semibold border flex items-center gap-1.5 transition-all shadow-sm', preservesPitch ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-emerald-500/10' : 'bg-background border-border text-muted-foreground hover:text-foreground']"
+              title="Koreksi nada audio agar tidak melengking saat dipercepat"
+            >
+              <span>🎵</span> {{ preservesPitch ? 'Koreksi Pitch (Aktif)' : 'Pitch Asli (Non-Aktif)' }}
+            </button>
+          </div>
+
+          <!-- Quick Preset Pills -->
+          <div class="flex flex-wrap items-center gap-1.5">
+            <button 
+              v-for="s in [0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.5, 3.0]" 
               :key="s" 
               @click="setPlaybackSpeed(s)"
-              :class="['px-2.5 py-1 rounded-lg text-xs font-mono transition-all', currentSpeed === s ? 'bg-primary text-white font-bold shadow-md' : 'bg-background border border-border text-muted-foreground hover:text-foreground']"
+              :class="['px-2.5 py-1 rounded-lg text-xs font-mono transition-all', Math.abs(currentSpeed - s) < 0.01 ? 'bg-primary text-white font-bold shadow-md' : 'bg-background border border-border text-muted-foreground hover:text-foreground']"
             >
               {{ s }}x
             </button>
@@ -530,12 +557,39 @@ function onTimeUpdate() {
   }
 }
 
+const preservesPitch = ref(true)
+
+function applyPitchPreservation() {
+  if (videoElement.value) {
+    const el = videoElement.value as any
+    if ('preservesPitch' in el) el.preservesPitch = preservesPitch.value
+    if ('webkitPreservesPitch' in el) el.webkitPreservesPitch = preservesPitch.value
+    if ('mozPreservesPitch' in el) el.mozPreservesPitch = preservesPitch.value
+  }
+}
+
+function updatePlaybackSpeed() {
+  if (player) {
+    player.speed = currentSpeed.value
+  }
+  if (videoElement.value) {
+    videoElement.value.playbackRate = currentSpeed.value
+    applyPitchPreservation()
+  }
+}
+
 function setPlaybackSpeed(s: number) {
   currentSpeed.value = s
-  if (player) {
-    player.speed = s
-  } else if (videoElement.value) {
-    videoElement.value.playbackRate = s
+  updatePlaybackSpeed()
+}
+
+function togglePitchPreservation() {
+  preservesPitch.value = !preservesPitch.value
+  applyPitchPreservation()
+  if (preservesPitch.value) {
+    success('Koreksi Pitch diaktifkan (Nada vokal alami).')
+  } else {
+    success('Koreksi Pitch dinonaktifkan (Pitch asli).')
   }
 }
 

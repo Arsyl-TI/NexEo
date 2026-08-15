@@ -205,3 +205,13 @@
   - **Multi-File Selection Checkboxes**: Added `☑` checkbox selection for every file card in the LAN Sharing File Manager.
   - **Master Select All Button**: Added `☑ Pilih Semua` / `✓ Pembatalan Pilih` toggle button in the toolbar.
   - **Floating Action Bar**: Displays selected file count and a 📦 **"Unduh Terpilih (.zip)"** button with loading feedback.
+
+---
+
+## Feature 19: Video Custom Playback Speed & Pitch Preservation Suite
+- **Files Modified**:
+  - `apps/frontend-nuxt/pages/video/[id].vue`
+- **Implementation Highlights**:
+  - **Precision Speed Range Slider**: Continuous range slider (`0.25x` to `3.0x` with `0.05x` step) with live numeric speed badge.
+  - **Comprehensive Speed Presets**: Added 10 instant speed pills (`0.25x`, `0.5x`, `0.75x`, `1.0x`, `1.25x`, `1.5x`, `1.75x`, `2.0x`, `2.5x`, `3.0x`).
+  - **Pitch Correction Toggle (Vocal Timbre Saver)**: Integrated 🎵 **"Koreksi Pitch"** toggle setting `preservesPitch` on the HTML5 video element so fast audio stays natural and clear instead of sounding like chipmunk voices.
