@@ -1,0 +1,86 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model VideoCategory {
+  id        String   @id
+  name      String
+  path      String
+  icon      String?
+  folders   VideoFolder[]
+  videos    VideoItem[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model VideoFolder {
+  id         String      @id
+  name       String
+  path       String
+  category   VideoCategory @relation(fields: [categoryId], references: [id])
+  categoryId String
+  videos     VideoItem[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+}
+
+model VideoItem {
+  id            String        @id
+  name          String
+  filename      String
+  path          String
+  relativePath  String
+  folder        VideoFolder   @relation(fields: [folderId], references: [id])
+  folderId      String
+  category      VideoCategory @relation(fields: [categoryId], references: [id])
+  categoryId    String
+  size          BigInt
+  sizeFormatted String
+  format        String
+  hasThumbnail  Boolean       @default(false)
+  modified      DateTime
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model Novel {
+  id        String         @id
+  slug      String         @unique
+  title     String
+  author    String?
+  coverUrl  String?
+  tags      String[]
+  chapters  NovelChapter[]
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+}
+
+model NovelChapter {
+  id         String   @id
+  novel      Novel    @relation(fields: [novelSlug], references: [slug])
+  novelSlug  String
+  title      String
+  number     Float?
+  filename   String
+  content    String?  @db.Text
+  translated String?  @db.Text
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model DownloadTask {
+  id        String   @id @default(uuid())
+  title     String
+  type      String   // novel | video | episode
+  url       String
+  status    String   // pending | downloading | completed | failed | cancelled
+  progress  Float    @default(0)
+  error     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

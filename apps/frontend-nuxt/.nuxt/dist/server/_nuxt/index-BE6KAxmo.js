@@ -1,0 +1,289 @@
+import { _ as __nuxt_component_0 } from "./nuxt-link-CcmIMMHP.js";
+import { defineComponent, ref, computed, mergeProps, withCtx, openBlock, createBlock, createVNode, createTextVNode, unref, toDisplayString, useSSRContext } from "vue";
+import { ssrRenderAttrs, ssrRenderStyle, ssrRenderComponent, ssrRenderAttr, ssrInterpolate, ssrRenderList, ssrRenderClass, ssrIncludeBooleanAttr, ssrLooseContain, ssrLooseEqual } from "vue/server-renderer";
+import { useRoute } from "vue-router";
+import { u as useToast } from "./useToast-B8q9yI-P.js";
+import "D:/MyProject/NexEo/node_modules/.pnpm/hookable@5.5.3/node_modules/hookable/dist/index.mjs";
+import { _ as _export_sfc } from "../server.mjs";
+import "D:/MyProject/NexEo/node_modules/.pnpm/ufo@1.6.4/node_modules/ufo/dist/index.mjs";
+import "D:/MyProject/NexEo/node_modules/.pnpm/defu@6.1.7/node_modules/defu/dist/defu.mjs";
+import "D:/MyProject/NexEo/node_modules/.pnpm/ofetch@1.5.1/node_modules/ofetch/dist/node.mjs";
+import "#internal/nuxt/paths";
+import "D:/MyProject/NexEo/node_modules/.pnpm/unctx@2.5.0/node_modules/unctx/dist/index.mjs";
+import "D:/MyProject/NexEo/node_modules/.pnpm/h3@1.15.11/node_modules/h3/dist/index.mjs";
+import "pinia";
+import "D:/MyProject/NexEo/node_modules/.pnpm/klona@2.0.6/node_modules/klona/dist/index.mjs";
+const _sfc_main = /* @__PURE__ */ defineComponent({
+  __name: "index",
+  __ssrInlineRender: true,
+  setup(__props) {
+    const route = useRoute();
+    const slug = route.params.slug;
+    useToast();
+    const novel = ref(null);
+    const chapters = ref([]);
+    const loading = ref(true);
+    const resumeChapter = ref(null);
+    const activeTab = ref("chapters");
+    const chapterSearch = ref("");
+    const chapterSort = ref("asc");
+    const showBatchTransModal = ref(false);
+    const isBatchTranslating = ref(false);
+    const transEngine = ref("google");
+    const transConfig = ref({
+      geminiApiKey: "",
+      deeplApiKey: "",
+      libreUrl: "http://localhost:5000",
+      libreApiKey: ""
+    });
+    const hasResumeChapter = computed(() => {
+      const savedChapter = typeof resumeChapter.value === "string" ? resumeChapter.value.trim() : "";
+      return Boolean(savedChapter) && chapters.value.some((chapter) => chapter.file === savedChapter);
+    });
+    const filteredChapters = computed(() => {
+      let list = [...chapters.value];
+      if (chapterSearch.value.trim()) {
+        const q = chapterSearch.value.toLowerCase();
+        list = list.filter((c) => c.title?.toLowerCase().includes(q));
+      }
+      if (chapterSort.value === "desc") {
+        list.reverse();
+      }
+      return list;
+    });
+    const novelGenres = computed(() => {
+      const allTags = novel.value?.tags || [];
+      const knownGenres = ["Action", "Adult", "Adventure", "Ecchi", "Fantasy", "Horror", "Mystery", "Romance", "Comedy", "Drama", "Sci-Fi", "Slice of Life", "Supernatural"];
+      const styles = [
+        "bg-rose-500/20 text-rose-300 border-rose-500/40",
+        "bg-amber-500/20 text-amber-300 border-amber-500/40",
+        "bg-emerald-500/20 text-emerald-300 border-emerald-500/40",
+        "bg-sky-500/20 text-sky-300 border-sky-500/40",
+        "bg-purple-500/20 text-purple-300 border-purple-500/40",
+        "bg-pink-500/20 text-pink-300 border-pink-500/40",
+        "bg-indigo-500/20 text-indigo-300 border-indigo-500/40"
+      ];
+      return allTags.filter((t) => knownGenres.some((kg) => kg.toLowerCase() === t.toLowerCase())).map((g, idx) => ({ name: g, style: styles[idx % styles.length] }));
+    });
+    const getThumbnailUrl = (pathStr) => {
+      if (pathStr.startsWith("http")) return pathStr;
+      return `/api/thumbnails/${encodeURIComponent(pathStr)}`;
+    };
+    return (_ctx, _push, _parent, _attrs) => {
+      const _component_NuxtLink = __nuxt_component_0;
+      _push(`<div${ssrRenderAttrs(mergeProps({ class: "novel-detail relative min-h-screen bg-background pb-16" }, _attrs))} data-v-050cd33f><div class="absolute inset-0 top-0 left-0 right-0 h-[380px] sm:h-[480px] overflow-hidden pointer-events-none z-0" data-v-050cd33f>`);
+      if (novel.value?.cover) {
+        _push(`<div class="absolute inset-0 opacity-25 blur-3xl scale-110" style="${ssrRenderStyle({
+          backgroundImage: `url(${getThumbnailUrl(novel.value.cover)})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center"
+        })}" data-v-050cd33f></div>`);
+      } else {
+        _push(`<!---->`);
+      }
+      _push(`<div class="absolute inset-0 bg-gradient-to-b from-background/40 via-background/80 to-background" data-v-050cd33f></div></div><div class="max-w-6xl mx-auto relative z-10 px-3 sm:px-6 pt-4" data-v-050cd33f>`);
+      _push(ssrRenderComponent(_component_NuxtLink, {
+        to: "/novels",
+        class: "inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full bg-card/70 hover:bg-border/80 border border-border/60 text-muted-foreground hover:text-foreground text-xs font-semibold transition-all shadow-md backdrop-blur-md"
+      }, {
+        default: withCtx((_, _push2, _parent2, _scopeId) => {
+          if (_push2) {
+            _push2(`<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-v-050cd33f${_scopeId}><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" data-v-050cd33f${_scopeId}></path></svg> Kembali ke Koleksi `);
+          } else {
+            return [
+              (openBlock(), createBlock("svg", {
+                class: "w-4 h-4",
+                fill: "none",
+                stroke: "currentColor",
+                viewBox: "0 0 24 24"
+              }, [
+                createVNode("path", {
+                  "stroke-linecap": "round",
+                  "stroke-linejoin": "round",
+                  "stroke-width": "2",
+                  d: "M15 19l-7-7 7-7"
+                })
+              ])),
+              createTextVNode(" Kembali ke Koleksi ")
+            ];
+          }
+        }),
+        _: 1
+      }, _parent));
+      if (loading.value) {
+        _push(`<div class="flex justify-center py-20" data-v-050cd33f><div class="spinner" data-v-050cd33f></div></div>`);
+      } else if (!novel.value) {
+        _push(`<div class="text-center py-20 bg-card/40 border border-border rounded-2xl text-muted-foreground" data-v-050cd33f>Novel tidak ditemukan.</div>`);
+      } else {
+        _push(`<div data-v-050cd33f><div class="flex flex-col lg:flex-row gap-6 lg:gap-10 mb-10" data-v-050cd33f><div class="w-full lg:w-72 shrink-0 flex flex-col items-center lg:items-start" data-v-050cd33f><div class="w-48 sm:w-60 lg:w-full aspect-[2/3] rounded-2xl overflow-hidden border border-border/80 shadow-[0_20px_50px_rgba(0,0,0,0.7)] bg-card mb-5 relative group" data-v-050cd33f>`);
+        if (novel.value.cover) {
+          _push(`<img${ssrRenderAttr("src", getThumbnailUrl(novel.value.cover))} class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500" loading="lazy" data-v-050cd33f>`);
+        } else {
+          _push(`<div class="flex flex-col items-center justify-center h-full text-muted-foreground text-xs p-4 text-center" data-v-050cd33f><span data-v-050cd33f>📖</span><span class="mt-2" data-v-050cd33f>No Cover Available</span></div>`);
+        }
+        _push(`</div><div class="w-full flex flex-col gap-2.5" data-v-050cd33f>`);
+        if (hasResumeChapter.value) {
+          _push(ssrRenderComponent(_component_NuxtLink, {
+            to: `/novels/${unref(slug)}/${resumeChapter.value}`,
+            class: "w-full py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-orange-950/40 transition-all flex items-center justify-center gap-2 active:scale-95"
+          }, {
+            default: withCtx((_, _push2, _parent2, _scopeId) => {
+              if (_push2) {
+                _push2(`<span data-v-050cd33f${_scopeId}>▶</span> Lanjutkan Membaca `);
+              } else {
+                return [
+                  createVNode("span", null, "▶"),
+                  createTextVNode(" Lanjutkan Membaca ")
+                ];
+              }
+            }),
+            _: 1
+          }, _parent));
+        } else if (chapters.value.length > 0) {
+          _push(ssrRenderComponent(_component_NuxtLink, {
+            to: `/novels/${unref(slug)}/${chapters.value[0].file}`,
+            class: "w-full py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-orange-950/40 transition-all flex items-center justify-center gap-2 active:scale-95"
+          }, {
+            default: withCtx((_, _push2, _parent2, _scopeId) => {
+              if (_push2) {
+                _push2(`<span data-v-050cd33f${_scopeId}>📖</span> Mulai Membaca `);
+              } else {
+                return [
+                  createVNode("span", null, "📖"),
+                  createTextVNode(" Mulai Membaca ")
+                ];
+              }
+            }),
+            _: 1
+          }, _parent));
+        } else {
+          _push(`<!---->`);
+        }
+        _push(`<button class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-indigo-950/40 transition-all flex items-center justify-center gap-2 active:scale-95" data-v-050cd33f><span data-v-050cd33f>🌐</span> Terjemahkan Semua Chapter (Permanen) </button>`);
+        if (novel.value.sourceUrl) {
+          _push(`<a${ssrRenderAttr("href", novel.value.sourceUrl)} target="_blank" class="w-full py-2.5 px-4 rounded-xl text-xs font-semibold bg-card/60 border border-border/80 text-muted-foreground hover:text-foreground hover:bg-border/60 transition-all flex items-center justify-center gap-2" data-v-050cd33f><span data-v-050cd33f>🌐</span> Buka Sumber Asli ↗ </a>`);
+        } else {
+          _push(`<!---->`);
+        }
+        _push(`</div><div class="w-full mt-4 p-4 rounded-2xl bg-card/50 border border-border/60 flex items-center justify-between text-xs" data-v-050cd33f><span class="text-muted-foreground font-medium" data-v-050cd33f>Total Bab</span><span class="text-amber-400 font-bold font-mono text-base" data-v-050cd33f>${ssrInterpolate(chapters.value.length)}</span></div></div><div class="flex-1 min-w-0" data-v-050cd33f><h1 class="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-foreground tracking-tight leading-tight mb-3" data-v-050cd33f>${ssrInterpolate(novel.value.title)}</h1><div class="flex flex-wrap items-center gap-2.5 mb-5 text-xs" data-v-050cd33f>`);
+        if (novel.value.author) {
+          _push(`<div class="inline-flex items-center gap-2 bg-purple-900/30 border border-purple-500/30 text-purple-300 px-3.5 py-1.5 rounded-full font-medium" data-v-050cd33f><span data-v-050cd33f>👤</span> Author: <span class="font-bold text-white" data-v-050cd33f>${ssrInterpolate(novel.value.author)}</span></div>`);
+        } else {
+          _push(`<!---->`);
+        }
+        _push(`<div class="inline-flex items-center gap-2 bg-card/80 border border-border text-muted-foreground px-3.5 py-1.5 rounded-full font-medium" data-v-050cd33f><span data-v-050cd33f>🌐</span> Bahasa: <span class="text-foreground font-semibold" data-v-050cd33f>Indonesia / English</span></div></div>`);
+        if (novelGenres.value.length) {
+          _push(`<div class="flex flex-wrap gap-2 mb-4" data-v-050cd33f><!--[-->`);
+          ssrRenderList(novelGenres.value, (g) => {
+            _push(`<span class="${ssrRenderClass(["px-3 py-1 rounded-lg text-xs font-bold shadow-md border", g.style])}" data-v-050cd33f>${ssrInterpolate(g.name)}</span>`);
+          });
+          _push(`<!--]--></div>`);
+        } else {
+          _push(`<!---->`);
+        }
+        if (novel.value.tags?.length) {
+          _push(`<div class="flex flex-wrap gap-1.5 mb-6" data-v-050cd33f><!--[-->`);
+          ssrRenderList(novel.value.tags, (tag) => {
+            _push(`<span class="px-2.5 py-0.5 rounded-full bg-card/40 border border-border/50 text-[11px] text-muted-foreground" data-v-050cd33f> #${ssrInterpolate(tag)}</span>`);
+          });
+          _push(`<!--]--></div>`);
+        } else {
+          _push(`<!---->`);
+        }
+        _push(`<div class="flex border-b border-border/80 mb-6 gap-6" data-v-050cd33f><button class="${ssrRenderClass(["pb-3 text-sm font-bold transition-all relative", activeTab.value === "chapters" ? "text-primary border-b-2 border-primary" : "text-muted-foreground hover:text-foreground"])}" data-v-050cd33f> 📋 Daftar Bab (${ssrInterpolate(chapters.value.length)}) </button><button class="${ssrRenderClass(["pb-3 text-sm font-bold transition-all relative", activeTab.value === "synopsis" ? "text-primary border-b-2 border-primary" : "text-muted-foreground hover:text-foreground"])}" data-v-050cd33f> 📄 Sinopsis Novel </button></div>`);
+        if (activeTab.value === "chapters") {
+          _push(`<div class="space-y-4" data-v-050cd33f><div class="flex flex-col sm:flex-row gap-3 justify-between items-center bg-card/40 border border-border/60 p-3 rounded-2xl" data-v-050cd33f><div class="relative w-full sm:w-72" data-v-050cd33f><input${ssrRenderAttr("value", chapterSearch.value)} type="text" placeholder="Cari judul bab..." class="w-full bg-background border border-border rounded-xl pl-9 pr-4 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary" data-v-050cd33f><span class="absolute left-3 top-2.5 text-xs text-muted-foreground" data-v-050cd33f>🔍</span></div><div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end" data-v-050cd33f><button class="px-3 py-2 bg-card border border-border rounded-xl text-xs font-semibold text-muted-foreground hover:text-foreground flex items-center gap-1.5" data-v-050cd33f><span data-v-050cd33f>${ssrInterpolate(chapterSort.value === "asc" ? "⬇ Urut Awal" : "⬆ Urut Akhir")}</span></button></div></div>`);
+          if (filteredChapters.value.length === 0) {
+            _push(`<div class="py-12 text-center text-muted-foreground text-xs" data-v-050cd33f> Tidak ada bab yang cocok dengan kata kunci pencarian. </div>`);
+          } else {
+            _push(`<div class="grid grid-cols-1 md:grid-cols-2 gap-3" data-v-050cd33f><!--[-->`);
+            ssrRenderList(filteredChapters.value, (c) => {
+              _push(ssrRenderComponent(_component_NuxtLink, {
+                key: c.id,
+                to: `/novels/${unref(slug)}/${c.file}`,
+                class: "group flex items-center justify-between p-3.5 rounded-xl bg-card/60 hover:bg-card border border-border/60 hover:border-primary/50 transition-all shadow-sm"
+              }, {
+                default: withCtx((_, _push2, _parent2, _scopeId) => {
+                  if (_push2) {
+                    _push2(`<div class="flex items-center gap-3 min-w-0" data-v-050cd33f${_scopeId}><div class="w-8 h-10 rounded-md overflow-hidden bg-card border border-border shrink-0" data-v-050cd33f${_scopeId}>`);
+                    if (novel.value.cover) {
+                      _push2(`<img${ssrRenderAttr("src", getThumbnailUrl(novel.value.cover))} class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" data-v-050cd33f${_scopeId}>`);
+                    } else {
+                      _push2(`<div class="w-full h-full flex items-center justify-center text-[10px]" data-v-050cd33f${_scopeId}>📖</div>`);
+                    }
+                    _push2(`</div><span class="text-xs font-semibold text-foreground group-hover:text-primary transition-colors truncate" data-v-050cd33f${_scopeId}>${ssrInterpolate(c.title)}</span></div><span class="text-[10px] text-muted-foreground font-mono shrink-0 ml-2 group-hover:text-primary" data-v-050cd33f${_scopeId}>Baca →</span>`);
+                  } else {
+                    return [
+                      createVNode("div", { class: "flex items-center gap-3 min-w-0" }, [
+                        createVNode("div", { class: "w-8 h-10 rounded-md overflow-hidden bg-card border border-border shrink-0" }, [
+                          novel.value.cover ? (openBlock(), createBlock("img", {
+                            key: 0,
+                            src: getThumbnailUrl(novel.value.cover),
+                            class: "w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                          }, null, 8, ["src"])) : (openBlock(), createBlock("div", {
+                            key: 1,
+                            class: "w-full h-full flex items-center justify-center text-[10px]"
+                          }, "📖"))
+                        ]),
+                        createVNode("span", { class: "text-xs font-semibold text-foreground group-hover:text-primary transition-colors truncate" }, toDisplayString(c.title), 1)
+                      ]),
+                      createVNode("span", { class: "text-[10px] text-muted-foreground font-mono shrink-0 ml-2 group-hover:text-primary" }, "Baca →")
+                    ];
+                  }
+                }),
+                _: 2
+              }, _parent));
+            });
+            _push(`<!--]--></div>`);
+          }
+          _push(`</div>`);
+        } else if (activeTab.value === "synopsis") {
+          _push(`<div class="bg-card/70 border border-border/80 rounded-2xl p-6 shadow-xl backdrop-blur-xl" data-v-050cd33f><h2 class="text-lg font-bold text-foreground mb-4 flex items-center gap-2" data-v-050cd33f><span data-v-050cd33f>📄</span> Sinopsis Novel </h2><div class="prose prose-invert max-w-none text-muted-foreground leading-relaxed text-sm" data-v-050cd33f>${(novel.value.description || "Tidak ada sinopsis resmi untuk novel ini.") ?? ""}</div></div>`);
+        } else {
+          _push(`<!---->`);
+        }
+        _push(`</div></div></div>`);
+      }
+      _push(`</div>`);
+      if (showBatchTransModal.value) {
+        _push(`<div class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm" data-v-050cd33f><div class="bg-card border border-border rounded-3xl max-w-md w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto" data-v-050cd33f><button class="absolute top-4 right-4 text-muted-foreground hover:text-foreground text-xl" data-v-050cd33f>✕</button><h2 class="text-xl font-bold text-foreground mb-1 flex items-center gap-2" data-v-050cd33f><span data-v-050cd33f>🌐</span> Terjemahkan Semua Chapter </h2><p class="text-xs text-muted-foreground mb-4" data-v-050cd33f>Terjemahan ini akan disimpan secara <strong data-v-050cd33f>PERMANEN</strong> di disk server sehingga Anda dapat membacanya langsung kapan saja!</p><div class="space-y-4 mb-6" data-v-050cd33f><div data-v-050cd33f><label class="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2" data-v-050cd33f>Mesin Penerjemah AI</label><select class="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:outline-none focus:border-primary" data-v-050cd33f><option value="google" data-v-050cd33f${ssrIncludeBooleanAttr(Array.isArray(transEngine.value) ? ssrLooseContain(transEngine.value, "google") : ssrLooseEqual(transEngine.value, "google")) ? " selected" : ""}>🌐 Google Translate (Gratis/Bawaan)</option><option value="gemini" data-v-050cd33f${ssrIncludeBooleanAttr(Array.isArray(transEngine.value) ? ssrLooseContain(transEngine.value, "gemini") : ssrLooseEqual(transEngine.value, "gemini")) ? " selected" : ""}>⚡ Gemini 1.5 Flash API (AI Disarankan)</option><option value="deepl" data-v-050cd33f${ssrIncludeBooleanAttr(Array.isArray(transEngine.value) ? ssrLooseContain(transEngine.value, "deepl") : ssrLooseEqual(transEngine.value, "deepl")) ? " selected" : ""}>🎯 DeepL API (Kualitas Sastra)</option><option value="libre" data-v-050cd33f${ssrIncludeBooleanAttr(Array.isArray(transEngine.value) ? ssrLooseContain(transEngine.value, "libre") : ssrLooseEqual(transEngine.value, "libre")) ? " selected" : ""}>🐳 LibreTranslate (Self-Hosted Docker)</option></select></div>`);
+        if (transEngine.value === "gemini") {
+          _push(`<div data-v-050cd33f><label class="block text-xs font-semibold text-muted-foreground mb-1" data-v-050cd33f>Gemini API Key</label><input${ssrRenderAttr("value", transConfig.value.geminiApiKey)} type="password" placeholder="Masukkan Gemini API Key..." class="w-full bg-background border border-border rounded-xl px-4 py-2 text-sm text-foreground focus:outline-none focus:border-primary" data-v-050cd33f></div>`);
+        } else {
+          _push(`<!---->`);
+        }
+        if (transEngine.value === "deepl") {
+          _push(`<div data-v-050cd33f><label class="block text-xs font-semibold text-muted-foreground mb-1" data-v-050cd33f>DeepL API Key</label><input${ssrRenderAttr("value", transConfig.value.deeplApiKey)} type="password" placeholder="Contoh: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx:fx" class="w-full bg-background border border-border rounded-xl px-4 py-2 text-sm text-foreground focus:outline-none focus:border-primary" data-v-050cd33f></div>`);
+        } else {
+          _push(`<!---->`);
+        }
+        if (transEngine.value === "libre") {
+          _push(`<div class="space-y-3" data-v-050cd33f><div data-v-050cd33f><label class="block text-xs font-semibold text-muted-foreground mb-1" data-v-050cd33f>LibreTranslate Docker URL</label><input${ssrRenderAttr("value", transConfig.value.libreUrl)} type="text" placeholder="http://localhost:5000" class="w-full bg-background border border-border rounded-xl px-4 py-2 text-sm text-foreground focus:outline-none focus:border-primary" data-v-050cd33f></div></div>`);
+        } else {
+          _push(`<!---->`);
+        }
+        _push(`<div class="bg-purple-950/30 border border-purple-500/30 rounded-xl p-3.5 text-xs text-purple-300 leading-relaxed" data-v-050cd33f> 💡 Teks terjemahan akan ditulis langsung ke file disk <code data-v-050cd33f>.txt</code> seluruh chapter novel. </div></div><div class="flex gap-3" data-v-050cd33f><button class="flex-1 px-4 py-2.5 rounded-xl border border-border text-xs font-medium text-muted-foreground hover:text-foreground" data-v-050cd33f> Batal </button><button${ssrIncludeBooleanAttr(isBatchTranslating.value) ? " disabled" : ""} class="flex-1 btn-primary py-2.5 text-xs font-bold flex items-center justify-center gap-2 shadow-lg disabled:opacity-50" data-v-050cd33f>`);
+        if (isBatchTranslating.value) {
+          _push(`<span class="spinner border-2 w-3.5 h-3.5" data-v-050cd33f></span>`);
+        } else {
+          _push(`<!---->`);
+        }
+        _push(`<span data-v-050cd33f>${ssrInterpolate(isBatchTranslating.value ? "Menerjemahkan..." : "Mulai Terjemahkan Permanen")}</span></button></div></div></div>`);
+      } else {
+        _push(`<!---->`);
+      }
+      _push(`</div>`);
+    };
+  }
+});
+const _sfc_setup = _sfc_main.setup;
+_sfc_main.setup = (props, ctx) => {
+  const ssrContext = useSSRContext();
+  (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("pages/novels/[slug]/index.vue");
+  return _sfc_setup ? _sfc_setup(props, ctx) : void 0;
+};
+const index = /* @__PURE__ */ _export_sfc(_sfc_main, [["__scopeId", "data-v-050cd33f"]]);
+export {
+  index as default
+};
+//# sourceMappingURL=index-BE6KAxmo.js.map

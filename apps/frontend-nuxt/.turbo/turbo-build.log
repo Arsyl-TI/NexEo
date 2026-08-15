@@ -1,0 +1,241 @@
+
+> @nexeo/frontend-nuxt@1.0.0 build D:\MyProject\NexEo\apps\frontend-nuxt
+> nuxt build
+
+T  [36mBuilding Nuxt for production...[39m
+|
+•  [32mNuxt [1m3.21.11[22m[39m[90m (with [39m[90mNitro [1m2.13.4[22m[39m[90m, Vite [1m7.3.6[22m[39m[90m and Vue [1m3.5.41[22m[39m[90m)[39m
+[90m[[90mnuxt:tailwindcss[90m][39m [36mi[39m Using default Tailwind CSS file
+|
+•  Nitro preset: [36mnode-server[39m
+[36mi[39m Building client...
+[36mi[39m [36mvite v7.3.6 [32mbuilding client environment for production...[36m[39m
+[36mi[39m transforming...
+[36mi[39m [32m✓[39m 220 modules transformed.
+[36mi[39m rendering chunks...
+[36mi[39m computing gzip size...
+[36mi[39m [2m.nuxt/dist/client/[22m[32mmanifest.json                 [39m[1m[2m  7.30 kB[22m[1m[22m[2m │ gzip:  0.92 kB[22m
+[36mi[39m [2m.nuxt/dist/client/[22m[35m_nuxt/default.C6XpIQV4.css    [39m[1m[2m  0.03 kB[22m[1m[22m[2m │ gzip:  0.05 kB[22m
+[36mi[39m [2m.nuxt/dist/client/[22m[35m_nuxt/index.IvK_20QZ.css      [39m[1m[2m  0.22 kB[22m[1m[22m[2m │ gzip:  0.17 kB[22m
+[36mi[39m [2m.nuxt/dist/client/[22m[35m_nuxt/share.Coz_IUD1.css      [39m[1m[2m  0.22 kB[22m[1m[22m[2m │ gzip:  0.17 kB[22m
+[36mi[39m [2m.nuxt/dist/client/[22m[35m_nuxt/index.CrXWa7u8.css      [39m[1m[2m  0.22 kB[22m[1m[22m[2m │ gzip:  0.17 kB[22m
+[36mi[39m [2m.nuxt/dist/client/[22m[35m_nuxt/index.DJrRBYJW.css      [39m[1m[2m  0.22 kB[22m[1m[22m[2m │ gzip:  0.17 kB[22m
+[36mi[39m [2m.nuxt/dist/client/[22m[35m_nuxt/index.Do-Lemy6.css      [39m[1m[2m  0.22 kB[22m[1m[22m[2m │ gzip:  0.17 kB[22m
+[36mi[39m [2m.nuxt/dist/client/[22m[35m_nuxt/_chapter_.CDA9QvaU.css  [39m[1m[2m  0.34 kB[22m[1m[22m[2m │ gzip:  0.22 kB[22m
+[36mi[39m [2m.nuxt/dist/client/[22m[35m_nuxt/error-500.CwOZ6KER.css  [39m[1m[2m  1.88 kB[22m[1m[22m[2m │ gzip:  0.72 kB[22m
+[36mi[39m [2m.nuxt/dist/client/[22m[35m_nuxt/error-404.C0cp8TcX.css  [39m[1m[2m  3.53 kB[22m[1m[22m[2m │ gzip:  1.09 kB[22m
+[36mi[39m [2m.nuxt/dist/client/[22m[35m_nuxt/_id_.Dt3KLP9A.css       [39m[1m[2m 32.55 kB[22m[1m[22m[2m │ gzip:  5.26 kB[22m
+[36mi[39m [2m.nuxt/dist/client/[22m[36m_nuxt/BcvC3udf.js             [39m[1m[2m  0.25 kB[22m[1m[22m[2m │ gzip:  0.20 kB[22m
+[36mi[39m [2m.nuxt/dist/client/[22m[36m_nuxt/B29YRhTE.js             [39m[1m[2m  0.29 kB[22m[1m[22m[2m │ gzip:  0.19 kB[22m
+[36mi[39m [2m.nuxt/dist/client/[22m[36m_nuxt/WzQYhqAw.js             [39m[1m[2m  0.41 kB[22m[1m[22m[2m │ gzip:  0.28 kB[22m
+[36mi[39m [2m.nuxt/dist/client/[22m[36m_nuxt/BXe38WZc.js             [39m[1m[2m  1.25 kB[22m[1m[22m[2m │ gzip:  0.49 kB[22m
+[36mi[39m [2m.nuxt/dist/client/[22m[36m_nuxt/eVYTgMhR.js             [39m[1m[2m  1.74 kB[22m[1m[22m[2m │ gzip:  0.69 kB[22m
+[36mi[39m [2m.nuxt/dist/client/[22m[36m_nuxt/BdxO4DGk.js             [39m[1m[2m  3.39 kB[22m[1m[22m[2m │ gzip:  1.53 kB[22m
+[36mi[39m [2m.nuxt/dist/client/[22m[36m_nuxt/DUc-Clr6.js             [39m[1m[2m  3.76 kB[22m[1m[22m[2m │ gzip:  1.71 kB[22m
+[36mi[39m [2m.nuxt/dist/client/[22m[36m_nuxt/D3yPVeyj.js             [39m[1m[2m  5.69 kB[22m[1m[22m[2m │ gzip:  2.26 kB[22m
+[36mi[39m [2m.nuxt/dist/client/[22m[36m_nuxt/D6Jkfkxe.js             [39m[1m[2m  6.85 kB[22m[1m[22m[2m │ gzip:  2.80 kB[22m
+[36mi[39m [2m.nuxt/dist/client/[22m[36m_nuxt/qkRjbTtR.js             [39m[1m[2m  7.26 kB[22m[1m[22m[2m │ gzip:  2.61 kB[22m
+[36mi[39m [2m.nuxt/dist/client/[22m[36m_nuxt/ngZ_oULr.js             [39m[1m[2m  8.82 kB[22m[1m[22m[2m │ gzip:  3.64 kB[22m
+[36mi[39m [2m.nuxt/dist/client/[22m[36m_nuxt/RdXpC3Rx.js             [39m[1m[2m  9.78 kB[22m[1m[22m[2m │ gzip:  3.39 kB[22m
+[36mi[39m [2m.nuxt/dist/client/[22m[36m_nuxt/BOGNJd0B.js             [39m[1m[2m 11.37 kB[22m[1m[22m[2m │ gzip:  3.84 kB[22m
+[36mi[39m [2m.nuxt/dist/client/[22m[36m_nuxt/CSbzU4TL.js             [39m[1m[2m 12.87 kB[22m[1m[22m[2m │ gzip:  4.17 kB[22m
+[36mi[39m [2m.nuxt/dist/client/[22m[36m_nuxt/vaJ0Yo1p.js             [39m[1m[2m 15.37 kB[22m[1m[22m[2m │ gzip:  5.17 kB[22m
+[36mi[39m [2m.nuxt/dist/client/[22m[36m_nuxt/O9TRA8Zc.js             [39m[1m[2m 21.19 kB[22m[1m[22m[2m │ gzip:  6.60 kB[22m
+[36mi[39m [2m.nuxt/dist/client/[22m[36m_nuxt/TBLFPCSJ.js             [39m[1m[2m120.00 kB[22m[1m[22m[2m │ gzip: 36.44 kB[22m
+[36mi[39m [2m.nuxt/dist/client/[22m[36m_nuxt/x62vROg2.js             [39m[1m[2m188.51 kB[22m[1m[22m[2m │ gzip: 70.57 kB[22m
+[36mi[39m [32m✓ built in 4.16s[39m
+[32m√[39m Client built in 4174ms
+[36mi[39m Building server...
+[36mi[39m [36mvite v7.3.6 [32mbuilding ssr environment for production...[36m[39m
+[36mi[39m transforming...
+[36mi[39m [32m✓[39m 155 modules transformed.
+[36mi[39m rendering chunks...
+[36mi[39m [32m✓ built in 2.79s[39m
+[32m√[39m Server built in 2803ms
+[90m[[90mnitro[90m][39m [32m√[39m Generated public [36m.output/public[39m
+[90m[[90mnitro[90m][39m [36mi[39m Building Nuxt Nitro server (preset: [36mnode-server[39m, compatibility date: [36m2024-01-01[39m)
+(node:23068) [DEP0155] DeprecationWarning: Use of deprecated trailing slash pattern mapping "./" in the "exports" field module resolution of the package at D:\MyProject\NexEo\node_modules\.pnpm\@nuxt+nitro-server@3.21.11__ab6b34050c574ac4ae20c7ed2556094e\node_modules\@vue\shared\package.json imported from D:\MyProject\NexEo\node_modules\.pnpm\@nuxt+nitro-server@3.21.11__ab6b34050c574ac4ae20c7ed2556094e\node_modules\@nuxt\nitro-server\dist\runtime\templates\error-500.mjs. Mapping specifiers ending in "/" is no longer supported.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[90m[[90mnitro[90m][39m [32m√[39m Nuxt Nitro server built
+[90m  ├─ .output/server/chunks/_/catalogScraper.mjs (13.1 kB)[39m[90m (3.33 kB gzip)[39m
+[90m  ├─ .output/server/chunks/_/catalogScraper.mjs.map (15.8 kB)[39m[90m (3.14 kB gzip)[39m
+[90m  ├─ .output/server/chunks/_/config.mjs (1.84 kB)[39m[90m (773 B gzip)[39m
+[90m  ├─ .output/server/chunks/_/config.mjs.map (2.24 kB)[39m[90m (666 B gzip)[39m
+[90m  ├─ .output/server/chunks/_/downloader.mjs (6.85 kB)[39m[90m (2.28 kB gzip)[39m
+[90m  ├─ .output/server/chunks/_/downloader.mjs.map (8.05 kB)[39m[90m (1.98 kB gzip)[39m
+[90m  ├─ .output/server/chunks/_/error-500.mjs (4.9 kB)[39m[90m (2.06 kB gzip)[39m
+[90m  ├─ .output/server/chunks/_/error-500.mjs.map (268 B)[39m[90m (202 B gzip)[39m
+[90m  ├─ .output/server/chunks/_/network.mjs (602 B)[39m[90m (328 B gzip)[39m
+[90m  ├─ .output/server/chunks/_/network.mjs.map (701 B)[39m[90m (332 B gzip)[39m
+[90m  ├─ .output/server/chunks/_/nitro.mjs (177 kB)[39m[90m (42.9 kB gzip)[39m
+[90m  ├─ .output/server/chunks/_/nitro.mjs.map (5.24 kB)[39m[90m (959 B gzip)[39m
+[90m  ├─ .output/server/chunks/_/novel.mjs (5.41 kB)[39m[90m (1.39 kB gzip)[39m
+[90m  ├─ .output/server/chunks/_/novel.mjs.map (6.46 kB)[39m[90m (1.45 kB gzip)[39m
+[90m  ├─ .output/server/chunks/_/sharedFiles.mjs (1.56 kB)[39m[90m (631 B gzip)[39m
+[90m  ├─ .output/server/chunks/_/sharedFiles.mjs.map (1.68 kB)[39m[90m (586 B gzip)[39m
+[90m  ├─ .output/server/chunks/_/thumbnail.mjs (1.68 kB)[39m[90m (646 B gzip)[39m
+[90m  ├─ .output/server/chunks/_/thumbnail.mjs.map (1.74 kB)[39m[90m (596 B gzip)[39m
+[90m  ├─ .output/server/chunks/_/translator.mjs (4.74 kB)[39m[90m (1.65 kB gzip)[39m
+[90m  ├─ .output/server/chunks/_/translator.mjs.map (4.9 kB)[39m[90m (1.3 kB gzip)[39m
+[90m  ├─ .output/server/chunks/_/video.mjs (6.14 kB)[39m[90m (1.78 kB gzip)[39m
+[90m  ├─ .output/server/chunks/_/video.mjs.map (6.64 kB)[39m[90m (1.74 kB gzip)[39m
+[90m  ├─ .output/server/chunks/_/youtubeDownloader.mjs (5.51 kB)[39m[90m (1.91 kB gzip)[39m
+[90m  ├─ .output/server/chunks/_/youtubeDownloader.mjs.map (5.89 kB)[39m[90m (1.54 kB gzip)[39m
+[90m  ├─ .output/server/chunks/build/_chapter_-Dnhs1yHk.mjs (27.8 kB)[39m[90m (6.03 kB gzip)[39m
+[90m  ├─ .output/server/chunks/build/_chapter_-Dnhs1yHk.mjs.map (14.9 kB)[39m[90m (3.23 kB gzip)[39m
+[90m  ├─ .output/server/chunks/build/_chapter_-styles.BeXx56vj.mjs (634 B)[39m[90m (349 B gzip)[39m
+[90m  ├─ .output/server/chunks/build/_chapter_-styles.BeXx56vj.mjs.map (198 B)[39m[90m (156 B gzip)[39m
+[90m  ├─ .output/server/chunks/build/_id_-BR5tuER7.mjs (8.19 kB)[39m[90m (2.67 kB gzip)[39m
+[90m  ├─ .output/server/chunks/build/_id_-BR5tuER7.mjs.map (2.97 kB)[39m[90m (886 B gzip)[39m
+[90m  ├─ .output/server/chunks/build/_id_-styles.cJvoUCKS.mjs (32.8 kB)[39m[90m (5.37 kB gzip)[39m
+[90m  ├─ .output/server/chunks/build/_id_-styles.cJvoUCKS.mjs.map (216 B)[39m[90m (167 B gzip)[39m
+[90m  ├─ .output/server/chunks/build/client.precomputed.mjs (15.6 kB)[39m[90m (1.54 kB gzip)[39m
+[90m  ├─ .output/server/chunks/build/client.precomputed.mjs.map (12.1 kB)[39m[90m (678 B gzip)[39m
+[90m  ├─ .output/server/chunks/build/default-Cb-C6D90.mjs (15.4 kB)[39m[90m (3.04 kB gzip)[39m
+[90m  ├─ .output/server/chunks/build/default-Cb-C6D90.mjs.map (6.38 kB)[39m[90m (1.43 kB gzip)[39m
+[90m  ├─ .output/server/chunks/build/default-styles.DNmtXFTg.mjs (313 B)[39m[90m (200 B gzip)[39m
+[90m  ├─ .output/server/chunks/build/default-styles.DNmtXFTg.mjs.map (194 B)[39m[90m (156 B gzip)[39m
+[90m  ├─ .output/server/chunks/build/entry-styles.BRsvX_rf.mjs (81.5 kB)[39m[90m (14.3 kB gzip)[39m
+[90m  ├─ .output/server/chunks/build/entry-styles.BRsvX_rf.mjs.map (218 B)[39m[90m (166 B gzip)[39m
+[90m  ├─ .output/server/chunks/build/error-404-C0XyIc30.mjs (5.75 kB)[39m[90m (2.32 kB gzip)[39m
+[90m  ├─ .output/server/chunks/build/error-404-C0XyIc30.mjs.map (309 B)[39m[90m (242 B gzip)[39m
+[90m  ├─ .output/server/chunks/build/error-404-styles.CHP9vysh.mjs (3.83 kB)[39m[90m (1.23 kB gzip)[39m
+[90m  ├─ .output/server/chunks/build/error-404-styles.CHP9vysh.mjs.map (198 B)[39m[90m (157 B gzip)[39m
+[90m  ├─ .output/server/chunks/build/error-500-5hYAtzei.mjs (4.85 kB)[39m[90m (2.02 kB gzip)[39m
+[90m  ├─ .output/server/chunks/build/error-500-5hYAtzei.mjs.map (291 B)[39m[90m (232 B gzip)[39m
+[90m  ├─ .output/server/chunks/build/error-500-styles.C231HcS2.mjs (2.18 kB)[39m[90m (862 B gzip)[39m
+[90m  ├─ .output/server/chunks/build/error-500-styles.C231HcS2.mjs.map (198 B)[39m[90m (157 B gzip)[39m
+[90m  ├─ .output/server/chunks/build/index-BE6KAxmo.mjs (23.4 kB)[39m[90m (5.55 kB gzip)[39m
+[90m  ├─ .output/server/chunks/build/index-BE6KAxmo.mjs.map (8.58 kB)[39m[90m (2.21 kB gzip)[39m
+[90m  ├─ .output/server/chunks/build/index-CJP95DiN.mjs (14.4 kB)[39m[90m (3.54 kB gzip)[39m
+[90m  ├─ .output/server/chunks/build/index-CJP95DiN.mjs.map (6.65 kB)[39m[90m (1.49 kB gzip)[39m
+[90m  ├─ .output/server/chunks/build/index-D8kQjp-3.mjs (3.59 kB)[39m[90m (885 B gzip)[39m
+[90m  ├─ .output/server/chunks/build/index-D8kQjp-3.mjs.map (4.04 kB)[39m[90m (863 B gzip)[39m
+[90m  ├─ .output/server/chunks/build/index-DqL9HHru.mjs (10 kB)[39m[90m (2.86 kB gzip)[39m
+[90m  ├─ .output/server/chunks/build/index-DqL9HHru.mjs.map (4.9 kB)[39m[90m (1.35 kB gzip)[39m
+[90m  ├─ .output/server/chunks/build/index-j7g5PtfO.mjs (17.1 kB)[39m[90m (4.04 kB gzip)[39m
+[90m  ├─ .output/server/chunks/build/index-j7g5PtfO.mjs.map (6.36 kB)[39m[90m (1.72 kB gzip)[39m
+[90m  ├─ .output/server/chunks/build/index-styles-2.DUDtt2oc.mjs (501 B)[39m[90m (302 B gzip)[39m
+[90m  ├─ .output/server/chunks/build/index-styles-2.DUDtt2oc.mjs.map (194 B)[39m[90m (156 B gzip)[39m
+[90m  ├─ .output/server/chunks/build/index-styles-3.lFWsKPvW.mjs (501 B)[39m[90m (303 B gzip)[39m
+[90m  ├─ .output/server/chunks/build/index-styles-3.lFWsKPvW.mjs.map (194 B)[39m[90m (157 B gzip)[39m
+[90m  ├─ .output/server/chunks/build/index-styles-4.x0gzGmWZ.mjs (501 B)[39m[90m (304 B gzip)[39m
+[90m  ├─ .output/server/chunks/build/index-styles-4.x0gzGmWZ.mjs.map (194 B)[39m[90m (157 B gzip)[39m
+[90m  ├─ .output/server/chunks/build/index-styles.BgYDo7Se.mjs (497 B)[39m[90m (301 B gzip)[39m
+[90m  ├─ .output/server/chunks/build/index-styles.BgYDo7Se.mjs.map (190 B)[39m[90m (154 B gzip)[39m
+[90m  ├─ .output/server/chunks/build/novel-browser-NdZC1hGE.mjs (15.2 kB)[39m[90m (3.69 kB gzip)[39m
+[90m  ├─ .output/server/chunks/build/novel-browser-NdZC1hGE.mjs.map (6.52 kB)[39m[90m (1.54 kB gzip)[39m
+[90m  ├─ .output/server/chunks/build/nuxt-link-CcmIMMHP.mjs (10.8 kB)[39m[90m (2.88 kB gzip)[39m
+[90m  ├─ .output/server/chunks/build/nuxt-link-CcmIMMHP.mjs.map (273 B)[39m[90m (220 B gzip)[39m
+[90m  ├─ .output/server/chunks/build/server.mjs (46.9 kB)[39m[90m (12.2 kB gzip)[39m
+[90m  ├─ .output/server/chunks/build/server.mjs.map (5.22 kB)[39m[90m (973 B gzip)[39m
+[90m  ├─ .output/server/chunks/build/share-DaWtyIYX.mjs (10.2 kB)[39m[90m (3.15 kB gzip)[39m
+[90m  ├─ .output/server/chunks/build/share-DaWtyIYX.mjs.map (4.02 kB)[39m[90m (1.1 kB gzip)[39m
+[90m  ├─ .output/server/chunks/build/share-styles.2cqKxhku.mjs (497 B)[39m[90m (300 B gzip)[39m
+[90m  ├─ .output/server/chunks/build/share-styles.2cqKxhku.mjs.map (190 B)[39m[90m (154 B gzip)[39m
+[90m  ├─ .output/server/chunks/build/styles.mjs (1.62 kB)[39m[90m (506 B gzip)[39m
+[90m  ├─ .output/server/chunks/build/styles.mjs.map (1.03 kB)[39m[90m (292 B gzip)[39m
+[90m  ├─ .output/server/chunks/build/useApi-CJK4OrTg.mjs (496 B)[39m[90m (267 B gzip)[39m
+[90m  ├─ .output/server/chunks/build/useApi-CJK4OrTg.mjs.map (676 B)[39m[90m (286 B gzip)[39m
+[90m  ├─ .output/server/chunks/build/useToast-B8q9yI-P.mjs (739 B)[39m[90m (367 B gzip)[39m
+[90m  ├─ .output/server/chunks/build/useToast-B8q9yI-P.mjs.map (1.01 kB)[39m[90m (393 B gzip)[39m
+[90m  ├─ .output/server/chunks/build/v3-B1iQazbp.mjs (702 B)[39m[90m (371 B gzip)[39m
+[90m  ├─ .output/server/chunks/build/v3-B1iQazbp.mjs.map (265 B)[39m[90m (216 B gzip)[39m
+[90m  ├─ .output/server/chunks/build/video-p99v0tOr.mjs (2.56 kB)[39m[90m (639 B gzip)[39m
+[90m  ├─ .output/server/chunks/build/video-p99v0tOr.mjs.map (2.91 kB)[39m[90m (644 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/_novels/_...path_.get.mjs (1.46 kB)[39m[90m (685 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/_novels/_...path_.get.mjs.map (1.19 kB)[39m[90m (348 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/categories.get.mjs (524 B)[39m[90m (253 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/categories.get.mjs.map (209 B)[39m[90m (151 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/download/_filename_.get.mjs (1.03 kB)[39m[90m (448 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/download/_filename_.get.mjs.map (666 B)[39m[90m (246 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/downloader/tasks.get.mjs (571 B)[39m[90m (274 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/downloader/tasks.get.mjs.map (274 B)[39m[90m (169 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/downloader/tasks.post.mjs (957 B)[39m[90m (455 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/downloader/tasks.post.mjs.map (624 B)[39m[90m (240 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/downloader/tasks/_id_.delete.mjs (902 B)[39m[90m (399 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/downloader/tasks/_id_.delete.mjs.map (594 B)[39m[90m (240 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/downloader/tasks/_id/cancel.post.mjs (913 B)[39m[90m (400 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/downloader/tasks/_id/cancel.post.mjs.map (603 B)[39m[90m (237 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/index.get.mjs (541 B)[39m[90m (267 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/index.get.mjs.map (264 B)[39m[90m (164 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/index2.get.mjs (498 B)[39m[90m (246 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/index2.get.mjs.map (207 B)[39m[90m (155 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/info.get.mjs (504 B)[39m[90m (268 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/info.get.mjs.map (279 B)[39m[90m (171 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/novel/_slug_.get.mjs (837 B)[39m[90m (382 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/novel/_slug_.get.mjs.map (561 B)[39m[90m (217 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/novel/_slug/chapter/_filename_.get.mjs (992 B)[39m[90m (418 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/novel/_slug/chapter/_filename_.get.mjs.map (676 B)[39m[90m (247 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/novel/_slug/chapters.get.mjs (766 B)[39m[90m (367 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/novel/_slug/chapters.get.mjs.map (470 B)[39m[90m (216 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/novel/library.get.mjs (556 B)[39m[90m (269 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/novel/library.get.mjs.map (271 B)[39m[90m (165 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/novels/_slug_.get.mjs (973 B)[39m[90m (419 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/novels/_slug_.get.mjs.map (692 B)[39m[90m (242 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/novels/_slug/chapter/_filename_.get.mjs (992 B)[39m[90m (418 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/novels/_slug/chapter/_filename_.get.mjs.map (677 B)[39m[90m (247 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/novels/_slug/chapters.get.mjs (766 B)[39m[90m (367 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/novels/_slug/chapters.get.mjs.map (471 B)[39m[90m (216 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/novels/epub/import.post.mjs (8.79 kB)[39m[90m (2.71 kB gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/novels/epub/import.post.mjs.map (9.44 kB)[39m[90m (2.22 kB gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/novels/import.post.mjs (7.36 kB)[39m[90m (2.3 kB gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/novels/import.post.mjs.map (7.37 kB)[39m[90m (1.93 kB gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/novels/library.get.mjs (556 B)[39m[90m (269 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/novels/library.get.mjs.map (272 B)[39m[90m (166 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/novels/sources.get.mjs (483 B)[39m[90m (249 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/novels/sources.get.mjs.map (201 B)[39m[90m (145 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/novels/sources/_source/novel/_slug_.get.mjs (976 B)[39m[90m (435 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/novels/sources/_source/novel/_slug_.get.mjs.map (575 B)[39m[90m (245 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/novels/sources/_source/novels.get.mjs (604 B)[39m[90m (296 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/novels/sources/_source/novels.get.mjs.map (318 B)[39m[90m (181 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/novels/translate-all.post.mjs (2.62 kB)[39m[90m (1.04 kB gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/novels/translate-all.post.mjs.map (2.36 kB)[39m[90m (538 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/novels/translate.post.mjs (973 B)[39m[90m (459 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/novels/translate.post.mjs.map (693 B)[39m[90m (268 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/qrcode.get.mjs (532 B)[39m[90m (284 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/qrcode.get.mjs.map (323 B)[39m[90m (179 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/shared-files/_filename_.delete.mjs (937 B)[39m[90m (402 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/shared-files/_filename_.delete.mjs.map (598 B)[39m[90m (239 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/shared-files/download/_filename_.get.mjs (1.04 kB)[39m[90m (449 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/shared-files/download/_filename_.get.mjs.map (682 B)[39m[90m (257 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/shared-files/upload.post.mjs (1.28 kB)[39m[90m (547 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/shared-files/upload.post.mjs.map (1.05 kB)[39m[90m (312 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/thumbnails/_...id_.get.mjs (1.65 kB)[39m[90m (769 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/thumbnails/_...id_.get.mjs.map (898 B)[39m[90m (305 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/thumbnails/_id_.get.mjs (1.59 kB)[39m[90m (736 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/thumbnails/_id_.get.mjs.map (851 B)[39m[90m (298 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/upload.post.mjs (1.27 kB)[39m[90m (545 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/upload.post.mjs.map (1.03 kB)[39m[90m (301 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/video/_id_.get.mjs (809 B)[39m[90m (373 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/video/_id_.get.mjs.map (527 B)[39m[90m (216 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/video/_id/stream.get.mjs (2.36 kB)[39m[90m (895 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/video/_id/stream.get.mjs.map (2.15 kB)[39m[90m (462 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/video/categories.get.mjs (533 B)[39m[90m (255 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/video/categories.get.mjs.map (218 B)[39m[90m (154 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/video/category/_category/folders.get.mjs (644 B)[39m[90m (300 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/video/category/_category/folders.get.mjs.map (323 B)[39m[90m (189 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/video/folder/_folder/videos.get.mjs (776 B)[39m[90m (349 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/video/folder/_folder/videos.get.mjs.map (447 B)[39m[90m (210 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/video/refresh.post.mjs (574 B)[39m[90m (280 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/video/refresh.post.mjs.map (265 B)[39m[90m (162 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/video/search.get.mjs (619 B)[39m[90m (301 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/video/search.get.mjs.map (344 B)[39m[90m (181 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/video/thumbnail/_...id_.get.mjs (1.66 kB)[39m[90m (768 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/video/thumbnail/_...id_.get.mjs.map (906 B)[39m[90m (309 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/video/thumbnail/_id_.get.mjs (1.6 kB)[39m[90m (737 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/video/thumbnail/_id_.get.mjs.map (859 B)[39m[90m (301 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/youtube/download.post.mjs (1.17 kB)[39m[90m (530 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/youtube/download.post.mjs.map (755 B)[39m[90m (277 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/youtube/info.post.mjs (1.07 kB)[39m[90m (500 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/api/youtube/info.post.mjs.map (706 B)[39m[90m (257 B gzip)[39m
+[90m  ├─ .output/server/chunks/routes/renderer.mjs (14.2 kB)[39m[90m (4.66 kB gzip)[39m
+[90m  ├─ .output/server/chunks/routes/renderer.mjs.map (1.58 kB)[39m[90m (354 B gzip)[39m
+[90m  ├─ .output/server/chunks/virtual/_virtual_spa-template.mjs (94 B)[39m[90m (100 B gzip)[39m
+[90m  ├─ .output/server/chunks/virtual/_virtual_spa-template.mjs.map (90 B)[39m[90m (98 B gzip)[39m
+[90m  ├─ .output/server/index.mjs (1.67 kB)[39m[90m (737 B gzip)[39m
+[90m  └─ .output/server/package.json (2.48 kB)[39m[90m (927 B gzip)[39m
+[36mΣ Total size:[39m 90 MB (32.3 MB gzip)
+[90m[[90mnitro[90m][39m [32m√[39m You can preview this build using [36mnode .output/server/index.mjs[39m
+|
+—  ✨ Build complete!

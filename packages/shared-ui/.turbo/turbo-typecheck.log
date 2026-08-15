@@ -1,0 +1,4 @@
+
+> @nexeo/shared-ui@1.0.0 typecheck D:\MyProject\NexEo\packages\shared-ui
+> tsc --noEmit
+
