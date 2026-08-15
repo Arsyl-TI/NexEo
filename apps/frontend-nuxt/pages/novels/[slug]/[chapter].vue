@@ -135,6 +135,16 @@
 
         <div class="space-y-4">
           <div>
+            <label class="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Bahasa Asal Novel</label>
+            <select v-model="transSourceLang" class="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:outline-none focus:border-primary mb-3">
+              <option value="auto">🤖 Deteksi Otomatis (Inggris / Korea / Jepang)</option>
+              <option value="en">🇬🇧 Bahasa Inggris (English)</option>
+              <option value="ko">🇰🇷 Bahasa Korea (Hangul)</option>
+              <option value="ja">🇯🇵 Bahasa Jepang (Kanji/Kana)</option>
+            </select>
+          </div>
+
+          <div>
             <label class="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Mesin Penerjemah</label>
             <select v-model="transEngine" class="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:outline-none focus:border-primary">
               <option value="google">🌐 Google Translate (Gratis/Bawaan)</option>
@@ -250,6 +260,7 @@ let synth: SpeechSynthesis | null = null
 const showTranslateModal = ref(false)
 const isTranslating = ref(false)
 const transEngine = ref<'google' | 'gemini' | 'deepl' | 'libre'>('google')
+const transSourceLang = ref<'auto' | 'en' | 'ko' | 'ja'>('auto')
 const transConfig = ref({
   geminiApiKey: '',
   deeplApiKey: '',
@@ -516,6 +527,7 @@ async function executeTranslation() {
   try {
     const res = await novelStore.translateChapter(paragraphs, {
       engine: transEngine.value,
+      sourceLang: transSourceLang.value,
       geminiApiKey: transConfig.value.geminiApiKey,
       deeplApiKey: transConfig.value.deeplApiKey,
       libreUrl: transConfig.value.libreUrl,

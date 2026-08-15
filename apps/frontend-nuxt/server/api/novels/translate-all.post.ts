@@ -56,7 +56,7 @@ function updateItemText(item: any, newText: string): any {
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
-  const { slug, engine, geminiApiKey, deeplApiKey, libreUrl, libreApiKey } = body || {}
+  const { slug, engine, sourceLang, geminiApiKey, deeplApiKey, libreUrl, libreApiKey } = body || {}
 
   if (!slug || typeof slug !== 'string') {
     throw createError({ statusCode: 400, statusMessage: 'slug novel wajib diisi' })
@@ -100,6 +100,7 @@ export default defineEventHandler(async (event) => {
         if (paragraphs.length > 0) {
           const translatedParagraphs = await translateBatch(paragraphs, {
             engine,
+            sourceLang,
             geminiApiKey,
             deeplApiKey,
             libreUrl,
@@ -139,6 +140,7 @@ export default defineEventHandler(async (event) => {
         if (extractedParagraphs.length > 0) {
           const translatedParagraphs = await translateBatch(extractedParagraphs, {
             engine,
+            sourceLang,
             geminiApiKey,
             deeplApiKey,
             libreUrl,

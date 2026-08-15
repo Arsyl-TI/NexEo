@@ -87,7 +87,7 @@ export const useNovelStore = defineStore('novel', () => {
     }
   }
 
-  async function translateChapter(texts: string[], config: { engine?: string; geminiApiKey?: string; deeplApiKey?: string; libreUrl?: string; libreApiKey?: string } = {}) {
+  async function translateChapter(texts: string[], config: { engine?: string; sourceLang?: string; geminiApiKey?: string; deeplApiKey?: string; libreUrl?: string; libreApiKey?: string } = {}) {
     try {
       const res = await $fetch<{ success: boolean; data?: string[]; error?: string }>('/api/novels/translate', {
         method: 'POST',

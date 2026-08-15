@@ -2,21 +2,36 @@ import axios from 'axios'
 import translate from 'google-translate-api-x'
 
 export type TranslationEngine = 'google' | 'gemini' | 'deepl' | 'libre'
+export type SourceLanguage = 'auto' | 'en' | 'ko' | 'ja'
 
 export interface TranslationConfig {
   engine?: TranslationEngine
+  sourceLang?: SourceLanguage
   geminiApiKey?: string
   deeplApiKey?: string
   libreUrl?: string
   libreApiKey?: string
 }
 
-export async function translateWithGemini(texts: string[], apiKey: string): Promise<string[]> {
+export function detectSourceLanguage(sampleText: string): 'ko' | 'ja' | 'en' {
+  if (/[\uac00-\ud7af\u1100-\u11ff]/.test(sampleText)) {
+    return 'ko'
+  }
+  if (/[\u3040-\u309f\u30a0-\u30ff]/.test(sampleText)) {
+    return 'ja'
+  }
+  return 'en'
+}
+
+export async function translateWithGemini(texts: string[], apiKey: string, sourceLang?: SourceLanguage): Promise<string[]> {
   if (!apiKey || apiKey === 'YOUR_GEMINI_API_KEY') {
     throw new Error('Gemini API key is invalid or not provided')
   }
 
-  const prompt = `You are a professional light novel translator. Translate the following JSON array of English strings to natural-sounding, contextually accurate Indonesian suitable for a novel reader. Keep the original expressions and formatting. Return a JSON array of strings in the exact same order and length. Return ONLY the JSON, without markdown formatting or code blocks.\n\nInput JSON:\n${JSON.stringify(texts)}`
+  const resolvedSource = (!sourceLang || sourceLang === 'auto') ? detectSourceLanguage(texts.join(' ')) : sourceLang
+  const langName = resolvedSource === 'ko' ? 'Korean' : resolvedSource === 'ja' ? 'Japanese' : 'English'
+
+  const prompt = `You are a professional light novel translator. Translate the following JSON array of ${langName} strings to natural-sounding, contextually accurate Indonesian suitable for a novel reader. Keep the original expressions and formatting. Return a JSON array of strings in the exact same order and length. Return ONLY the JSON, without markdown formatting or code blocks.\n\nInput JSON:\n${JSON.stringify(texts)}`
 
   const response = await axios.post(
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey.trim()}`,
@@ -75,9 +90,11 @@ export async function translateBatchDeepL(texts: string[], apiKey: string): Prom
   throw new Error('Invalid response format from DeepL API')
 }
 
-export async function translateBatchLibre(texts: string[], apiUrl: string, apiKey?: string): Promise<string[]> {
+export async function translateBatchLibre(texts: string[], apiUrl: string, apiKey?: string, sourceLang?: SourceLanguage): Promise<string[]> {
   const targetUrl = (apiUrl || 'http://localhost:5000').replace(/\/$/, '')
   const results: string[] = []
+
+  const resolvedSource = (!sourceLang || sourceLang === 'auto') ? detectSourceLanguage(texts.join(' ')) : sourceLang
 
   // Process in small batches of 5 to avoid flooding LibreTranslate Docker container
   const batchSize = 5
@@ -88,7 +105,7 @@ export async function translateBatchLibre(texts: string[], apiUrl: string, apiKe
         `${targetUrl}/translate`,
         {
           q: t,
-          source: 'en',
+          source: resolvedSource,
           target: 'id',
           format: 'text',
           api_key: apiKey ? apiKey.trim() : undefined
@@ -108,9 +125,11 @@ export async function translateBatchLibre(texts: string[], apiUrl: string, apiKe
   return results
 }
 
-export async function translateBatchGoogle(texts: string[]): Promise<string[]> {
+export async function translateBatchGoogle(texts: string[], sourceLang?: SourceLanguage): Promise<string[]> {
+  const resolvedSource = (!sourceLang || sourceLang === 'auto') ? detectSourceLanguage(texts.join(' ')) : sourceLang
+
   try {
-    const res = await translate(texts, { from: 'en', to: 'id' })
+    const res = await translate(texts, { from: resolvedSource, to: 'id' })
     const rawArr = Array.isArray(res) ? res : [res]
     return rawArr.map((item: any) => item.text ?? '')
   } catch (e: any) {
@@ -118,7 +137,7 @@ export async function translateBatchGoogle(texts: string[]): Promise<string[]> {
     const results: string[] = []
     for (const t of texts) {
       try {
-        const res = await translate(t, { from: 'en', to: 'id' })
+        const res = await translate(t, { from: resolvedSource, to: 'id' })
         results.push((res as any)?.text ?? t)
       } catch {
         results.push(t)
@@ -132,11 +151,12 @@ export async function translateBatch(texts: string[], config: TranslationConfig 
   if (!texts || texts.length === 0) return []
 
   const engine = config.engine || 'google'
+  const sourceLang = config.sourceLang || 'auto'
 
   // 1. Try LibreTranslate (when engine === 'libre')
   if (engine === 'libre') {
     try {
-      return await translateBatchLibre(texts, config.libreUrl || 'http://localhost:5000', config.libreApiKey)
+      return await translateBatchLibre(texts, config.libreUrl || 'http://localhost:5000', config.libreApiKey, sourceLang)
     } catch (e: any) {
       console.warn('LibreTranslate failed, falling back to Google Translate:', e?.message)
     }
@@ -145,7 +165,7 @@ export async function translateBatch(texts: string[], config: TranslationConfig 
   // 2. Try Gemini API
   if (engine === 'gemini' && config.geminiApiKey) {
     try {
-      return await translateWithGemini(texts, config.geminiApiKey)
+      return await translateWithGemini(texts, config.geminiApiKey, sourceLang)
     } catch (e: any) {
       console.warn('Gemini API failed, falling back to Google Translate:', e?.message)
     }
@@ -161,5 +181,5 @@ export async function translateBatch(texts: string[], config: TranslationConfig 
   }
 
   // 4. Default / Fallback: Google Translate
-  return await translateBatchGoogle(texts)
+  return await translateBatchGoogle(texts, sourceLang)
 }

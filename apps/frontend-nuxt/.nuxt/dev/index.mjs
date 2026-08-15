@@ -2147,16 +2147,16 @@ _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw
 const assets = {
   "/index.mjs": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"36f0f-+yyuiNDejxKssoqLLCiOoJwgK4M\"",
-    "mtime": "2026-08-15T13:59:33.387Z",
-    "size": 225039,
+    "etag": "\"37386-W3Kpde6sgoNVDBLYLEMSWYVB86o\"",
+    "mtime": "2026-08-15T14:07:36.153Z",
+    "size": 226182,
     "path": "index.mjs"
   },
   "/index.mjs.map": {
     "type": "application/json",
-    "etag": "\"cbdf8-LTRWcDmOYt/h+boW68WYClocNy0\"",
-    "mtime": "2026-08-15T13:59:33.387Z",
-    "size": 835064,
+    "etag": "\"cce42-HjS64mRpQpPM6AjozLOhDulhgFw\"",
+    "mtime": "2026-08-15T14:07:36.153Z",
+    "size": 839234,
     "path": "index.mjs.map"
   }
 };
@@ -4582,12 +4582,23 @@ const import_post$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.definePrope
   default: import_post$2
 }, Symbol.toStringTag, { value: 'Module' }));
 
-async function translateWithGemini(texts, apiKey) {
+function detectSourceLanguage(sampleText) {
+  if (/[\uac00-\ud7af\u1100-\u11ff]/.test(sampleText)) {
+    return "ko";
+  }
+  if (/[\u3040-\u309f\u30a0-\u30ff]/.test(sampleText)) {
+    return "ja";
+  }
+  return "en";
+}
+async function translateWithGemini(texts, apiKey, sourceLang) {
   var _a, _b, _c, _d, _e, _f;
   if (!apiKey || apiKey === "YOUR_GEMINI_API_KEY") {
     throw new Error("Gemini API key is invalid or not provided");
   }
-  const prompt = `You are a professional light novel translator. Translate the following JSON array of English strings to natural-sounding, contextually accurate Indonesian suitable for a novel reader. Keep the original expressions and formatting. Return a JSON array of strings in the exact same order and length. Return ONLY the JSON, without markdown formatting or code blocks.
+  const resolvedSource = sourceLang === "auto" ? detectSourceLanguage(texts.join(" ")) : sourceLang;
+  const langName = resolvedSource === "ko" ? "Korean" : resolvedSource === "ja" ? "Japanese" : "English";
+  const prompt = `You are a professional light novel translator. Translate the following JSON array of ${langName} strings to natural-sounding, contextually accurate Indonesian suitable for a novel reader. Keep the original expressions and formatting. Return a JSON array of strings in the exact same order and length. Return ONLY the JSON, without markdown formatting or code blocks.
 
 Input JSON:
 ${JSON.stringify(texts)}`;
@@ -4642,9 +4653,10 @@ async function translateBatchDeepL(texts, apiKey) {
   }
   throw new Error("Invalid response format from DeepL API");
 }
-async function translateBatchLibre(texts, apiUrl, apiKey) {
+async function translateBatchLibre(texts, apiUrl, apiKey, sourceLang) {
   const targetUrl = (apiUrl).replace(/\/$/, "");
   const results = [];
+  const resolvedSource = sourceLang === "auto" ? detectSourceLanguage(texts.join(" ")) : sourceLang;
   const batchSize = 5;
   for (let i = 0; i < texts.length; i += batchSize) {
     const chunk = texts.slice(i, i + batchSize);
@@ -4653,7 +4665,7 @@ async function translateBatchLibre(texts, apiUrl, apiKey) {
         `${targetUrl}/translate`,
         {
           q: t,
-          source: "en",
+          source: resolvedSource,
           target: "id",
           format: "text",
           api_key: apiKey ? apiKey.trim() : void 0
@@ -4675,10 +4687,11 @@ async function translateBatchLibre(texts, apiUrl, apiKey) {
   }
   return results;
 }
-async function translateBatchGoogle(texts) {
+async function translateBatchGoogle(texts, sourceLang) {
   var _a;
+  const resolvedSource = sourceLang === "auto" ? detectSourceLanguage(texts.join(" ")) : sourceLang;
   try {
-    const res = await translate(texts, { from: "en", to: "id" });
+    const res = await translate(texts, { from: resolvedSource, to: "id" });
     const rawArr = Array.isArray(res) ? res : [res];
     return rawArr.map((item) => {
       var _a2;
@@ -4688,7 +4701,7 @@ async function translateBatchGoogle(texts) {
     const results = [];
     for (const t of texts) {
       try {
-        const res = await translate(t, { from: "en", to: "id" });
+        const res = await translate(t, { from: resolvedSource, to: "id" });
         results.push((_a = res == null ? void 0 : res.text) != null ? _a : t);
       } catch {
         results.push(t);
@@ -4700,16 +4713,17 @@ async function translateBatchGoogle(texts) {
 async function translateBatch(texts, config = {}) {
   if (!texts || texts.length === 0) return [];
   const engine = config.engine || "google";
+  const sourceLang = config.sourceLang || "auto";
   if (engine === "libre") {
     try {
-      return await translateBatchLibre(texts, config.libreUrl || "http://localhost:5000", config.libreApiKey);
+      return await translateBatchLibre(texts, config.libreUrl || "http://localhost:5000", config.libreApiKey, sourceLang);
     } catch (e) {
       console.warn("LibreTranslate failed, falling back to Google Translate:", e == null ? void 0 : e.message);
     }
   }
   if (engine === "gemini" && config.geminiApiKey) {
     try {
-      return await translateWithGemini(texts, config.geminiApiKey);
+      return await translateWithGemini(texts, config.geminiApiKey, sourceLang);
     } catch (e) {
       console.warn("Gemini API failed, falling back to Google Translate:", e == null ? void 0 : e.message);
     }
@@ -4721,7 +4735,7 @@ async function translateBatch(texts, config = {}) {
       console.warn("DeepL API failed, falling back to Google Translate:", e == null ? void 0 : e.message);
     }
   }
-  return await translateBatchGoogle(texts);
+  return await translateBatchGoogle(texts, sourceLang);
 }
 
 const NOVEL_SOURCES = [
@@ -5333,7 +5347,7 @@ function updateItemText(item, newText) {
 }
 const translateAll_post = defineEventHandler(async (event) => {
   const body = await readBody(event);
-  const { slug, engine, geminiApiKey, deeplApiKey, libreUrl, libreApiKey } = body || {};
+  const { slug, engine, sourceLang, geminiApiKey, deeplApiKey, libreUrl, libreApiKey } = body || {};
   if (!slug || typeof slug !== "string") {
     throw createError({ statusCode: 400, statusMessage: "slug novel wajib diisi" });
   }
@@ -5367,6 +5381,7 @@ const translateAll_post = defineEventHandler(async (event) => {
         if (paragraphs.length > 0) {
           const translatedParagraphs = await translateBatch(paragraphs, {
             engine,
+            sourceLang,
             geminiApiKey,
             deeplApiKey,
             libreUrl,
@@ -5401,6 +5416,7 @@ const translateAll_post = defineEventHandler(async (event) => {
         if (extractedParagraphs.length > 0) {
           const translatedParagraphs = await translateBatch(extractedParagraphs, {
             engine,
+            sourceLang,
             geminiApiKey,
             deeplApiKey,
             libreUrl,
@@ -5455,12 +5471,13 @@ const translateAll_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defin
 
 const translate_post = defineEventHandler(async (event) => {
   const body = await readBody(event);
-  const { texts, engine, geminiApiKey, deeplApiKey, libreUrl, libreApiKey } = body || {};
+  const { texts, engine, sourceLang, geminiApiKey, deeplApiKey, libreUrl, libreApiKey } = body || {};
   if (!texts || !Array.isArray(texts)) {
     throw createError({ statusCode: 400, statusMessage: "texts array is required" });
   }
   const translated = await translateBatch(texts, {
     engine,
+    sourceLang,
     geminiApiKey,
     deeplApiKey,
     libreUrl,

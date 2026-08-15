@@ -45,6 +45,7 @@ declare global {
   const deleteCookie: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').deleteCookie
   const deleteDownloadTask: typeof import('../../server/utils/downloader').deleteDownloadTask
   const deleteSharedFile: typeof import('../../server/utils/sharedFiles').deleteSharedFile
+  const detectSourceLanguage: typeof import('../../server/utils/novel/translator').detectSourceLanguage
   const dynamicEventHandler: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').dynamicEventHandler
   const ensureYtDlpBinary: typeof import('../../server/utils/youtubeDownloader').ensureYtDlpBinary
   const eventHandler: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').eventHandler
@@ -194,7 +195,7 @@ declare global {
   export type { MassImportOptions, ImportResult } from '../../server/utils/novel/massScraper'
   import('../../server/utils/novel/massScraper')
   // @ts-ignore
-  export type { TranslationEngine, TranslationConfig } from '../../server/utils/novel/translator'
+  export type { TranslationEngine, SourceLanguage, TranslationConfig } from '../../server/utils/novel/translator'
   import('../../server/utils/novel/translator')
   // @ts-ignore
   export type { VideoScanResult } from '../../server/utils/video'
@@ -225,7 +226,7 @@ export { NovelServerRepository, novelServerRepo, listLocalNovels, getLocalNovel,
 export { NOVEL_SOURCES, scrapeDreamyCatalog, scrapeDreamyNovelDetail, scrapeNoveldexCatalog, scrapeNoveldexNovelDetail, getSourceCatalog } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/novel/catalogScraper';
 export { importEpubFile } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/novel/epubImporter';
 export { importNovelFromSource } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/novel/massScraper';
-export { translateWithGemini, translateBatchDeepL, translateBatchLibre, translateBatchGoogle, translateBatch } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/novel/translator';
+export { detectSourceLanguage, translateWithGemini, translateBatchDeepL, translateBatchLibre, translateBatchGoogle, translateBatch } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/novel/translator';
 export { listSharedFiles, getSharedFilePath, deleteSharedFile } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/sharedFiles';
 export { getOrGenerateThumbnail } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/thumbnail';
 export { scanVideos, getVideoCategories, getFoldersByCategory, getVideosByFolder, getVideoById, searchVideos, invalidateVideoCache } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/video';
