@@ -1,23 +1,26 @@
-# Technical Execution Plan: Novel Offline TXT Exporter / Downloader
+# Technical Execution Plan: Shared Files Global Drag-and-Drop & QR Code LAN Sharing Suite
 
-Target Files:
-- `apps/frontend-nuxt/server/api/novels/[slug]/export.get.ts`
-- `apps/frontend-nuxt/pages/novels/[slug]/index.vue`
+Target File:
+- `apps/frontend-nuxt/pages/share.vue`
 
 ## Step-by-Step Execution Steps
 
-1. **Build Export Nitro API Endpoint (`server/api/novels/[slug]/export.get.ts`)**:
-   - Read novel metadata and all chapter `.txt` files in `data/novels/[slug]`.
-   - Format single combined `.txt` document with clear chapter boundaries.
-   - Return raw plain text response with attachment headers.
+1. **Global Full-Screen Window Drag & Drop Overlay**:
+   - Attach window-level `dragenter`, `dragover`, and `dragleave` listeners to detect when any file is dragged from Windows Explorer into the browser.
+   - Render a high-contrast glassmorphic full-screen dropzone overlay with smooth transitions.
+   - Support multiple files dropped simultaneously.
 
-2. **Add Export Button to Novel Detail Page (`pages/novels/[slug]/index.vue`)**:
-   - Add **"📥 Unduh Novel (.txt)"** button.
-   - Direct download action triggering `window.open('/api/novels/' + slug + '/export', '_blank')`.
+2. **Real-time Live Upload Queue UI**:
+   - Provide a dynamic upload queue showing file names, progress percentages, and upload state.
+   - Use `XMLHttpRequest` with upload `progress` event listener so actual byte transfer progress is shown accurately on LAN.
 
-3. **Testing & Build Verification**:
-   - Run `pnpm turbo run typecheck` and `pnpm turbo run build`.
+3. **QR Code Sharing Modal for Mobile Scanning**:
+   - Integrate an SVG/canvas QR Code generator for any shared file link.
+   - Allow smartphone users on the same Wi-Fi network to scan the QR code and immediately download the file without manually typing the IP address.
 
-4. **Git Commit & Progress Log**:
-   - Append log entry in `PROGRESS.md`.
-   - Execute `git add . && git commit -m "feat(novel): add Novel TXT Exporter/Downloader endpoint and UI button"`.
+4. **Testing & Build Verification**:
+   - Run `pnpm turbo run typecheck` across all monorepo packages.
+
+5. **Git Commit & Progress Log**:
+   - Append completed feature entry to `PROGRESS.md`.
+   - Commit changes via `git add . && git commit -m "feat(share): add fullscreen drag-and-drop overlay, real upload progress, and LAN QR Code modal"`.

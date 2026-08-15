@@ -52,3 +52,15 @@
 - **Implementation Highlights**:
   - Built Nitro API export endpoint `GET /api/novels/[slug]/export` that compiles novel metadata and all chapter `.txt` files into a single, clean formatted plain text document download.
   - Added **"📥 Unduh Seluruh Chapter (.txt)"** button to novel detail page.
+
+---
+
+## Feature 6: Shared Files Global Drag-and-Drop, Real Upload Queue, & LAN QR Code Suite
+- **Files Modified**:
+  - `apps/frontend-nuxt/pages/share.vue`
+  - `IDEAS.md`, `PLAN.md`, `PROGRESS.md`
+- **Implementation Highlights**:
+  - **Window Fullscreen Drag & Drop Overlay**: Dropping files anywhere onto the browser window activates a glassmorphic overlay for instant multi-file upload.
+  - **Real-time Live Upload Queue**: Tracks per-file and total byte transfer progress using `XMLHttpRequest` with upload event listeners.
+  - **LAN QR Code Sharing Modal**: Each shared file has a 📱 **QR** button generating a scannable QR code for instant smartphone downloads on the same local Wi-Fi without typing IPs.
+  - **Inline Media Preview**: Added 👁️ preview modal for photos and videos directly inside the LAN file sharing manager.

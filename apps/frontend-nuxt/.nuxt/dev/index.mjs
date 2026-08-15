@@ -2144,22 +2144,7 @@ const plugins = [
 _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw
 ];
 
-const assets = {
-  "/index.mjs": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"37386-W3Kpde6sgoNVDBLYLEMSWYVB86o\"",
-    "mtime": "2026-08-15T14:07:36.153Z",
-    "size": 226182,
-    "path": "index.mjs"
-  },
-  "/index.mjs.map": {
-    "type": "application/json",
-    "etag": "\"cce42-HjS64mRpQpPM6AjozLOhDulhgFw\"",
-    "mtime": "2026-08-15T14:07:36.153Z",
-    "size": 839234,
-    "path": "index.mjs.map"
-  }
-};
+const assets = {};
 
 function readAsset (id) {
   const serverDir = dirname$1(fileURLToPath(globalThis._importMeta_.url));
@@ -4653,6 +4638,70 @@ async function translateBatchDeepL(texts, apiKey) {
   }
   throw new Error("Invalid response format from DeepL API");
 }
+async function translateSingleLibre(t, targetUrl, source, apiKey) {
+  var _a, _b, _c, _d;
+  try {
+    const res = await axios.post(
+      `${targetUrl}/translate`,
+      {
+        q: t,
+        source,
+        target: "id",
+        format: "text",
+        api_key: apiKey ? apiKey.trim() : void 0
+      },
+      {
+        headers: { "Content-Type": "application/json" },
+        timeout: 15e3
+      }
+    );
+    if ((_a = res.data) == null ? void 0 : _a.translatedText) return res.data.translatedText;
+  } catch {
+  }
+  if (source !== "en") {
+    try {
+      const step1 = await axios.post(
+        `${targetUrl}/translate`,
+        {
+          q: t,
+          source,
+          target: "en",
+          format: "text",
+          api_key: apiKey ? apiKey.trim() : void 0
+        },
+        {
+          headers: { "Content-Type": "application/json" },
+          timeout: 15e3
+        }
+      );
+      const enText = (_b = step1.data) == null ? void 0 : _b.translatedText;
+      if (enText) {
+        const step2 = await axios.post(
+          `${targetUrl}/translate`,
+          {
+            q: enText,
+            source: "en",
+            target: "id",
+            format: "text",
+            api_key: apiKey ? apiKey.trim() : void 0
+          },
+          {
+            headers: { "Content-Type": "application/json" },
+            timeout: 15e3
+          }
+        );
+        if ((_c = step2.data) == null ? void 0 : _c.translatedText) return step2.data.translatedText;
+      }
+    } catch {
+    }
+  }
+  try {
+    const res = await translate(t, { from: source, to: "id" });
+    return (_d = res == null ? void 0 : res.text) != null ? _d : t;
+  } catch {
+    return t;
+  }
+}
 async function translateBatchLibre(texts, apiUrl, apiKey, sourceLang) {
   const targetUrl = (apiUrl).replace(/\/$/, "");
   const results = [];
@@ -4660,28 +4709,7 @@ async function translateBatchLibre(texts, apiUrl, apiKey, sourceLang) {
   const batchSize = 5;
   for (let i = 0; i < texts.length; i += batchSize) {
     const chunk = texts.slice(i, i + batchSize);
-    const promises = chunk.map(
-      (t) => axios.post(
-        `${targetUrl}/translate`,
-        {
-          q: t,
-          source: resolvedSource,
-          target: "id",
-          format: "text",
-          api_key: apiKey ? apiKey.trim() : void 0
-        },
-        {
-          headers: { "Content-Type": "application/json" },
-          timeout: 3e4
-        }
-      ).then((r) => {
-        var _a, _b;
-        return (_b = (_a = r.data) == null ? void 0 : _a.translatedText) != null ? _b : t;
-      }).catch((err) => {
-        console.error("Single paragraph LibreTranslate error:", err == null ? void 0 : err.message);
-        return t;
-      })
-    );
+    const promises = chunk.map((t) => translateSingleLibre(t, targetUrl, resolvedSource, apiKey));
     const chunkResults = await Promise.all(promises);
     results.push(...chunkResults);
   }
