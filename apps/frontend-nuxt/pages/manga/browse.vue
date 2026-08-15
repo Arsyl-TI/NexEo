@@ -10,7 +10,7 @@
 
         <div class="flex items-center gap-2">
           <span class="px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 border border-primary/30 text-primary flex items-center gap-1.5 shadow-sm">
-            <span>⚡</span> Provider: <b>MangaDex Direct API</b>
+            <span>⚡</span> Provider: <b>MangaDex API (Cached)</b>
           </span>
         </div>
       </div>
@@ -25,19 +25,20 @@
             Cari ribuan judul komik & terjemahan Bahasa Indonesia langsung dari server MangaDex, lalu simpan ke disk lokal server untuk dibaca secara offline / LAN.
           </p>
 
-          <form @submit.prevent="executeSearch" class="flex flex-col sm:flex-row gap-3">
+          <form @submit.prevent="triggerImmediateSearch" class="flex flex-col sm:flex-row gap-3">
             <div class="relative flex-1">
               <input 
                 v-model="searchQuery" 
+                @input="handleSearchInput"
                 type="text" 
                 placeholder="Ketik judul manga/manhwa (contoh: Solo Leveling, One Piece, Jujutsu Kaisen)..." 
-                class="w-full bg-background border border-border rounded-2xl pl-11 pr-4 py-3.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary shadow-inner"
+                class="w-full bg-background border border-border rounded-2xl pl-11 pr-4 py-3.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary shadow-inner transition-all"
               />
               <span class="absolute left-4 top-3.5 text-base text-muted-foreground">🔍</span>
             </div>
 
             <!-- Language Filter Selector -->
-            <select v-model="selectedLang" class="bg-background border border-border rounded-2xl px-4 py-3 text-xs font-semibold text-foreground focus:outline-none focus:border-primary shrink-0">
+            <select v-model="selectedLang" @change="triggerImmediateSearch" class="bg-background border border-border rounded-2xl px-4 py-3 text-xs font-semibold text-foreground focus:outline-none focus:border-primary shrink-0 cursor-pointer">
               <option value="id">🇮🇩 Bahasa Indonesia</option>
               <option value="en">🇬🇧 English</option>
               <option value="all">🌐 Semua Bahasa</option>
@@ -51,10 +52,13 @@
         </div>
       </div>
 
-      <!-- Loading State -->
-      <div v-if="loading" class="flex flex-col items-center justify-center py-20">
-        <div class="spinner mb-4"></div>
-        <p class="text-xs text-muted-foreground font-medium">Menghubungi server MangaDex...</p>
+      <!-- Loading State Skeleton -->
+      <div v-if="loading" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 sm:gap-5 animate-pulse">
+        <div v-for="n in 12" :key="n" class="p-3 rounded-2xl border border-border/40 bg-card/40">
+          <div class="aspect-[2/3] rounded-xl bg-card border border-border/40 mb-3"></div>
+          <div class="h-3.5 bg-card rounded mb-2"></div>
+          <div class="h-2.5 bg-card rounded w-2/3"></div>
+        </div>
       </div>
 
       <!-- Empty State -->
@@ -72,7 +76,7 @@
           v-for="item in mangaResults" 
           :key="item.id"
           @click="openMangaDetail(item)"
-          class="group glass-card-hover p-3 rounded-2xl border border-border/70 shadow-lg flex flex-col justify-between cursor-pointer hover:border-primary/50 transition-all duration-300"
+          class="group glass-card-hover p-3 rounded-2xl border border-border/70 shadow-lg flex flex-col justify-between cursor-pointer hover:border-primary/50 transition-all duration-300 transform-gpu"
         >
           <div>
             <div class="aspect-[2/3] rounded-xl overflow-hidden bg-card border border-border/80 mb-3 relative shadow-md group-hover:shadow-xl transition-all">
@@ -82,6 +86,7 @@
                 :alt="item.title"
                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 loading="lazy"
+                decoding="async"
                 @error="($event.target as HTMLImageElement).style.display='none'"
               />
               <div v-else class="flex flex-col items-center justify-center w-full h-full text-xs text-muted-foreground p-4 text-center">
@@ -125,7 +130,7 @@
           <!-- Top Info Row -->
           <div class="flex flex-col sm:flex-row gap-6 items-start">
             <div class="w-36 sm:w-44 aspect-[2/3] rounded-2xl overflow-hidden bg-background border border-border shadow-xl shrink-0 mx-auto sm:mx-0">
-              <img v-if="activeMangaDetail.cover" :src="activeMangaDetail.cover" class="w-full h-full object-cover" />
+              <img v-if="activeMangaDetail.cover" :src="activeMangaDetail.cover" class="w-full h-full object-cover" decoding="async" />
             </div>
 
             <div class="flex-1 min-w-0">
@@ -218,6 +223,20 @@ const activeChapters = ref<OnlineMangaChapter[]>([])
 const downloadingChapters = ref<Record<string, boolean>>({})
 const isBatchDownloading = ref(false)
 
+let debounceTimer: any = null
+
+function handleSearchInput() {
+  if (debounceTimer) clearTimeout(debounceTimer)
+  debounceTimer = setTimeout(() => {
+    void executeSearch()
+  }, 400)
+}
+
+function triggerImmediateSearch() {
+  if (debounceTimer) clearTimeout(debounceTimer)
+  void executeSearch()
+}
+
 async function executeSearch() {
   loading.value = true
   try {
@@ -231,7 +250,7 @@ async function executeSearch() {
       mangaResults.value = res.data
     }
   } catch (err: any) {
-    showError('Gagal mencari komik online. Periksa koneksi internet server.')
+    showError('Gagal mencari komik online. Periksa koneksi server.')
   } finally {
     loading.value = false
   }

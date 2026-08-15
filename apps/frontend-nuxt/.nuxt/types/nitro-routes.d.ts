@@ -37,6 +37,9 @@ declare module "nitropack/types" {
     '/api/manga/library': {
       'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/manga/library.get').default>>>>
     }
+    '/api/manga/online/cover': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/manga/online/cover.get').default>>>>
+    }
     '/api/manga/online/detail': {
       'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/manga/online/detail.get').default>>>>
     }

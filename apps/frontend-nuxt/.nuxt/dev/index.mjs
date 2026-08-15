@@ -9,11 +9,11 @@ import viteNodeEntry_mjs from 'file://D:/MyProject/NexEo/node_modules/.pnpm/@nux
 import { viteNodeFetch } from 'file://D:/MyProject/NexEo/node_modules/.pnpm/@nuxt+vite-builder@3.21.11__8a558ac528f01abbe15109c260a6a427/node_modules/@nuxt/vite-builder/dist/vite-node.mjs';
 import fs, { promises } from 'node:fs';
 import AdmZip from 'file://D:/MyProject/NexEo/node_modules/.pnpm/adm-zip@0.5.18/node_modules/adm-zip/adm-zip.js';
+import axios from 'file://D:/MyProject/NexEo/node_modules/.pnpm/axios@1.19.0/node_modules/axios/index.js';
 import xml2js from 'file://D:/MyProject/NexEo/node_modules/.pnpm/xml2js@0.6.2/node_modules/xml2js/lib/xml2js.js';
 import * as cheerio from 'file://D:/MyProject/NexEo/node_modules/.pnpm/cheerio@1.2.0/node_modules/cheerio/dist/esm/index.js';
 import jschardet from 'file://D:/MyProject/NexEo/node_modules/.pnpm/jschardet@3.1.4/node_modules/jschardet/index.js';
 import iconv from 'file://D:/MyProject/NexEo/node_modules/.pnpm/iconv-lite@0.6.3/node_modules/iconv-lite/lib/index.js';
-import axios from 'file://D:/MyProject/NexEo/node_modules/.pnpm/axios@1.19.0/node_modules/axios/index.js';
 import translate from 'file://D:/MyProject/NexEo/node_modules/.pnpm/google-translate-api-x@10.7.3/node_modules/google-translate-api-x/index.cjs';
 import ffmpeg from 'file://D:/MyProject/NexEo/node_modules/.pnpm/fluent-ffmpeg@2.1.3/node_modules/fluent-ffmpeg/index.js';
 import ffmpegStatic from 'file://D:/MyProject/NexEo/node_modules/.pnpm/ffmpeg-static@5.3.0/node_modules/ffmpeg-static/index.js';
@@ -2144,7 +2144,22 @@ const plugins = [
 _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw
 ];
 
-const assets = {};
+const assets = {
+  "/index.mjs": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"3e42d-WQKBPHn+6TfY7IT2bSm+hLwrEBA\"",
+    "mtime": "2026-08-15T16:43:32.661Z",
+    "size": 255021,
+    "path": "index.mjs"
+  },
+  "/index.mjs.map": {
+    "type": "application/json",
+    "etag": "\"e7a74-Xbyo+YlxKtJQvNZJwBvH95uSHFs\"",
+    "mtime": "2026-08-15T16:43:32.662Z",
+    "size": 948852,
+    "path": "index.mjs.map"
+  }
+};
 
 function readAsset (id) {
   const serverDir = dirname$1(fileURLToPath(globalThis._importMeta_.url));
@@ -2813,8 +2828,13 @@ const _lazy_EY18Ms = () => Promise.resolve().then(function () { return cancel_po
 const _lazy_W5Oup1 = () => Promise.resolve().then(function () { return info_get$1; });
 const _lazy_HB3OpB = () => Promise.resolve().then(function () { return _slug__get$7; });
 const _lazy_Mumbhl = () => Promise.resolve().then(function () { return _chapter__get$1; });
+const _lazy_wohPue = () => Promise.resolve().then(function () { return export_get$3; });
 const _lazy_Qzwczy = () => Promise.resolve().then(function () { return chapters_get$5; });
 const _lazy_tjTMLf = () => Promise.resolve().then(function () { return library_get$5; });
+const _lazy_4SwZZ8 = () => Promise.resolve().then(function () { return cover_get$1; });
+const _lazy_Tqjkfq = () => Promise.resolve().then(function () { return detail_get$1; });
+const _lazy_beLa_g = () => Promise.resolve().then(function () { return download_post$3; });
+const _lazy_jObWaU = () => Promise.resolve().then(function () { return search_get$3; });
 const _lazy_gxyA6_ = () => Promise.resolve().then(function () { return _slug__get$5; });
 const _lazy_Otvuu2 = () => Promise.resolve().then(function () { return _filename__get$5; });
 const _lazy_9WBEmy = () => Promise.resolve().then(function () { return chapters_get$3; });
@@ -2823,6 +2843,7 @@ const _lazy_1lIZyF = () => Promise.resolve().then(function () { return library_g
 const _lazy_k__e6W = () => Promise.resolve().then(function () { return _slug__get$3; });
 const _lazy_MXVajN = () => Promise.resolve().then(function () { return _filename__get$3; });
 const _lazy_If3HSz = () => Promise.resolve().then(function () { return chapters_get$1; });
+const _lazy_yxNIcw = () => Promise.resolve().then(function () { return exportEpub_get$1; });
 const _lazy_RkLv1B = () => Promise.resolve().then(function () { return export_get$1; });
 const _lazy__LIpxI = () => Promise.resolve().then(function () { return import_post$3; });
 const _lazy_lOzC13 = () => Promise.resolve().then(function () { return import_post$1; });
@@ -2866,8 +2887,13 @@ const handlers = [
   { route: '/api/info', handler: _lazy_W5Oup1, lazy: true, middleware: false, method: "get" },
   { route: '/api/manga/:slug', handler: _lazy_HB3OpB, lazy: true, middleware: false, method: "get" },
   { route: '/api/manga/:slug/chapter/:chapter', handler: _lazy_Mumbhl, lazy: true, middleware: false, method: "get" },
+  { route: '/api/manga/:slug/chapter/:chapter/export', handler: _lazy_wohPue, lazy: true, middleware: false, method: "get" },
   { route: '/api/manga/:slug/chapters', handler: _lazy_Qzwczy, lazy: true, middleware: false, method: "get" },
   { route: '/api/manga/library', handler: _lazy_tjTMLf, lazy: true, middleware: false, method: "get" },
+  { route: '/api/manga/online/cover', handler: _lazy_4SwZZ8, lazy: true, middleware: false, method: "get" },
+  { route: '/api/manga/online/detail', handler: _lazy_Tqjkfq, lazy: true, middleware: false, method: "get" },
+  { route: '/api/manga/online/download', handler: _lazy_beLa_g, lazy: true, middleware: false, method: "post" },
+  { route: '/api/manga/online/search', handler: _lazy_jObWaU, lazy: true, middleware: false, method: "get" },
   { route: '/api/novel/:slug', handler: _lazy_gxyA6_, lazy: true, middleware: false, method: "get" },
   { route: '/api/novel/:slug/chapter/:filename', handler: _lazy_Otvuu2, lazy: true, middleware: false, method: "get" },
   { route: '/api/novel/:slug/chapters', handler: _lazy_9WBEmy, lazy: true, middleware: false, method: "get" },
@@ -2876,6 +2902,7 @@ const handlers = [
   { route: '/api/novels/:slug', handler: _lazy_k__e6W, lazy: true, middleware: false, method: "get" },
   { route: '/api/novels/:slug/chapter/:filename', handler: _lazy_MXVajN, lazy: true, middleware: false, method: "get" },
   { route: '/api/novels/:slug/chapters', handler: _lazy_If3HSz, lazy: true, middleware: false, method: "get" },
+  { route: '/api/novels/:slug/export-epub', handler: _lazy_yxNIcw, lazy: true, middleware: false, method: "get" },
   { route: '/api/novels/:slug/export', handler: _lazy_RkLv1B, lazy: true, middleware: false, method: "get" },
   { route: '/api/novels/epub/import', handler: _lazy__LIpxI, lazy: true, middleware: false, method: "post" },
   { route: '/api/novels/import', handler: _lazy_lOzC13, lazy: true, middleware: false, method: "post" },
@@ -3991,6 +4018,49 @@ const _chapter__get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.definePro
   default: _chapter__get
 }, Symbol.toStringTag, { value: 'Module' }));
 
+const export_get$2 = defineEventHandler(async (event) => {
+  var _a;
+  const slug = getRouterParam(event, "slug");
+  const chapter = getRouterParam(event, "chapter");
+  const query = getQuery$1(event);
+  const format = ((_a = query.format) == null ? void 0 : _a.toLowerCase()) === "zip" ? "zip" : "cbz";
+  if (!slug || !chapter) {
+    throw createError({ statusCode: 400, statusMessage: "Slug dan Chapter manga wajib diisi" });
+  }
+  const mangaDir = getMangaDir();
+  const chapterDir = path.join(mangaDir, slug, chapter);
+  if (!fs.existsSync(chapterDir)) {
+    throw createError({ statusCode: 404, statusMessage: "Folder chapter manga tidak ditemukan" });
+  }
+  const files = fs.readdirSync(chapterDir).filter((f) => {
+    const l = f.toLowerCase();
+    return l.endsWith(".jpg") || l.endsWith(".jpeg") || l.endsWith(".png") || l.endsWith(".webp") || l.endsWith(".gif");
+  }).sort((a, b) => {
+    const numA = parseInt(a.replace(/\D/g, "") || "0", 10);
+    const numB = parseInt(b.replace(/\D/g, "") || "0", 10);
+    return numA - numB;
+  });
+  if (files.length === 0) {
+    throw createError({ statusCode: 400, statusMessage: "Tidak ada gambar halaman dalam chapter ini" });
+  }
+  const zip = new AdmZip();
+  for (const file of files) {
+    const filePath = path.join(chapterDir, file);
+    zip.addLocalFile(filePath);
+  }
+  const buffer = zip.toBuffer();
+  const safeFilename = `${slug}_${chapter}.${format}`;
+  setHeader(event, "Content-Type", format === "zip" ? "application/zip" : "application/vnd.comicbook+zip");
+  setHeader(event, "Content-Disposition", `attachment; filename="${encodeURIComponent(safeFilename)}"`);
+  setHeader(event, "Content-Length", buffer.length);
+  return buffer;
+});
+
+const export_get$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: export_get$2
+}, Symbol.toStringTag, { value: 'Module' }));
+
 const chapters_get$4 = defineEventHandler(async (event) => {
   const slug = getRouterParam(event, "slug");
   if (!slug) {
@@ -4019,6 +4089,433 @@ const library_get$4 = defineEventHandler(async () => {
 const library_get$5 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
   default: library_get$4
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const coverCache = /* @__PURE__ */ new Map();
+const cover_get = defineEventHandler(async (event) => {
+  const query = getQuery$1(event);
+  const id = typeof query.id === "string" ? query.id : "";
+  const file = typeof query.file === "string" ? query.file : "";
+  if (!id || !file) {
+    throw createError({ statusCode: 400, statusMessage: "Manga ID and Cover file required" });
+  }
+  const cacheKey = `${id}_${file}`;
+  const now = Date.now();
+  if (coverCache.has(cacheKey)) {
+    const cached = coverCache.get(cacheKey);
+    if (cached.expiry > now) {
+      setHeader(event, "Content-Type", cached.contentType);
+      setHeader(event, "Cache-Control", "public, max-age=604800, immutable");
+      return cached.data;
+    }
+  }
+  try {
+    const targetUrl = `https://uploads.mangadex.org/covers/${id}/${file}.256.jpg`;
+    const res = await axios.get(targetUrl, {
+      responseType: "arraybuffer",
+      timeout: 8e3,
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+      }
+    });
+    const buffer = Buffer.from(res.data);
+    const rawType = res.headers["content-type"];
+    const contentType = typeof rawType === "string" ? rawType : "image/jpeg";
+    coverCache.set(cacheKey, {
+      data: buffer,
+      contentType,
+      expiry: now + 3600 * 1e3
+    });
+    setHeader(event, "Content-Type", contentType);
+    setHeader(event, "Cache-Control", "public, max-age=604800, immutable");
+    return buffer;
+  } catch (err) {
+    try {
+      const fallbackUrl = `https://uploads.mangadex.org/covers/${id}/${file}`;
+      const res = await axios.get(fallbackUrl, {
+        responseType: "arraybuffer",
+        timeout: 8e3,
+        headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" }
+      });
+      const buffer = Buffer.from(res.data);
+      const rawType = res.headers["content-type"];
+      const contentType = typeof rawType === "string" ? rawType : "image/jpeg";
+      setHeader(event, "Content-Type", contentType);
+      setHeader(event, "Cache-Control", "public, max-age=604800, immutable");
+      return buffer;
+    } catch {
+      throw createError({ statusCode: 404, statusMessage: "Cover image not found" });
+    }
+  }
+});
+
+const cover_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: cover_get
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const searchCache = /* @__PURE__ */ new Map();
+const detailCache = /* @__PURE__ */ new Map();
+const CACHE_TTL = 15 * 60 * 1e3;
+async function searchMangaDex(query, lang = "id") {
+  var _a;
+  const cacheKey = `${query.trim().toLowerCase()}_${lang}`;
+  const now = Date.now();
+  if (searchCache.has(cacheKey)) {
+    const cached = searchCache.get(cacheKey);
+    if (cached.expiry > now) {
+      return cached.data;
+    }
+  }
+  try {
+    const params = {
+      limit: 24,
+      "includes[]": ["cover_art", "author"],
+      "contentRating[]": ["safe", "suggestive", "erotica"]
+    };
+    if (query && query.trim()) {
+      params.title = query.trim();
+      params["order[relevance]"] = "desc";
+    } else {
+      params["order[followedCount]"] = "desc";
+    }
+    if (lang && lang !== "all") {
+      params["availableTranslatedLanguage[]"] = [lang];
+    }
+    const res = await axios.get("https://api.mangadex.org/manga", {
+      params,
+      timeout: 1e4,
+      headers: {
+        "User-Agent": "NexEo-LocalApp/1.0"
+      }
+    });
+    const data = ((_a = res.data) == null ? void 0 : _a.data) || [];
+    const results = data.map((item) => {
+      var _a2, _b;
+      const attrs = item.attributes || {};
+      const titleObj = attrs.title || {};
+      const title = titleObj[lang] || titleObj["en"] || titleObj["ja-ro"] || Object.values(titleObj)[0] || "Unknown Title";
+      const descObj = attrs.description || {};
+      const description = descObj[lang] || descObj["en"] || Object.values(descObj)[0] || "";
+      let coverFile = "";
+      let author = "Unknown";
+      if (Array.isArray(item.relationships)) {
+        for (const rel of item.relationships) {
+          if (rel.type === "cover_art" && ((_a2 = rel.attributes) == null ? void 0 : _a2.fileName)) {
+            coverFile = rel.attributes.fileName;
+          }
+          if (rel.type === "author" && ((_b = rel.attributes) == null ? void 0 : _b.name)) {
+            author = rel.attributes.name;
+          }
+        }
+      }
+      const cover = coverFile ? `/api/manga/online/cover?id=${item.id}&file=${encodeURIComponent(coverFile)}` : null;
+      const tags = (attrs.tags || []).map((t) => {
+        var _a3, _b2;
+        return ((_b2 = (_a3 = t.attributes) == null ? void 0 : _a3.name) == null ? void 0 : _b2.en) || "";
+      }).filter(Boolean);
+      const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || item.id;
+      return {
+        id: item.id,
+        title,
+        slug,
+        cover,
+        coverFile,
+        author,
+        description,
+        status: attrs.status || "ongoing",
+        tags,
+        provider: "mangadex",
+        availableLanguages: attrs.availableTranslatedLanguages || []
+      };
+    });
+    searchCache.set(cacheKey, { data: results, expiry: now + CACHE_TTL });
+    return results;
+  } catch (err) {
+    console.error("[MangaDex Search Error]", err.message);
+    return [];
+  }
+}
+async function getMangaDexDetail(mangaId, lang = "id") {
+  var _a, _b, _c, _d;
+  const cacheKey = `${mangaId}_${lang}`;
+  const now = Date.now();
+  if (detailCache.has(cacheKey)) {
+    const cached = detailCache.get(cacheKey);
+    if (cached.expiry > now) {
+      return cached.data;
+    }
+  }
+  try {
+    const mangaRes = await axios.get(`https://api.mangadex.org/manga/${mangaId}?includes[]=cover_art&includes[]=author`, {
+      timeout: 1e4,
+      headers: { "User-Agent": "NexEo-LocalApp/1.0" }
+    });
+    const item = (_a = mangaRes.data) == null ? void 0 : _a.data;
+    if (!item) return null;
+    const attrs = item.attributes || {};
+    const titleObj = attrs.title || {};
+    const title = titleObj[lang] || titleObj["en"] || titleObj["ja-ro"] || Object.values(titleObj)[0] || "Unknown Title";
+    const descObj = attrs.description || {};
+    const description = descObj[lang] || descObj["en"] || Object.values(descObj)[0] || "";
+    let coverFile = "";
+    let author = "Unknown";
+    if (Array.isArray(item.relationships)) {
+      for (const rel of item.relationships) {
+        if (rel.type === "cover_art" && ((_b = rel.attributes) == null ? void 0 : _b.fileName)) {
+          coverFile = rel.attributes.fileName;
+        }
+        if (rel.type === "author" && ((_c = rel.attributes) == null ? void 0 : _c.name)) {
+          author = rel.attributes.name;
+        }
+      }
+    }
+    const cover = coverFile ? `/api/manga/online/cover?id=${item.id}&file=${encodeURIComponent(coverFile)}` : null;
+    const tags = (attrs.tags || []).map((t) => {
+      var _a2, _b2;
+      return ((_b2 = (_a2 = t.attributes) == null ? void 0 : _a2.name) == null ? void 0 : _b2.en) || "";
+    }).filter(Boolean);
+    const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || item.id;
+    const manga = {
+      id: item.id,
+      title,
+      slug,
+      cover,
+      coverFile,
+      author,
+      description,
+      status: attrs.status || "ongoing",
+      tags,
+      provider: "mangadex",
+      availableLanguages: attrs.availableTranslatedLanguages || []
+    };
+    const feedParams = {
+      limit: 150,
+      "order[chapter]": "asc",
+      "includes[]": ["scanlation_group"]
+    };
+    if (lang && lang !== "all") {
+      feedParams["translatedLanguage[]"] = [lang];
+    }
+    const feedRes = await axios.get(`https://api.mangadex.org/manga/${mangaId}/feed`, {
+      params: feedParams,
+      timeout: 1e4,
+      headers: { "User-Agent": "NexEo-LocalApp/1.0" }
+    });
+    const rawChapters = ((_d = feedRes.data) == null ? void 0 : _d.data) || [];
+    const chapters = rawChapters.map((ch) => {
+      var _a2;
+      const chAttr = ch.attributes || {};
+      let scanlationGroup = "Indonesian Scan";
+      if (Array.isArray(ch.relationships)) {
+        const group = ch.relationships.find((r) => r.type === "scanlation_group");
+        if ((_a2 = group == null ? void 0 : group.attributes) == null ? void 0 : _a2.name) {
+          scanlationGroup = group.attributes.name;
+        }
+      }
+      return {
+        id: ch.id,
+        chapter: chAttr.chapter || "1",
+        title: chAttr.title ? `Ch. ${chAttr.chapter} - ${chAttr.title}` : `Chapter ${chAttr.chapter || "1"}`,
+        language: chAttr.translatedLanguage || "id",
+        publishDate: chAttr.publishAt,
+        scanlationGroup
+      };
+    });
+    manga.chapterCount = chapters.length;
+    const result = { manga, chapters };
+    detailCache.set(cacheKey, { data: result, expiry: now + CACHE_TTL });
+    return result;
+  } catch (err) {
+    console.error("[MangaDex Detail Error]", err.message);
+    return null;
+  }
+}
+async function getMangaDexChapterPages(chapterId) {
+  var _a, _b;
+  try {
+    const res = await axios.get(`https://api.mangadex.org/at-home/server/${chapterId}`, {
+      timeout: 1e4,
+      headers: { "User-Agent": "NexEo-LocalApp/1.0" }
+    });
+    const baseUrl = (_a = res.data) == null ? void 0 : _a.baseUrl;
+    const chapter = (_b = res.data) == null ? void 0 : _b.chapter;
+    if (!baseUrl || !chapter) return [];
+    const hash = chapter.hash;
+    const files = chapter.data || chapter.dataSaver || [];
+    return files.map((file) => `${baseUrl}/data/${hash}/${file}`);
+  } catch (err) {
+    console.error("[MangaDex Pages Error]", err.message);
+    return [];
+  }
+}
+async function downloadWorker(urls, concurrency = 4) {
+  let index = 0;
+  const total = urls.length;
+  async function worker() {
+    while (index < total) {
+      const current = urls[index++];
+      if (!current) break;
+      if (!fs.existsSync(current.dest)) {
+        try {
+          const res = await axios.get(current.url, {
+            responseType: "arraybuffer",
+            timeout: 2e4,
+            headers: {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+              "Referer": "https://mangadex.org/"
+            }
+          });
+          fs.writeFileSync(current.dest, Buffer.from(res.data));
+        } catch (err) {
+          console.warn(`[Download warning for ${current.dest}]:`, err.message);
+        }
+      }
+    }
+  }
+  const workers = Array.from({ length: Math.min(concurrency, total) }, () => worker());
+  await Promise.all(workers);
+}
+async function downloadChapterToLocal(options) {
+  const { mangaTitle, mangaSlug, chapterNum, coverUrl, author, description, pageUrls } = options;
+  try {
+    const mangaDir = path.join(serverConfig.manga.dir, mangaSlug);
+    if (!fs.existsSync(mangaDir)) {
+      fs.mkdirSync(mangaDir, { recursive: true });
+    }
+    const metaPath = path.join(mangaDir, "meta.json");
+    if (!fs.existsSync(metaPath)) {
+      const meta = {
+        title: mangaTitle,
+        slug: mangaSlug,
+        author: author || "Unknown",
+        description: description || "",
+        updatedAt: (/* @__PURE__ */ new Date()).toISOString()
+      };
+      fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2), "utf-8");
+    }
+    if (coverUrl) {
+      const coverPath = path.join(mangaDir, "cover.jpg");
+      if (!fs.existsSync(coverPath)) {
+        try {
+          const actualUrl = coverUrl.startsWith("/api") ? `http://127.0.0.1:${serverConfig.port}${coverUrl}` : coverUrl;
+          const coverRes = await axios.get(actualUrl, { responseType: "arraybuffer", timeout: 1e4 });
+          fs.writeFileSync(coverPath, Buffer.from(coverRes.data));
+        } catch {
+        }
+      }
+    }
+    const padNum = chapterNum.padStart(2, "0");
+    const chapterDir = path.join(mangaDir, `chapter-${padNum}`);
+    if (!fs.existsSync(chapterDir)) {
+      fs.mkdirSync(chapterDir, { recursive: true });
+    }
+    const tasks = pageUrls.map((pageUrl, i) => {
+      const ext = path.extname(pageUrl.split("?")[0]) || ".jpg";
+      const pageFileName = `${(i + 1).toString().padStart(3, "0")}${ext}`;
+      const pageFilePath = path.join(chapterDir, pageFileName);
+      return { url: pageUrl, dest: pageFilePath };
+    });
+    await downloadWorker(tasks, 4);
+    return { success: true, path: chapterDir };
+  } catch (err) {
+    console.error("[Manga Download Error]", err.message);
+    return { success: false, error: err.message };
+  }
+}
+
+const detail_get = defineEventHandler(async (event) => {
+  const query = getQuery$1(event);
+  const id = typeof query.id === "string" ? query.id : "";
+  const lang = typeof query.lang === "string" ? query.lang : "id";
+  if (!id) {
+    throw createError({ statusCode: 400, statusMessage: "ID manga wajib diisi" });
+  }
+  try {
+    const detail = await getMangaDexDetail(id, lang);
+    if (!detail) {
+      throw createError({ statusCode: 404, statusMessage: "Manga online tidak ditemukan" });
+    }
+    return {
+      success: true,
+      data: detail
+    };
+  } catch (err) {
+    throw createError({
+      statusCode: 500,
+      statusMessage: err.message || "Gagal memuat detail manga online"
+    });
+  }
+});
+
+const detail_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: detail_get
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const download_post$2 = defineEventHandler(async (event) => {
+  const body = await readBody(event);
+  const { mangaTitle, mangaSlug, chapterId, chapterNum, chapterTitle, coverUrl, author, description } = body;
+  if (!chapterId || !chapterNum || !mangaSlug) {
+    throw createError({ statusCode: 400, statusMessage: "Parameter unduhan chapter tidak lengkap" });
+  }
+  try {
+    const pageUrls = await getMangaDexChapterPages(chapterId);
+    if (!pageUrls || pageUrls.length === 0) {
+      throw createError({ statusCode: 404, statusMessage: "Tidak dapat menemukan halaman untuk chapter ini" });
+    }
+    const result = await downloadChapterToLocal({
+      mangaTitle: mangaTitle || mangaSlug,
+      mangaSlug,
+      chapterNum: String(chapterNum),
+      chapterTitle: chapterTitle || `Chapter ${chapterNum}`,
+      coverUrl,
+      author,
+      description,
+      pageUrls
+    });
+    if (!result.success) {
+      throw createError({ statusCode: 500, statusMessage: result.error || "Gagal mengunduh chapter ke disk lokal" });
+    }
+    return {
+      success: true,
+      message: `Chapter ${chapterNum} berhasil disimpan ke koleksi lokal!`,
+      pageCount: pageUrls.length
+    };
+  } catch (err) {
+    throw createError({
+      statusCode: 500,
+      statusMessage: err.message || "Gagal memproses unduhan chapter manga"
+    });
+  }
+});
+
+const download_post$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: download_post$2
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const search_get$2 = defineEventHandler(async (event) => {
+  const query = getQuery$1(event);
+  const q = typeof query.q === "string" ? query.q : "";
+  const lang = typeof query.lang === "string" ? query.lang : "id";
+  try {
+    const results = await searchMangaDex(q, lang);
+    return {
+      success: true,
+      data: results
+    };
+  } catch (err) {
+    throw createError({
+      statusCode: 500,
+      statusMessage: err.message || "Gagal mencari manga online"
+    });
+  }
+});
+
+const search_get$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: search_get$2
 }, Symbol.toStringTag, { value: 'Module' }));
 
 class NovelServerRepository {
@@ -4309,6 +4806,231 @@ const chapters_get = defineEventHandler((event) => {
 const chapters_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
   default: chapters_get
+}, Symbol.toStringTag, { value: 'Module' }));
+
+function escapeXml(unsafe) {
+  return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");
+}
+const exportEpub_get = defineEventHandler(async (event) => {
+  const slug = getRouterParam(event, "slug");
+  if (!slug || typeof slug !== "string") {
+    throw createError({ statusCode: 400, statusMessage: "slug novel wajib diisi" });
+  }
+  const novelDir = path.join(serverConfig.novel.dir, slug);
+  if (!fs.existsSync(novelDir)) {
+    throw createError({ statusCode: 404, statusMessage: "Folder novel tidak ditemukan" });
+  }
+  let meta = { title: slug, author: "Unknown Author", description: "", tags: [] };
+  const metaPath = path.join(novelDir, "meta.json");
+  if (fs.existsSync(metaPath)) {
+    try {
+      meta = JSON.parse(fs.readFileSync(metaPath, "utf-8"));
+    } catch {
+    }
+  }
+  const novelTitle = meta.title || slug;
+  const novelAuthor = meta.author || "Unknown";
+  const novelDescription = meta.description ? meta.description.replace(/<[^>]*>?/gm, "") : "";
+  const files = fs.readdirSync(novelDir);
+  const chapterFiles = files.filter((f) => {
+    const l = f.toLowerCase();
+    return (l.endsWith(".txt") || l.endsWith(".json")) && !l.includes("meta") && !l.includes("index") && !l.includes("cover");
+  }).sort((a, b) => {
+    const numA = parseInt(a.replace(/\D/g, "") || "0", 10);
+    const numB = parseInt(b.replace(/\D/g, "") || "0", 10);
+    return numA - numB;
+  });
+  if (chapterFiles.length === 0) {
+    throw createError({ statusCode: 400, statusMessage: "Tidak ada berkas chapter dalam novel ini" });
+  }
+  const zip = new AdmZip();
+  zip.addFile("mimetype", Buffer.from("application/epub+zip", "utf-8"));
+  const containerXml = `<?xml version="1.0" encoding="UTF-8"?>
+<container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">
+  <rootfiles>
+    <rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/>
+  </rootfiles>
+</container>`;
+  zip.addFile("META-INF/container.xml", Buffer.from(containerXml, "utf-8"));
+  const styleCss = `
+body {
+  font-family: Georgia, serif;
+  line-height: 1.8;
+  padding: 5%;
+  color: #1a1a1a;
+}
+h1, h2 {
+  font-family: sans-serif;
+  text-align: center;
+  color: #333;
+  margin-bottom: 2rem;
+}
+p {
+  margin-bottom: 1.25rem;
+  text-indent: 1.5em;
+  text-align: justify;
+}
+.cover-page {
+  text-align: center;
+  padding: 10% 5%;
+}
+.cover-title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+.cover-author {
+  font-size: 1.2rem;
+  color: #666;
+  margin-bottom: 2rem;
+}
+`;
+  zip.addFile("OEBPS/style.css", Buffer.from(styleCss, "utf-8"));
+  const manifestItems = [
+    { id: "style", href: "style.css", mediaType: "text/css", title: "Styles" }
+  ];
+  const spineItems = [];
+  let coverFilename = null;
+  for (const f of files) {
+    const l = f.toLowerCase();
+    if ((l.startsWith("cover") || l.includes("cover")) && (l.endsWith(".jpg") || l.endsWith(".jpeg") || l.endsWith(".png") || l.endsWith(".webp"))) {
+      coverFilename = f;
+      break;
+    }
+  }
+  if (coverFilename) {
+    const coverPath = path.join(novelDir, coverFilename);
+    const coverExt = path.extname(coverFilename).toLowerCase().replace(".", "");
+    const coverMime = coverExt === "png" ? "image/png" : coverExt === "webp" ? "image/webp" : "image/jpeg";
+    zip.addLocalFile(coverPath, "OEBPS");
+    manifestItems.push({ id: "cover-image", href: coverFilename, mediaType: coverMime, title: "Cover Image" });
+  }
+  const titlePageXhtml = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>${escapeXml(novelTitle)}</title>
+  <link rel="stylesheet" type="text/css" href="style.css"/>
+</head>
+<body>
+  <div class="cover-page">
+    <h1 class="cover-title">${escapeXml(novelTitle)}</h1>
+    <p class="cover-author">Oleh: ${escapeXml(novelAuthor)}</p>
+    ${novelDescription ? `<div class="cover-desc"><p>${escapeXml(novelDescription)}</p></div>` : ""}
+  </div>
+</body>
+</html>`;
+  zip.addFile("OEBPS/title.xhtml", Buffer.from(titlePageXhtml, "utf-8"));
+  manifestItems.push({ id: "title-page", href: "title.xhtml", mediaType: "application/xhtml+xml", title: "Halaman Judul" });
+  spineItems.push("title-page");
+  chapterFiles.forEach((fileName, idx) => {
+    const chapNum = idx + 1;
+    const chapId = `chapter_${chapNum}`;
+    const chapHref = `chapter_${chapNum}.xhtml`;
+    const chapTitle = `Bab ${chapNum}: ${fileName.replace(/\.(txt|json)$/i, "").replace(/_/g, " ")}`;
+    const filePath = path.join(novelDir, fileName);
+    let paragraphs = [];
+    if (fileName.toLowerCase().endsWith(".txt")) {
+      const content = fs.readFileSync(filePath, "utf-8");
+      paragraphs = content.split(/\r?\n/).map((p) => p.trim()).filter(Boolean);
+    } else {
+      try {
+        const rawJson = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+        if (Array.isArray(rawJson)) {
+          paragraphs = rawJson.map((item) => typeof item === "string" ? item : item.value || item.text || "").filter(Boolean);
+        } else if (rawJson && typeof rawJson === "object") {
+          const arr = rawJson.content || rawJson.paragraphs || [];
+          paragraphs = arr.map((item) => typeof item === "string" ? item : item.value || item.text || "").filter(Boolean);
+        }
+      } catch {
+      }
+    }
+    const chapBody = paragraphs.map((p) => `<p>${escapeXml(p)}</p>`).join("\n");
+    const chapterXhtml = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>${escapeXml(chapTitle)}</title>
+  <link rel="stylesheet" type="text/css" href="style.css"/>
+</head>
+<body>
+  <h2>${escapeXml(chapTitle)}</h2>
+  ${chapBody}
+</body>
+</html>`;
+    zip.addFile(`OEBPS/${chapHref}`, Buffer.from(chapterXhtml, "utf-8"));
+    manifestItems.push({ id: chapId, href: chapHref, mediaType: "application/xhtml+xml", title: chapTitle });
+    spineItems.push(chapId);
+  });
+  const tocNavPoints = manifestItems.filter((item) => item.mediaType === "application/xhtml+xml").map((item, i) => `
+    <navPoint id="navPoint-${i + 1}" playOrder="${i + 1}">
+      <navLabel><text>${escapeXml(item.title)}</text></navLabel>
+      <content src="${item.href}"/>
+    </navPoint>`).join("");
+  const tocNcx = `<?xml version="1.0" encoding="UTF-8"?>
+<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1">
+  <head>
+    <meta name="dtb:uid" content="urn:uuid:${slug}"/>
+    <meta name="dtb:depth" content="1"/>
+    <meta name="dtb:totalPageCount" content="0"/>
+    <meta name="dtb:maxPageNumber" content="0"/>
+  </head>
+  <docTitle><text>${escapeXml(novelTitle)}</text></docTitle>
+  <navMap>
+    ${tocNavPoints}
+  </navMap>
+</ncx>`;
+  zip.addFile("OEBPS/toc.ncx", Buffer.from(tocNcx, "utf-8"));
+  manifestItems.push({ id: "ncx", href: "toc.ncx", mediaType: "application/x-dtbncx+xml", title: "Table of Contents" });
+  const navListItems = manifestItems.filter((item) => item.mediaType === "application/xhtml+xml").map((item) => `<li><a href="${item.href}">${escapeXml(item.title)}</a></li>`).join("\n      ");
+  const navXhtml = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+  <title>Daftar Isi</title>
+  <link rel="stylesheet" type="text/css" href="style.css"/>
+</head>
+<body>
+  <nav epub:type="toc" id="toc">
+    <h1>Daftar Isi</h1>
+    <ol>
+      ${navListItems}
+    </ol>
+  </nav>
+</body>
+</html>`;
+  zip.addFile("OEBPS/nav.xhtml", Buffer.from(navXhtml, "utf-8"));
+  manifestItems.push({ id: "nav", href: "nav.xhtml", mediaType: "application/xhtml+xml", title: "Navigation" });
+  const manifestXml = manifestItems.map((item) => `<item id="${item.id}" href="${item.href}" media-type="${item.mediaType}" ${item.id === "nav" ? 'properties="nav"' : ""}/>`).join("\n    ");
+  const spineXml = spineItems.map((id) => `<itemref idref="${id}"/>`).join("\n    ");
+  const contentOpf = `<?xml version="1.0" encoding="UTF-8"?>
+<package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="pub-id">
+  <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <dc:identifier id="pub-id">urn:uuid:${slug}</dc:identifier>
+    <dc:title>${escapeXml(novelTitle)}</dc:title>
+    <dc:creator>${escapeXml(novelAuthor)}</dc:creator>
+    <dc:language>id</dc:language>
+    <meta property="dcterms:modified">${(/* @__PURE__ */ new Date()).toISOString().replace(/\.\d+Z$/, "Z")}</meta>
+    ${coverFilename ? `<meta name="cover" content="cover-image"/>` : ""}
+  </metadata>
+  <manifest>
+    ${manifestXml}
+  </manifest>
+  <spine toc="ncx">
+    ${spineXml}
+  </spine>
+</package>`;
+  zip.addFile("OEBPS/content.opf", Buffer.from(contentOpf, "utf-8"));
+  const epubBuffer = zip.toBuffer();
+  setHeader(event, "Content-Type", "application/epub+zip");
+  setHeader(event, "Content-Disposition", `attachment; filename="${encodeURIComponent(slug)}.epub"`);
+  setHeader(event, "Content-Length", epubBuffer.length);
+  return epubBuffer;
+});
+
+const exportEpub_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: exportEpub_get
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const export_get = defineEventHandler(async (event) => {
