@@ -605,27 +605,27 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import("./_nuxt/index-C3mfIvL_.js")
+    component: () => import("./_nuxt/index-L9HZBkFQ.js")
   },
   {
     name: "share",
     path: "/share",
-    component: () => import("./_nuxt/share-DaWtyIYX.js")
+    component: () => import("./_nuxt/share-C4lzA8g7.js")
   },
   {
     name: "library",
     path: "/library",
-    component: () => import("./_nuxt/library-B-iC759z.js")
+    component: () => import("./_nuxt/library-WcilZlrV.js")
   },
   {
     name: "video-id",
     path: "/video/:id()",
-    component: () => import("./_nuxt/_id_-D6YP_0A_.js")
+    component: () => import("./_nuxt/_id_-yysuphj-.js")
   },
   {
     name: "novels",
     path: "/novels",
-    component: () => import("./_nuxt/index-DqL9HHru.js")
+    component: () => import("./_nuxt/index-BC42u-1I.js")
   },
   {
     name: "novel-browser",
@@ -635,17 +635,17 @@ const _routes = [
   {
     name: "downloader",
     path: "/downloader",
-    component: () => import("./_nuxt/index-CJP95DiN.js")
+    component: () => import("./_nuxt/index-BPqvJ-qM.js")
   },
   {
     name: "novels-slug",
     path: "/novels/:slug()",
-    component: () => import("./_nuxt/index-B-2_SL4B.js")
+    component: () => import("./_nuxt/index-Bxa7ycsU.js")
   },
   {
     name: "novels-slug-chapter",
     path: "/novels/:slug()/:chapter()",
-    component: () => import("./_nuxt/_chapter_-Dnhs1yHk.js")
+    component: () => import("./_nuxt/_chapter_-Yp9CtV5s.js")
   }
 ];
 const validate = /* @__PURE__ */ defineNuxtRouteMiddleware(async (to) => {
@@ -1009,7 +1009,7 @@ const plugins = [
   pinia_Ab1D_QMMf_egrzVdVYpZ5xs6QSwaKU60pkFvRWVq_9Y
 ];
 const layouts = {
-  default: defineAsyncComponent(() => import("./_nuxt/default-CUIpgmA5.js").then((m) => m.default || m))
+  default: defineAsyncComponent(() => import("./_nuxt/default-B3hqqpu-.js").then((m) => m.default || m))
 };
 const routeRulesMatcher = _routeRulesMatcher;
 const LayoutLoader = defineComponent({

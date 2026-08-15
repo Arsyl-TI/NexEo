@@ -613,27 +613,27 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-C3mfIvL_.mjs')
+    component: () => import('./index-L9HZBkFQ.mjs')
   },
   {
     name: "share",
     path: "/share",
-    component: () => import('./share-DaWtyIYX.mjs')
+    component: () => import('./share-C4lzA8g7.mjs')
   },
   {
     name: "library",
     path: "/library",
-    component: () => import('./library-B-iC759z.mjs')
+    component: () => import('./library-WcilZlrV.mjs')
   },
   {
     name: "video-id",
     path: "/video/:id()",
-    component: () => import('./_id_-D6YP_0A_.mjs')
+    component: () => import('./_id_-yysuphj-.mjs')
   },
   {
     name: "novels",
     path: "/novels",
-    component: () => import('./index-DqL9HHru.mjs')
+    component: () => import('./index-BC42u-1I.mjs')
   },
   {
     name: "novel-browser",
@@ -643,17 +643,17 @@ const _routes = [
   {
     name: "downloader",
     path: "/downloader",
-    component: () => import('./index-CJP95DiN.mjs')
+    component: () => import('./index-BPqvJ-qM.mjs')
   },
   {
     name: "novels-slug",
     path: "/novels/:slug()",
-    component: () => import('./index-B-2_SL4B.mjs')
+    component: () => import('./index-Bxa7ycsU.mjs')
   },
   {
     name: "novels-slug-chapter",
     path: "/novels/:slug()/:chapter()",
-    component: () => import('./_chapter_-Dnhs1yHk.mjs')
+    component: () => import('./_chapter_-Yp9CtV5s.mjs')
   }
 ];
 const validate = /* @__PURE__ */ defineNuxtRouteMiddleware(async (to) => {
@@ -1017,7 +1017,7 @@ const plugins = [
   pinia_Ab1D_QMMf_egrzVdVYpZ5xs6QSwaKU60pkFvRWVq_9Y
 ];
 const layouts = {
-  default: defineAsyncComponent(() => import('./default-CUIpgmA5.mjs').then((m) => m.default || m))
+  default: defineAsyncComponent(() => import('./default-B3hqqpu-.mjs').then((m) => m.default || m))
 };
 const routeRulesMatcher = _routeRulesMatcher;
 const LayoutLoader = defineComponent({

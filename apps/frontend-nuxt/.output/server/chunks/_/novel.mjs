@@ -106,7 +106,7 @@ function getLocalNovel(slug) {
   const novelDir = path.join(serverConfig.novel.dir, slug);
   if (!fs.existsSync(novelDir)) return null;
   const metadata = novelServerRepo.getNovelMetadata(slug);
-  const masterIndex = novelServerRepo.getMasterIndex(slug);
+  novelServerRepo.getMasterIndex(slug);
   let title = (metadata == null ? void 0 : metadata.title) || slug;
   let author = metadata == null ? void 0 : metadata.author;
   let tags = (metadata == null ? void 0 : metadata.tags) || [];
@@ -124,13 +124,7 @@ function getLocalNovel(slug) {
       cover = `/_novels/${slug}/images/${found}`;
     }
   }
-  const chapters = masterIndex.map((c) => ({
-    id: String(c.id),
-    title: c.title,
-    file: c.file || `chapter-${c.id}.json`,
-    number: c.number,
-    url: c.url
-  }));
+  const chapters = getLocalChapters(slug);
   return {
     id: slug,
     slug,
@@ -144,12 +138,32 @@ function getLocalNovel(slug) {
   };
 }
 function getLocalChapters(slug) {
-  return novelServerRepo.getMasterIndex(slug).map((c) => ({
-    id: String(c.id),
-    title: c.title,
-    file: c.file || `chapter-${c.id}.json`,
-    number: c.number,
-    url: c.url
+  const masterIndex = novelServerRepo.getMasterIndex(slug);
+  if (masterIndex.length > 0) {
+    return masterIndex.map((c) => ({
+      id: String(c.id),
+      title: c.title,
+      file: c.file || `chapter-${c.id}.json`,
+      number: c.number,
+      url: c.url
+    }));
+  }
+  const novelDir = path.join(serverConfig.novel.dir, slug);
+  if (!fs.existsSync(novelDir)) return [];
+  const files = fs.readdirSync(novelDir);
+  const chapterFiles = files.filter((f) => {
+    const l = f.toLowerCase();
+    return (l.endsWith(".txt") || l.endsWith(".json")) && !l.includes("meta") && !l.includes("index") && !l.includes("cover");
+  }).sort((a, b) => {
+    const numA = parseInt(a.replace(/\D/g, "") || "0", 10);
+    const numB = parseInt(b.replace(/\D/g, "") || "0", 10);
+    return numA - numB;
+  });
+  return chapterFiles.map((fileName, idx) => ({
+    id: String(idx + 1),
+    title: fileName.replace(/\.(txt|json)$/i, ""),
+    file: fileName,
+    number: idx + 1
   }));
 }
 function getLocalChapterContent(slug, filename) {

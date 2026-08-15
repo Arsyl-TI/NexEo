@@ -15,7 +15,7 @@ function scanDirectory(dirPath) {
     return [];
   }
 }
-function scanVideos(dir, relativeBase, categoryId, supportedFormats) {
+function scanVideos(dir, relativeBase, categoryId, supportedFormats, recursive = true) {
   const videos = [];
   try {
     if (!fs.existsSync(dir)) return [];
@@ -25,7 +25,9 @@ function scanVideos(dir, relativeBase, categoryId, supportedFormats) {
       const relPath = path.relative(relativeBase, fullPath).replace(/\\/g, "/");
       const id = `${categoryId}/${relPath.toLowerCase()}`;
       if (item.isDirectory()) {
-        videos.push(...scanVideos(fullPath, relativeBase, categoryId, supportedFormats));
+        if (recursive) {
+          videos.push(...scanVideos(fullPath, relativeBase, categoryId, supportedFormats, true));
+        }
       } else {
         const ext = path.extname(fullPath).toLowerCase();
         if (supportedFormats.includes(ext)) {
@@ -81,7 +83,7 @@ async function scan() {
   for (const cat of serverConfig.video.categories) {
     if (!fs.existsSync(cat.path)) continue;
     let folderVideoCount = 0;
-    const categoryDirectVideos = scanVideos(cat.path, cat.path, cat.id, serverConfig.video.supportedFormats).filter((v) => !v.folder || v.folder === "." || v.folder === "Root");
+    const categoryDirectVideos = scanVideos(cat.path, cat.path, cat.id, serverConfig.video.supportedFormats, false);
     if (categoryDirectVideos.length > 0) {
       folderVideoCount += categoryDirectVideos.length;
       const firstVideo = categoryDirectVideos[0];

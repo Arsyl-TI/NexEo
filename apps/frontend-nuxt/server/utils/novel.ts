@@ -169,13 +169,7 @@ export function getLocalNovel(slug: string): NovelDetail | null {
     }
   }
 
-  const chapters: LocalChapter[] = masterIndex.map(c => ({
-    id: String(c.id),
-    title: c.title,
-    file: (c as any).file || `chapter-${c.id}.json`,
-    number: c.number,
-    url: c.url
-  }))
+  const chapters: LocalChapter[] = getLocalChapters(slug)
 
   return {
     id: slug,
@@ -191,12 +185,36 @@ export function getLocalNovel(slug: string): NovelDetail | null {
 }
 
 export function getLocalChapters(slug: string): LocalChapter[] {
-  return novelServerRepo.getMasterIndex(slug).map(c => ({
-    id: String(c.id),
-    title: c.title,
-    file: (c as any).file || `chapter-${c.id}.json`,
-    number: c.number,
-    url: c.url
+  const masterIndex = novelServerRepo.getMasterIndex(slug)
+  if (masterIndex.length > 0) {
+    return masterIndex.map(c => ({
+      id: String(c.id),
+      title: c.title,
+      file: (c as any).file || `chapter-${c.id}.json`,
+      number: c.number,
+      url: c.url
+    }))
+  }
+
+  // Fallback: Scan .txt and .json files in novel directory if master_index.json is missing
+  const novelDir = path.join(serverConfig.novel.dir, slug)
+  if (!fs.existsSync(novelDir)) return []
+
+  const files = fs.readdirSync(novelDir)
+  const chapterFiles = files.filter(f => {
+    const l = f.toLowerCase()
+    return (l.endsWith('.txt') || l.endsWith('.json')) && !l.includes('meta') && !l.includes('index') && !l.includes('cover')
+  }).sort((a, b) => {
+    const numA = parseInt(a.replace(/\D/g, '') || '0', 10)
+    const numB = parseInt(b.replace(/\D/g, '') || '0', 10)
+    return numA - numB
+  })
+
+  return chapterFiles.map((fileName, idx) => ({
+    id: String(idx + 1),
+    title: fileName.replace(/\.(txt|json)$/i, ''),
+    file: fileName,
+    number: idx + 1
   }))
 }
 

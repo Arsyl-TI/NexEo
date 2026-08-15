@@ -25,7 +25,7 @@ function scanDirectory(dirPath: string): string[] {
   } catch (e) { return [] }
 }
 
-export function scanVideos(dir: string, relativeBase: string, categoryId: string, supportedFormats: readonly string[]): VideoItem[] {
+export function scanVideos(dir: string, relativeBase: string, categoryId: string, supportedFormats: readonly string[], recursive: boolean = true): VideoItem[] {
   const videos: VideoItem[] = []
   try {
     if (!fs.existsSync(dir)) return []
@@ -36,7 +36,9 @@ export function scanVideos(dir: string, relativeBase: string, categoryId: string
       const id = `${categoryId}/${relPath.toLowerCase()}`
 
       if (item.isDirectory()) {
-        videos.push(...scanVideos(fullPath, relativeBase, categoryId, supportedFormats))
+        if (recursive) {
+          videos.push(...scanVideos(fullPath, relativeBase, categoryId, supportedFormats, true))
+        }
       } else {
         const ext = path.extname(fullPath).toLowerCase()
         if (supportedFormats.includes(ext)) {
@@ -91,8 +93,8 @@ async function scan(): Promise<VideoScanResult> {
     if (!fs.existsSync(cat.path)) continue
     let folderVideoCount = 0
 
-    // Direct videos in category root folder
-    const categoryDirectVideos = scanVideos(cat.path, cat.path, cat.id, serverConfig.video.supportedFormats).filter(v => !v.folder || v.folder === '.' || v.folder === 'Root')
+    // Direct videos in category root folder only (non-recursive)
+    const categoryDirectVideos = scanVideos(cat.path, cat.path, cat.id, serverConfig.video.supportedFormats, false)
     if (categoryDirectVideos.length > 0) {
       folderVideoCount += categoryDirectVideos.length
       const firstVideo = categoryDirectVideos[0]
