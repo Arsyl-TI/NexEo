@@ -11,9 +11,10 @@ NexEo adalah aplikasi server media personal berbasis **Full-Stack Nuxt 3 (Nitro 
 * **Generasi Thumbnail Direct Seek**: Pembuatan *thumbnail* pratinjau otomatis menggunakan `fluent-ffmpeg` tanpa ketergantungan pada `ffprobe`.
 * **HTTP Range Streaming**: Pemutaran video `.mp4`, `.mkv`, `.avi` yang lancar dengan pencarian timeline responsif.
 
-### 2. Pustaka Novel & Scraper Browser Online
+### 2. Pustaka Novel & Scraper Premium
 * **Online Browser & Scraper**: Mengunduh katalog dan bab novel langsung dari **Dreamy Translations** & **Noveldex** (termasuk 500+ novel dengan API pagination).
 * **Import EPUB**: Pengunggahan dan ekstraksi otomatis berkas `.epub` ke pustaka lokal.
+* **Scraper Otomatis**: Mengunduh bab-bab novel langsung dari sumber target beserta ilustrasi gambarnya secara otomatis.
 * **Pembaca Premium**: 
   - Mode baca kustom: Tema Terang (Light), Gelap (Dark), Sepia, serta penyesuaian font.
   - Progres baca otomatis (**Resume Reading**).
