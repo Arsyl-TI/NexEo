@@ -2144,7 +2144,22 @@ const plugins = [
 _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw
 ];
 
-const assets = {};
+const assets = {
+  "/index.mjs": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"3642a-WB8Q0ab9sioLWZs0rAYuMOuNHCc\"",
+    "mtime": "2026-08-15T12:26:32.585Z",
+    "size": 222250,
+    "path": "index.mjs"
+  },
+  "/index.mjs.map": {
+    "type": "application/json",
+    "etag": "\"c93c9-310/uHP6Zl9MScDb5oOUBENge5M\"",
+    "mtime": "2026-08-15T12:26:32.585Z",
+    "size": 824265,
+    "path": "index.mjs.map"
+  }
+};
 
 function readAsset (id) {
   const serverDir = dirname$1(fileURLToPath(globalThis._importMeta_.url));
@@ -4629,27 +4644,36 @@ async function translateBatchDeepL(texts, apiKey) {
 }
 async function translateBatchLibre(texts, apiUrl, apiKey) {
   const targetUrl = (apiUrl).replace(/\/$/, "");
-  const promises = texts.map(
-    (t) => axios.post(
-      `${targetUrl}/translate`,
-      {
-        q: t,
-        source: "auto",
-        target: "id",
-        format: "text",
-        api_key: apiKey ? apiKey.trim() : void 0
-      },
-      {
-        headers: { "Content-Type": "application/json" },
-        timeout: 2e4
-      }
-    )
-  );
-  const responses = await Promise.all(promises);
-  return responses.map((r) => {
-    var _a, _b;
-    return (_b = (_a = r.data) == null ? void 0 : _a.translatedText) != null ? _b : "";
-  });
+  const results = [];
+  const batchSize = 5;
+  for (let i = 0; i < texts.length; i += batchSize) {
+    const chunk = texts.slice(i, i + batchSize);
+    const promises = chunk.map(
+      (t) => axios.post(
+        `${targetUrl}/translate`,
+        {
+          q: t,
+          source: "auto",
+          target: "id",
+          format: "text",
+          api_key: apiKey ? apiKey.trim() : void 0
+        },
+        {
+          headers: { "Content-Type": "application/json" },
+          timeout: 3e4
+        }
+      ).then((r) => {
+        var _a, _b;
+        return (_b = (_a = r.data) == null ? void 0 : _a.translatedText) != null ? _b : t;
+      }).catch((err) => {
+        console.error("Single paragraph LibreTranslate error:", err == null ? void 0 : err.message);
+        return t;
+      })
+    );
+    const chunkResults = await Promise.all(promises);
+    results.push(...chunkResults);
+  }
+  return results;
 }
 async function translateBatchGoogle(texts) {
   var _a;
@@ -4676,7 +4700,7 @@ async function translateBatchGoogle(texts) {
 async function translateBatch(texts, config = {}) {
   if (!texts || texts.length === 0) return [];
   const engine = config.engine || "google";
-  if (engine === "libre" || config.libreUrl) {
+  if (engine === "libre") {
     try {
       return await translateBatchLibre(texts, config.libreUrl || "http://localhost:5000", config.libreApiKey);
     } catch (e) {
@@ -5276,45 +5300,88 @@ const translateAll_post = defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, statusMessage: "Folder novel tidak ditemukan" });
   }
   const files = fs.readdirSync(novelDir);
-  const txtFiles = files.filter((f) => f.toLowerCase().endsWith(".txt")).sort((a, b) => {
+  const chapterFiles = files.filter((f) => {
+    const l = f.toLowerCase();
+    return (l.endsWith(".txt") || l.endsWith(".json")) && !l.includes("meta") && !l.includes("index") && !l.includes("cover");
+  }).sort((a, b) => {
     const numA = parseInt(a.replace(/\D/g, "") || "0", 10);
     const numB = parseInt(b.replace(/\D/g, "") || "0", 10);
     return numA - numB;
   });
-  if (txtFiles.length === 0) {
-    throw createError({ statusCode: 400, statusMessage: "Tidak ada berkas chapter .txt dalam novel ini" });
+  if (chapterFiles.length === 0) {
+    throw createError({ statusCode: 400, statusMessage: "Tidak ada berkas chapter (.txt / .json) dalam novel ini" });
   }
   let translatedCount = 0;
-  for (let i = 0; i < txtFiles.length; i++) {
-    const fileName = txtFiles[i];
+  for (let i = 0; i < chapterFiles.length; i++) {
+    const fileName = chapterFiles[i];
     if (!fileName) continue;
+    console.log(`[Batch Translate] (${i + 1}/${chapterFiles.length}) Translating chapter ${fileName} using engine '${engine || "google"}'...`);
     const filePath = path.join(novelDir, fileName);
-    const content = fs.readFileSync(filePath, "utf-8");
-    const paragraphs = content.split(/\r?\n/).filter((p) => p.trim().length > 0);
-    if (paragraphs.length > 0) {
-      try {
-        const translatedParagraphs = await translateBatch(paragraphs, {
-          engine,
-          geminiApiKey,
-          deeplApiKey,
-          libreUrl,
-          libreApiKey
-        });
-        if (translatedParagraphs && translatedParagraphs.length > 0) {
-          const newContent = translatedParagraphs.join("\n\n");
-          fs.writeFileSync(filePath, newContent, "utf-8");
-          translatedCount++;
+    const ext = path.extname(fileName).toLowerCase();
+    try {
+      if (ext === ".txt") {
+        const content = fs.readFileSync(filePath, "utf-8");
+        const paragraphs = content.split(/\r?\n/).filter((p) => p.trim().length > 0);
+        if (paragraphs.length > 0) {
+          const translatedParagraphs = await translateBatch(paragraphs, {
+            engine,
+            geminiApiKey,
+            deeplApiKey,
+            libreUrl,
+            libreApiKey
+          });
+          if (translatedParagraphs && translatedParagraphs.length > 0) {
+            fs.writeFileSync(filePath, translatedParagraphs.join("\n\n"), "utf-8");
+            translatedCount++;
+          }
         }
-      } catch (err) {
-        console.error(`Failed to translate chapter ${fileName}:`, err);
+      } else if (ext === ".json") {
+        const rawJson = fs.readFileSync(filePath, "utf-8");
+        const jsonData = JSON.parse(rawJson);
+        let paragraphsToTranslate = [];
+        if (Array.isArray(jsonData)) {
+          paragraphsToTranslate = jsonData.filter((p) => typeof p === "string" && p.trim().length > 0);
+        } else if (jsonData && typeof jsonData === "object") {
+          if (Array.isArray(jsonData.paragraphs)) {
+            paragraphsToTranslate = jsonData.paragraphs.filter((p) => typeof p === "string" && p.trim().length > 0);
+          } else if (Array.isArray(jsonData.content)) {
+            paragraphsToTranslate = jsonData.content.filter((p) => typeof p === "string" && p.trim().length > 0);
+          }
+        }
+        if (paragraphsToTranslate.length > 0) {
+          const translatedParagraphs = await translateBatch(paragraphsToTranslate, {
+            engine,
+            geminiApiKey,
+            deeplApiKey,
+            libreUrl,
+            libreApiKey
+          });
+          if (translatedParagraphs && translatedParagraphs.length > 0) {
+            if (Array.isArray(jsonData)) {
+              fs.writeFileSync(filePath, JSON.stringify(translatedParagraphs, null, 2), "utf-8");
+            } else if (jsonData && typeof jsonData === "object") {
+              if (Array.isArray(jsonData.paragraphs)) {
+                jsonData.paragraphs = translatedParagraphs;
+              } else if (Array.isArray(jsonData.content)) {
+                jsonData.content = translatedParagraphs;
+              } else {
+                jsonData.paragraphs = translatedParagraphs;
+              }
+              fs.writeFileSync(filePath, JSON.stringify(jsonData, null, 2), "utf-8");
+            }
+            translatedCount++;
+          }
+        }
       }
+    } catch (err) {
+      console.error(`Failed to translate chapter ${fileName}:`, err);
     }
   }
   return {
     success: true,
-    totalChapters: txtFiles.length,
+    totalChapters: chapterFiles.length,
     translatedCount,
-    message: `Berhasil menerjemahkan ${translatedCount} dari ${txtFiles.length} chapter secara permanen!`
+    message: `Berhasil menerjemahkan ${translatedCount} dari ${chapterFiles.length} chapter secara permanen!`
   };
 });
 

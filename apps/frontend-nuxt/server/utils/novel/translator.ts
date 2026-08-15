@@ -77,26 +77,35 @@ export async function translateBatchDeepL(texts: string[], apiKey: string): Prom
 
 export async function translateBatchLibre(texts: string[], apiUrl: string, apiKey?: string): Promise<string[]> {
   const targetUrl = (apiUrl || 'http://localhost:5000').replace(/\/$/, '')
+  const results: string[] = []
 
-  const promises = texts.map(t =>
-    axios.post(
-      `${targetUrl}/translate`,
-      {
-        q: t,
-        source: 'auto',
-        target: 'id',
-        format: 'text',
-        api_key: apiKey ? apiKey.trim() : undefined
-      },
-      {
-        headers: { 'Content-Type': 'application/json' },
-        timeout: 20000
-      }
+  // Process in small batches of 5 to avoid flooding/crashing LibreTranslate Docker container
+  const batchSize = 5
+  for (let i = 0; i < texts.length; i += batchSize) {
+    const chunk = texts.slice(i, i + batchSize)
+    const promises = chunk.map(t =>
+      axios.post(
+        `${targetUrl}/translate`,
+        {
+          q: t,
+          source: 'auto',
+          target: 'id',
+          format: 'text',
+          api_key: apiKey ? apiKey.trim() : undefined
+        },
+        {
+          headers: { 'Content-Type': 'application/json' },
+          timeout: 30000
+        }
+      ).then(r => r.data?.translatedText ?? t).catch((err) => {
+        console.error('Single paragraph LibreTranslate error:', err?.message)
+        return t
+      })
     )
-  )
-
-  const responses = await Promise.all(promises)
-  return responses.map(r => r.data?.translatedText ?? '')
+    const chunkResults = await Promise.all(promises)
+    results.push(...chunkResults)
+  }
+  return results
 }
 
 export async function translateBatchGoogle(texts: string[]): Promise<string[]> {
@@ -124,8 +133,8 @@ export async function translateBatch(texts: string[], config: TranslationConfig 
 
   const engine = config.engine || 'google'
 
-  // 1. Try LibreTranslate
-  if (engine === 'libre' || config.libreUrl) {
+  // 1. Try LibreTranslate (when engine === 'libre')
+  if (engine === 'libre') {
     try {
       return await translateBatchLibre(texts, config.libreUrl || 'http://localhost:5000', config.libreApiKey)
     } catch (e: any) {

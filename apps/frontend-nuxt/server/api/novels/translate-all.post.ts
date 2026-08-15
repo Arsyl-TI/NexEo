@@ -37,6 +37,8 @@ export default defineEventHandler(async (event) => {
     const fileName = chapterFiles[i]
     if (!fileName) continue
 
+    console.log(`[Batch Translate] (${i + 1}/${chapterFiles.length}) Translating chapter ${fileName} using engine '${engine || 'google'}'...`)
+
     const filePath = path.join(novelDir, fileName)
     const ext = path.extname(fileName).toLowerCase()
 
