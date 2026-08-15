@@ -1,4 +1,4 @@
-import { c as defineEventHandler, l as getQuery } from '../../../_/nitro.mjs';
+import { c as defineEventHandler, m as getQuery } from '../../../_/nitro.mjs';
 import { s as searchVideos } from '../../../_/video.mjs';
 import 'node:http';
 import 'node:https';

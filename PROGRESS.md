@@ -42,3 +42,13 @@
   - Built a universal Command Palette modal triggered by pressing `Ctrl+K`, `Cmd+K`, or clicking `🔍 Cari` button on Navbar.
   - Searches across 3 media sources simultaneously: 🎬 Videos, 📖 Novels, and 📤 Shared Files.
   - Keyboard navigation (`↑`/`↓` and `Enter`) to jump directly to search results.
+
+---
+
+## Feature 5: Novel Offline TXT Exporter / Downloader
+- **Files Modified**:
+  - `apps/frontend-nuxt/server/api/novels/[slug]/export.get.ts`
+  - `apps/frontend-nuxt/pages/novels/[slug]/index.vue`
+- **Implementation Highlights**:
+  - Built Nitro API export endpoint `GET /api/novels/[slug]/export` that compiles novel metadata and all chapter `.txt` files into a single, clean formatted plain text document download.
+  - Added **"📥 Unduh Seluruh Chapter (.txt)"** button to novel detail page.

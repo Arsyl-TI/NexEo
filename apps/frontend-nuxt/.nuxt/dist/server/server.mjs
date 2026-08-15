@@ -640,7 +640,7 @@ const _routes = [
   {
     name: "novels-slug",
     path: "/novels/:slug()",
-    component: () => import("./_nuxt/index-BE6KAxmo.js")
+    component: () => import("./_nuxt/index-B-2_SL4B.js")
   },
   {
     name: "novels-slug-chapter",

@@ -1,4 +1,4 @@
-import { c as defineEventHandler, g as getRouterParam, e as createError, k as getRequestHeader, i as setResponseStatus, f as setHeader, h as sendStream } from '../../../../_/nitro.mjs';
+import { c as defineEventHandler, g as getRouterParam, e as createError, l as getRequestHeader, i as setResponseStatus, f as setHeader, h as sendStream } from '../../../../_/nitro.mjs';
 import { a as getVideoById } from '../../../../_/video.mjs';
 import fs from 'fs';
 import path from 'path';

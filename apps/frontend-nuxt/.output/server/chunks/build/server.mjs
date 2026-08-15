@@ -1,5 +1,5 @@
 import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};import { hasInjectionContext, getCurrentInstance, defineComponent, createElementBlock, shallowRef, provide, cloneVNode, h, defineAsyncComponent, inject, computed, unref, shallowReactive, ref, createApp, isVNode, createCommentVNode, onErrorCaptured, onServerPrefetch, createVNode, resolveDynamicComponent, reactive, effectScope, getCurrentScope, mergeProps, toRef, withCtx, Suspense, nextTick, Fragment, isReadonly, toRaw, useSSRContext, isRef, isShallow, isReactive } from 'vue';
-import { w as parseURL, n as encodePath, x as decodePath, y as hasProtocol, z as isScriptProtocol, A as joinURL, B as withQuery, C as sanitizeStatusCode, D as getContext, $ as $fetch, E as defu, F as createHooks, e as createError$1, G as executeAsync } from '../_/nitro.mjs';
+import { x as parseURL, o as encodePath, y as decodePath, z as hasProtocol, A as isScriptProtocol, B as joinURL, C as withQuery, D as sanitizeStatusCode, E as getContext, $ as $fetch, F as defu, G as createHooks, e as createError$1, H as executeAsync } from '../_/nitro.mjs';
 import { b as baseURL } from '../routes/renderer.mjs';
 import { setActivePinia, createPinia, shouldHydrate } from 'pinia';
 import { useRoute as useRoute$1, RouterView, START_LOCATION, createMemoryHistory, createRouter } from 'vue-router';
@@ -648,7 +648,7 @@ const _routes = [
   {
     name: "novels-slug",
     path: "/novels/:slug()",
-    component: () => import('./index-BE6KAxmo.mjs')
+    component: () => import('./index-B-2_SL4B.mjs')
   },
   {
     name: "novels-slug-chapter",

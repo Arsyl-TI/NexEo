@@ -1,4 +1,4 @@
-import { c as defineEventHandler, g as getRouterParam, l as getQuery } from '../../../../../_/nitro.mjs';
+import { c as defineEventHandler, g as getRouterParam, m as getQuery } from '../../../../../_/nitro.mjs';
 import { c as getVideosByFolder } from '../../../../../_/video.mjs';
 import 'node:http';
 import 'node:https';
