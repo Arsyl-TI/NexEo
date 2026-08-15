@@ -100,22 +100,35 @@
             </div>
 
             <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <NuxtLink 
+              <div 
                 v-for="c in filteredChapters" 
                 :key="c.id" 
-                :to="`/manga/${slug}/${encodeURIComponent(c.file)}`" 
-                class="group flex items-center justify-between p-3.5 rounded-xl bg-card/60 hover:bg-card border border-border/60 hover:border-primary/50 transition-all shadow-sm"
+                class="group flex items-center justify-between p-3 rounded-xl bg-card/60 hover:bg-card border border-border/60 hover:border-primary/50 transition-all shadow-sm"
               >
-                <div class="flex items-center gap-3 min-w-0">
-                  <span class="text-lg">🎨</span>
+                <NuxtLink 
+                  :to="`/manga/${slug}/${encodeURIComponent(c.file)}`" 
+                  class="flex items-center gap-2.5 min-w-0 flex-1 mr-2"
+                >
+                  <span class="text-base">🎨</span>
                   <span class="text-xs font-semibold text-foreground group-hover:text-primary transition-colors truncate">
                     {{ c.title }}
                   </span>
+                </NuxtLink>
+
+                <div class="flex items-center gap-2 shrink-0">
+                  <span class="text-[10px] text-muted-foreground font-mono">
+                    {{ c.pageCount ? `${c.pageCount} Hal` : '' }}
+                  </span>
+                  <a 
+                    :href="`/api/manga/${slug}/chapter/${encodeURIComponent(c.file)}/export?format=cbz`" 
+                    download 
+                    class="px-2 py-1 bg-card/80 hover:bg-primary hover:text-white text-muted-foreground border border-border rounded-lg text-[10px] font-semibold transition-all flex items-center gap-1 shadow-sm"
+                    title="Unduh Chapter Komik (.cbz)"
+                  >
+                    <span>📥</span> CBZ
+                  </a>
                 </div>
-                <span class="text-[10px] text-muted-foreground font-mono shrink-0 ml-2 group-hover:text-primary">
-                  {{ c.pageCount ? `${c.pageCount} Hal` : 'Baca' }} →
-                </span>
-              </NuxtLink>
+              </div>
             </div>
 
           </div>

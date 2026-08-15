@@ -58,9 +58,20 @@
 ## Feature 6: Shared Files Global Drag-and-Drop, Real Upload Queue, & LAN QR Code Suite
 - **Files Modified**:
   - `apps/frontend-nuxt/pages/share.vue`
-  - `IDEAS.md`, `PLAN.md`, `PROGRESS.md`
 - **Implementation Highlights**:
   - **Window Fullscreen Drag & Drop Overlay**: Dropping files anywhere onto the browser window activates a glassmorphic overlay for instant multi-file upload.
   - **Real-time Live Upload Queue**: Tracks per-file and total byte transfer progress using `XMLHttpRequest` with upload event listeners.
   - **LAN QR Code Sharing Modal**: Each shared file has a 📱 **QR** button generating a scannable QR code for instant smartphone downloads on the same local Wi-Fi without typing IPs.
   - **Inline Media Preview**: Added 👁️ preview modal for photos and videos directly inside the LAN file sharing manager.
+
+---
+
+## Feature 7: Manga Chapter Offline CBZ / ZIP Exporter
+- **Files Modified**:
+  - `apps/frontend-nuxt/server/api/manga/[slug]/chapter/[chapter]/export.get.ts`
+  - `apps/frontend-nuxt/pages/manga/[slug]/index.vue`
+  - `apps/frontend-nuxt/pages/manga/[slug]/[chapter].vue`
+- **Implementation Highlights**:
+  - Built streaming archive exporter endpoint `GET /api/manga/[slug]/chapter/[chapter]/export?format=cbz` using `adm-zip` to bundle all manga chapter pages sequentially into standard comic reader format (`.cbz` or `.zip`).
+  - Added **"📥 CBZ"** download button next to each chapter in the Manga Detail catalog (`pages/manga/[slug]/index.vue`).
+  - Added **"📥 CBZ"** download button to the Manga Reader header toolbar (`pages/manga/[slug]/[chapter].vue`) for instant 1-click chapter export.

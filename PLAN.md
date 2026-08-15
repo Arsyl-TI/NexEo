@@ -1,26 +1,27 @@
-# Technical Execution Plan: Shared Files Global Drag-and-Drop & QR Code LAN Sharing Suite
+# Technical Execution Plan: Manga Chapter Offline CBZ / ZIP Exporter
 
-Target File:
-- `apps/frontend-nuxt/pages/share.vue`
+Target Files:
+- `apps/frontend-nuxt/server/api/manga/[slug]/chapter/[chapter]/export.get.ts`
+- `apps/frontend-nuxt/pages/manga/[slug]/index.vue`
+- `apps/frontend-nuxt/pages/manga/[slug]/[chapter].vue`
 
 ## Step-by-Step Execution Steps
 
-1. **Global Full-Screen Window Drag & Drop Overlay**:
-   - Attach window-level `dragenter`, `dragover`, and `dragleave` listeners to detect when any file is dragged from Windows Explorer into the browser.
-   - Render a high-contrast glassmorphic full-screen dropzone overlay with smooth transitions.
-   - Support multiple files dropped simultaneously.
+1. **Build Manga Chapter Export Nitro API Endpoint (`server/api/manga/[slug]/chapter/[chapter]/export.get.ts`)**:
+   - Locate manga chapter folder in `data/manga/[slug]/[chapter]`.
+   - Read query parameter `format` (`cbz` or `zip`, default `cbz`).
+   - Use `adm-zip` to bundle all page images (`.jpg`, `.jpeg`, `.png`, `.webp`, `.gif`) in sequential numerical order.
+   - Stream the generated `.cbz` or `.zip` file with `Content-Type: application/vnd.comicbook+zip` (for CBZ) or `application/zip` and `Content-Disposition: attachment; filename="..."`.
 
-2. **Real-time Live Upload Queue UI**:
-   - Provide a dynamic upload queue showing file names, progress percentages, and upload state.
-   - Use `XMLHttpRequest` with upload `progress` event listener so actual byte transfer progress is shown accurately on LAN.
+2. **Add Export UI to Manga Detail Page (`pages/manga/[slug]/index.vue`)**:
+   - In each chapter row in the chapter list, add a quick **"📥 Unduh (.cbz)"** button.
 
-3. **QR Code Sharing Modal for Mobile Scanning**:
-   - Integrate an SVG/canvas QR Code generator for any shared file link.
-   - Allow smartphone users on the same Wi-Fi network to scan the QR code and immediately download the file without manually typing the IP address.
+3. **Add Export Button to Manga Reader Header (`pages/manga/[slug]/[chapter].vue`)**:
+   - Add a download icon button in the reader top toolbar to easily export current chapter as CBZ.
 
 4. **Testing & Build Verification**:
    - Run `pnpm turbo run typecheck` across all monorepo packages.
 
 5. **Git Commit & Progress Log**:
    - Append completed feature entry to `PROGRESS.md`.
-   - Commit changes via `git add . && git commit -m "feat(share): add fullscreen drag-and-drop overlay, real upload progress, and LAN QR Code modal"`.
+   - Execute `git add . && git commit -m "feat(manga): add offline CBZ/ZIP chapter exporter endpoint and download buttons"`.

@@ -28,6 +28,15 @@
           <option value="full">100% Asli</option>
         </select>
 
+        <a 
+          :href="`/api/manga/${slug}/chapter/${encodeURIComponent(chapter)}/export?format=cbz`" 
+          download 
+          class="px-3 py-1.5 rounded-full text-xs font-semibold bg-background border border-border text-foreground hover:bg-border/60 flex items-center gap-1.5 shadow-sm" 
+          title="Unduh Chapter ini (.cbz)"
+        >
+          <span>📥</span> <span class="hidden sm:inline">CBZ</span>
+        </a>
+
         <button @click="immersive = !immersive" class="px-3 py-1.5 rounded-full text-xs font-semibold bg-background border border-border text-foreground hover:bg-border/60">
           {{ immersive ? 'Normal' : 'Immersive' }}
         </button>

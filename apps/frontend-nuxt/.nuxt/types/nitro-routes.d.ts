@@ -28,6 +28,9 @@ declare module "nitropack/types" {
     '/api/manga/:slug/chapter/:chapter': {
       'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/manga/[slug]/chapter/[chapter].get').default>>>>
     }
+    '/api/manga/:slug/chapter/:chapter/export': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/manga/[slug]/chapter/[chapter]/export.get').default>>>>
+    }
     '/api/manga/:slug/chapters': {
       'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/manga/[slug]/chapters.get').default>>>>
     }
