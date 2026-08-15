@@ -149,7 +149,7 @@
 
 ---
 
-## Feature 14: Multi-Provider Manga Online Engine (MangaDex, WestManga, Komiku.id)
+## Feature 14: Multi-Provider Manga Online Engine (MangaDex, WestManga, Komiku.org)
 - **Files Modified**:
   - `apps/frontend-nuxt/server/utils/manga/online.ts`
   - `apps/frontend-nuxt/server/api/manga/online/search.get.ts`
@@ -159,6 +159,17 @@
 - **Implementation Highlights**:
   - **Multiple Indonesian Providers**:
     - 🌟 **MangaDex (API)**: Official REST API with direct Indonesian translation filters.
-    - ⚡ **WestManga**: Scraping adapter for Indonesian Manhwa & Manhua releases.
-    - 📖 **Komiku.id**: Scraping adapter for Indonesian Japanese Manga releases.
+    - ⚡ **WestManga**: Multi-mirror failover (`westmanga.co`, `v1.westmanga.my`, `v1.westmanga.top`).
+    - 📖 **Komiku.org**: Live HTMX API scraper for Indonesian Japanese Manga releases.
   - **Universal Search & Detail Router**: Single unified interface switching seamlessly between providers with in-memory caching and high-speed multi-worker downloading.
+
+---
+
+## Feature 15: Video Bookmark & Chapter Markers Suite
+- **Files Modified**:
+  - `apps/frontend-nuxt/pages/video/[id].vue`
+- **Implementation Highlights**:
+  - **Timestamp Bookmark Creation**: Added 🔖 **Tambah Bookmark** button and keyboard shortcut `B` to instantly capture moments in videos with custom notes/labels.
+  - **Visual Scrubber Marker Pins**: Interactive visual bookmark pins displayed along the player timeline bar relative to `time / duration * 100%`.
+  - **Bookmarks List & 1-Click Jump**: Interactive side drawer showing all saved timestamp bookmarks with timestamp badge, note label, 1-click seek button (`▶`), and delete button (`✕`).
+  - **Markdown Export**: Added **"📋 Salin Catatan"** button to copy all timestamps and notes formatted as Markdown to the clipboard.

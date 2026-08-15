@@ -22,11 +22,20 @@
         </button>
 
         <div class="flex items-center gap-2">
+          <!-- Add Bookmark Button -->
+          <button 
+            @click="openAddBookmarkModal" 
+            class="px-3.5 py-1.5 bg-gradient-to-r from-amber-500/20 to-orange-500/20 hover:from-amber-500/30 hover:to-orange-500/30 border border-amber-500/40 text-amber-300 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm"
+            title="Tambah Penanda Waktu (Shortcut: B)"
+          >
+            <span>🔖</span> Tambah Bookmark <kbd class="text-[9px] bg-amber-950/60 border border-amber-500/40 px-1.5 rounded font-mono">B</kbd>
+          </button>
+
           <!-- Theater Mode Toggle -->
           <button 
             @click="isTheaterMode = !isTheaterMode" 
             :class="['px-3 py-1.5 rounded-full text-xs font-semibold border transition-all flex items-center gap-1.5 shadow-sm', isTheaterMode ? 'bg-primary text-white border-primary shadow-md' : 'bg-card border-border text-foreground hover:bg-border/60']"
-            title="Mode Bioskop (Theater Mode)"
+            title="Mode Bioskop (Theater Mode - Shortcut: T)"
           >
             <span>🎭</span> {{ isTheaterMode ? 'Mode Normal' : 'Mode Bioskop' }}
           </button>
@@ -35,7 +44,7 @@
           <button 
             @click="togglePictureInPicture" 
             class="px-3 py-1.5 bg-card hover:bg-border border border-border rounded-full text-xs font-semibold text-foreground transition-all flex items-center gap-1.5 shadow-sm"
-            title="Picture in Picture (Floating Video)"
+            title="Picture in Picture (Floating Video - Shortcut: P)"
           >
             <span>📺</span> PiP
           </button>
@@ -64,7 +73,7 @@
       </div>
 
       <!-- Main Video Player Canvas -->
-      <div class="aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl mb-4 relative border border-border/80">
+      <div class="aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl mb-2 relative border border-border/80">
         <video 
           ref="videoElement" 
           class="w-full h-full object-contain" 
@@ -84,6 +93,27 @@
           />
           Browser Anda tidak mendukung video tag.
         </video>
+      </div>
+
+      <!-- Visual Bookmark Markers Bar on Timeline -->
+      <div v-if="bookmarks.length > 0 && videoDuration > 0" class="mb-4 px-2">
+        <div class="relative w-full h-3 bg-card/60 border border-border/60 rounded-full overflow-hidden flex items-center shadow-inner cursor-pointer" @click="handleTimelineClick">
+          <!-- Playback progress underlay -->
+          <div 
+            class="absolute top-0 bottom-0 left-0 bg-primary/20 transition-all pointer-events-none"
+            :style="{ width: `${(currentTime / videoDuration) * 100}%` }"
+          ></div>
+
+          <!-- Bookmark Pin Markers -->
+          <div 
+            v-for="bm in bookmarks" 
+            :key="bm.id"
+            @click.stop="seekToBookmark(bm.time)"
+            class="absolute top-0 bottom-0 w-2.5 -ml-1 bg-amber-400 hover:bg-amber-300 hover:scale-125 z-10 transition-all cursor-pointer rounded-full shadow-md"
+            :style="{ left: `${Math.min(99, Math.max(1, (bm.time / videoDuration) * 100))}%` }"
+            :title="`${bm.timeFormatted} - ${bm.label}`"
+          ></div>
+        </div>
       </div>
 
       <!-- Subtitle Sync & Custom Subtitle Loader Toolbar -->
@@ -109,6 +139,51 @@
           <button @click="adjustSubtitleDelay(0.1)" class="px-2 py-1 bg-background border border-border rounded-lg text-xs font-mono hover:bg-card">+0.1s</button>
           <button @click="adjustSubtitleDelay(0.5)" class="px-2 py-1 bg-background border border-border rounded-lg text-xs font-mono hover:bg-card">+0.5s</button>
           <button @click="resetSubtitleDelay" class="px-2 py-1 bg-card border border-border rounded-lg text-[10px] text-muted-foreground hover:text-foreground">Reset</button>
+        </div>
+      </div>
+
+      <!-- Bookmarks List & Notes Drawer -->
+      <div v-if="bookmarks.length > 0" class="bg-card/70 border border-border/70 p-5 rounded-2xl shadow-xl backdrop-blur-xl mb-6">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-sm font-bold text-foreground flex items-center gap-2">
+            <span>🔖</span> Penanda Waktu / Bookmarks ({{ bookmarks.length }})
+          </h3>
+          <div class="flex items-center gap-2">
+            <button @click="copyBookmarksSummary" class="px-2.5 py-1 rounded-lg bg-background border border-border hover:bg-card text-xs text-muted-foreground hover:text-foreground font-medium transition-all">
+              📋 Salin Catatan
+            </button>
+            <button @click="clearAllBookmarks" class="px-2.5 py-1 rounded-lg bg-rose-500/10 border border-rose-500/30 hover:bg-rose-500/20 text-xs text-rose-400 font-medium transition-all">
+              🗑️ Bersihkan
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 max-h-56 overflow-y-auto pr-1">
+          <div 
+            v-for="bm in bookmarks" 
+            :key="bm.id"
+            class="flex items-center justify-between p-3 rounded-xl bg-background border border-border/80 hover:border-amber-500/40 transition-all group"
+          >
+            <div class="min-w-0 pr-2 cursor-pointer flex-1" @click="seekToBookmark(bm.time)">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="px-2 py-0.5 rounded bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[10px] font-mono font-bold">
+                  ⏱️ {{ bm.timeFormatted }}
+                </span>
+              </div>
+              <p class="text-xs font-semibold text-foreground truncate group-hover:text-amber-300 transition-colors">
+                {{ bm.label }}
+              </p>
+            </div>
+
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button @click="seekToBookmark(bm.time)" class="p-1.5 rounded-lg bg-card hover:bg-primary hover:text-white border border-border text-xs transition-all" title="Putar dari detik ini">
+                ▶
+              </button>
+              <button @click="deleteBookmark(bm.id)" class="p-1.5 rounded-lg bg-card hover:bg-rose-500/20 hover:text-rose-400 border border-border text-xs text-muted-foreground transition-all" title="Hapus Bookmark">
+                ✕
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -168,6 +243,38 @@
       </div>
     </div>
 
+    <!-- Add Bookmark Popover / Modal -->
+    <div v-if="showAddBookmarkModal" @click.self="showAddBookmarkModal = false" class="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
+      <div class="bg-card border border-border rounded-3xl max-w-sm w-full p-6 shadow-2xl relative">
+        <button @click="showAddBookmarkModal = false" class="absolute top-4 right-4 text-muted-foreground hover:text-foreground text-sm p-1 rounded-lg">✕</button>
+
+        <h3 class="text-base font-bold text-foreground mb-1 flex items-center gap-2">
+          <span>🔖</span> Tambah Bookmark Video
+        </h3>
+        <p class="text-xs text-muted-foreground mb-4">
+          Waktu: <span class="font-mono font-bold text-amber-300">{{ formatTime(currentTime) }}</span>
+        </p>
+
+        <form @submit.prevent="saveNewBookmark" class="space-y-4">
+          <div>
+            <label class="block text-xs font-medium text-muted-foreground mb-1.5">Catatan / Label Bookmark:</label>
+            <input 
+              v-model="newBookmarkLabel" 
+              type="text" 
+              placeholder="Contoh: Adegan penting, Penjelasan rumus, Momen lucu..." 
+              class="w-full bg-background border border-border rounded-xl px-3.5 py-2.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-amber-400 shadow-inner"
+              autofocus
+            />
+          </div>
+
+          <div class="flex items-center justify-end gap-2 pt-2">
+            <button type="button" @click="showAddBookmarkModal = false" class="px-4 py-2 rounded-xl bg-card border border-border text-xs text-muted-foreground hover:text-foreground font-medium">Batal</button>
+            <button type="submit" class="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-bold text-xs shadow-md transition-all">Simpan Penanda</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <!-- Keyboard Shortcuts Modal -->
     <div v-if="showShortcutsModal" @click.self="showShortcutsModal = false" class="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
       <div class="bg-card border border-border rounded-3xl max-w-sm w-full p-6 shadow-2xl relative">
@@ -184,6 +291,10 @@
             <kbd class="px-2 py-0.5 bg-card border border-border rounded text-foreground font-mono font-bold">Space / K</kbd>
           </div>
           <div class="flex items-center justify-between p-2 rounded-xl bg-background border border-border/60">
+            <span class="text-muted-foreground">Tambah Bookmark / Penanda</span>
+            <kbd class="px-2 py-0.5 bg-card border border-border rounded text-foreground font-mono font-bold">B</kbd>
+          </div>
+          <div class="flex items-center justify-between p-2 rounded-xl bg-background border border-border/60">
             <span class="text-muted-foreground">Mundur 10 Detik</span>
             <kbd class="px-2 py-0.5 bg-card border border-border rounded text-foreground font-mono font-bold">J / ←</kbd>
           </div>
@@ -198,6 +309,10 @@
           <div class="flex items-center justify-between p-2 rounded-xl bg-background border border-border/60">
             <span class="text-muted-foreground">Mode Bioskop</span>
             <kbd class="px-2 py-0.5 bg-card border border-border rounded text-foreground font-mono font-bold">T</kbd>
+          </div>
+          <div class="flex items-center justify-between p-2 rounded-xl bg-background border border-border/60">
+            <span class="text-muted-foreground">Picture in Picture</span>
+            <kbd class="px-2 py-0.5 bg-card border border-border rounded text-foreground font-mono font-bold">P</kbd>
           </div>
           <div class="flex items-center justify-between p-2 rounded-xl bg-background border border-border/60">
             <span class="text-muted-foreground">Mute Suara</span>
@@ -218,6 +333,14 @@ import type { VideoItem } from '@nexeo/shared/types/video'
 import Plyr from 'plyr'
 import 'plyr/dist/plyr.css'
 
+export interface VideoBookmark {
+  id: string
+  time: number
+  timeFormatted: string
+  label: string
+  createdAt: string
+}
+
 const route = useRoute()
 const router = useRouter()
 const videoStore = useVideoStore()
@@ -235,10 +358,17 @@ const videoElement = ref<HTMLVideoElement | null>(null)
 let player: Plyr | null = null
 
 const savedTime = ref(0)
+const currentTime = ref(0)
+const videoDuration = ref(0)
 const showResumeBanner = ref(false)
 const currentSpeed = ref(1)
 const isTheaterMode = ref(false)
 const showShortcutsModal = ref(false)
+
+// Bookmarks Suite State
+const bookmarks = ref<VideoBookmark[]>([])
+const showAddBookmarkModal = ref(false)
+const newBookmarkLabel = ref('')
 
 // Custom Subtitle State
 const customSubtitleUrl = ref<string | null>(null)
@@ -263,6 +393,83 @@ function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60)
   const s = Math.floor(seconds % 60)
   return `${m}:${s < 10 ? '0' : ''}${s}`
+}
+
+function loadBookmarks() {
+  if (typeof window === 'undefined' || !videoId.value) return
+  const raw = localStorage.getItem(`video_bookmarks_${videoId.value}`)
+  if (raw) {
+    try {
+      bookmarks.value = JSON.parse(raw)
+    } catch {
+      bookmarks.value = []
+    }
+  }
+}
+
+function saveBookmarksToStorage() {
+  if (typeof window === 'undefined' || !videoId.value) return
+  localStorage.setItem(`video_bookmarks_${videoId.value}`, JSON.stringify(bookmarks.value))
+}
+
+function openAddBookmarkModal() {
+  const cur = videoElement.value?.currentTime || 0
+  newBookmarkLabel.value = `Catatan ${formatTime(cur)}`
+  showAddBookmarkModal.value = true
+}
+
+function saveNewBookmark() {
+  const cur = videoElement.value?.currentTime || 0
+  const bm: VideoBookmark = {
+    id: `bm_${Date.now()}`,
+    time: cur,
+    timeFormatted: formatTime(cur),
+    label: newBookmarkLabel.value.trim() || `Bookmark ${formatTime(cur)}`,
+    createdAt: new Date().toISOString()
+  }
+
+  bookmarks.value.push(bm)
+  // Sort ascending by timestamp
+  bookmarks.value.sort((a, b) => a.time - b.time)
+  saveBookmarksToStorage()
+  showAddBookmarkModal.value = false
+  success(`Penanda "${bm.label}" berhasil disimpan!`)
+}
+
+function seekToBookmark(sec: number) {
+  if (videoElement.value) {
+    videoElement.value.currentTime = sec
+    videoElement.value.play().catch(() => {})
+  }
+}
+
+function deleteBookmark(id: string) {
+  bookmarks.value = bookmarks.value.filter(b => b.id !== id)
+  saveBookmarksToStorage()
+}
+
+function clearAllBookmarks() {
+  if (confirm('Yakin ingin menghapus seluruh bookmark video ini?')) {
+    bookmarks.value = []
+    saveBookmarksToStorage()
+    success('Seluruh bookmark berhasil dibersihkan.')
+  }
+}
+
+function copyBookmarksSummary() {
+  if (!bookmarks.value.length) return
+  const text = bookmarks.value.map(b => `- [${b.timeFormatted}] ${b.label}`).join('\n')
+  navigator.clipboard.writeText(text)
+  success('Daftar catatan bookmark berhasil disalin ke clipboard!')
+}
+
+function handleTimelineClick(e: MouseEvent) {
+  const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+  const clickX = e.clientX - rect.left
+  const ratio = Math.max(0, Math.min(1, clickX / rect.width))
+  if (videoElement.value && videoDuration.value > 0) {
+    videoElement.value.currentTime = ratio * videoDuration.value
+  }
 }
 
 function checkResumeTimestamp() {
@@ -293,6 +500,9 @@ function onTimeUpdate() {
   if (!videoElement.value || !videoId.value || !video.value) return
   const cur = videoElement.value.currentTime
   const dur = videoElement.value.duration || 0
+  currentTime.value = cur
+  videoDuration.value = dur
+
   if (cur > 5) {
     localStorage.setItem(`video_resume_${videoId.value}`, String(cur))
     try {
@@ -422,7 +632,6 @@ function adjustSubtitleDelay(offsetSec: number) {
   if (!rawVttContent) return
   subtitleDelay.value += offsetSec
 
-  // Shift all VTT timestamps by delay
   const lines = rawVttContent.split('\n')
   const adjustedLines = lines.map(line => {
     if (line.includes('-->')) {
@@ -454,6 +663,8 @@ function handleGlobalKeydown(e: KeyboardEvent) {
     isTheaterMode.value = !isTheaterMode.value
   } else if (e.key === 'p' || e.key === 'P') {
     togglePictureInPicture()
+  } else if (e.key === 'b' || e.key === 'B') {
+    openAddBookmarkModal()
   }
 }
 
@@ -473,6 +684,7 @@ onMounted(async () => {
     if (data) {
       video.value = data
       checkResumeTimestamp()
+      loadBookmarks()
       
       setTimeout(() => {
         if (videoElement.value) {

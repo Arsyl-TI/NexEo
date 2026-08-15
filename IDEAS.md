@@ -1,7 +1,10 @@
 # NexEo Autonomous Feature Ideas
 
-1. **Manga Dual-Page Spread Reader Mode (Book Simulation) (`pages/manga/[slug]/[chapter].vue`)**
-   - Add two-page spread view (side-by-side reading like a physical tankobon book) with Right-to-Left (RTL) manga reading order.
+1. **Novel Text Keyword In-Chapter Search & Highlighter (`pages/novels/[slug]/[chapter].vue`)**
+   - Quick in-chapter text finder (`Ctrl+F` in reader) with match counter, previous/next jump, and luminous yellow text highlighting.
 
-2. **Video Bookmark & Chapter Markers Suite (`pages/video/[id].vue`)**
-   - Allow bookmarking specific timestamps with notes and auto-generating timeline chapter markers for long videos and courses.
+2. **Manga Webtoon Hands-Free Auto-Scroll Engine (`pages/manga/[slug]/[chapter].vue`)**
+   - Smooth constant-speed auto-scrolling with floating speed dial (`1x` to `5x`) and spacebar pause/resume for long webtoons.
+
+3. **Shared Files Zip Multi-File Batch Downloader (`pages/share.vue`)**
+   - Select multiple shared files with checkboxes and download them all bundled into a single ZIP archive on-the-fly.
