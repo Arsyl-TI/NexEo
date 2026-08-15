@@ -3,6 +3,45 @@ import path from 'path'
 import { serverConfig } from '../../utils/config'
 import { translateBatch } from '../../utils/novel/translator'
 
+function shouldTranslateItem(item: any): boolean {
+  if (typeof item === 'string' && item.trim().length > 0) return true
+  if (item && typeof item === 'object') {
+    if (item.type === 'image') return false // NEVER touch or translate image nodes!
+    if (item.type === 'text' && typeof item.value === 'string' && item.value.trim().length > 0) return true
+    if (item.type === 'paragraph' && typeof item.text === 'string' && item.text.trim().length > 0) return true
+    if (!item.type && typeof item.value === 'string' && !item.value.match(/\.(jpg|jpeg|png|webp|gif|svg)$/i) && item.value.trim().length > 0) return true
+    if (!item.type && typeof item.text === 'string' && item.text.trim().length > 0) return true
+  }
+  return false
+}
+
+function getItemText(item: any): string {
+  if (typeof item === 'string') return item.trim()
+  if (item && typeof item === 'object') {
+    if (item.type === 'text' && typeof item.value === 'string') return item.value.trim()
+    if (item.type === 'paragraph' && typeof item.text === 'string') return item.text.trim()
+    if (!item.type && typeof item.value === 'string') return item.value.trim()
+    if (!item.type && typeof item.text === 'string') return item.text.trim()
+  }
+  return ''
+}
+
+function updateItemText(item: any, newText: string): any {
+  if (typeof item === 'string') return newText
+  if (item && typeof item === 'object') {
+    if (item.type === 'text' && typeof item.value === 'string') {
+      item.value = newText
+    } else if (item.type === 'paragraph' && typeof item.text === 'string') {
+      item.text = newText
+    } else if (!item.type && typeof item.value === 'string') {
+      item.value = newText
+    } else if (!item.type && typeof item.text === 'string') {
+      item.text = newText
+    }
+  }
+  return item
+}
+
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const { slug, engine, geminiApiKey, deeplApiKey, libreUrl, libreApiKey } = body || {}
@@ -68,36 +107,22 @@ export default defineEventHandler(async (event) => {
 
         if (Array.isArray(jsonData)) {
           for (const item of jsonData) {
-            if (typeof item === 'string' && item.trim()) {
-              extractedParagraphs.push(item.trim())
-            } else if (item && typeof item === 'object') {
-              if (item.type === 'text' && typeof item.value === 'string' && item.value.trim()) {
-                extractedParagraphs.push(item.value.trim())
-              } else if (typeof item.value === 'string' && item.value.trim()) {
-                extractedParagraphs.push(item.value.trim())
-              } else if (typeof item.text === 'string' && item.text.trim()) {
-                extractedParagraphs.push(item.text.trim())
-              }
+            if (shouldTranslateItem(item)) {
+              const txt = getItemText(item)
+              if (txt) extractedParagraphs.push(txt)
             }
           }
         } else if (jsonData && typeof jsonData === 'object') {
           const contentArr = Array.isArray(jsonData.content) ? jsonData.content : (Array.isArray(jsonData.paragraphs) ? jsonData.paragraphs : [])
           for (const item of contentArr) {
-            if (typeof item === 'string' && item.trim()) {
-              extractedParagraphs.push(item.trim())
-            } else if (item && typeof item === 'object') {
-              if (item.type === 'text' && typeof item.value === 'string' && item.value.trim()) {
-                extractedParagraphs.push(item.value.trim())
-              } else if (typeof item.value === 'string' && item.value.trim()) {
-                extractedParagraphs.push(item.value.trim())
-              } else if (typeof item.text === 'string' && item.text.trim()) {
-                extractedParagraphs.push(item.text.trim())
-              }
+            if (shouldTranslateItem(item)) {
+              const txt = getItemText(item)
+              if (txt) extractedParagraphs.push(txt)
             }
           }
         }
 
-        console.log(`[Batch Translate] (${i + 1}/${chapterFiles.length}) Chapter ${fileName} (.json): found ${extractedParagraphs.length} paragraphs. Translating via '${engine || 'google'}'...`)
+        console.log(`[Batch Translate] (${i + 1}/${chapterFiles.length}) Chapter ${fileName} (.json): found ${extractedParagraphs.length} text paragraphs. Translating via '${engine || 'google'}'...`)
 
         if (extractedParagraphs.length > 0) {
           const translatedParagraphs = await translateBatch(extractedParagraphs, {
@@ -113,15 +138,10 @@ export default defineEventHandler(async (event) => {
             if (Array.isArray(jsonData)) {
               for (let k = 0; k < jsonData.length; k++) {
                 const item = jsonData[k]
-                if (typeof item === 'string' && item.trim()) {
-                  jsonData[k] = translatedParagraphs[tIdx++] ?? item
-                } else if (item && typeof item === 'object') {
-                  if (item.type === 'text' && typeof item.value === 'string' && item.value.trim()) {
-                    item.value = translatedParagraphs[tIdx++] ?? item.value
-                  } else if (typeof item.value === 'string' && item.value.trim()) {
-                    item.value = translatedParagraphs[tIdx++] ?? item.value
-                  } else if (typeof item.text === 'string' && item.text.trim()) {
-                    item.text = translatedParagraphs[tIdx++] ?? item.text
+                if (shouldTranslateItem(item)) {
+                  const newTxt = translatedParagraphs[tIdx++]
+                  if (newTxt) {
+                    jsonData[k] = updateItemText(item, newTxt)
                   }
                 }
               }
@@ -130,15 +150,10 @@ export default defineEventHandler(async (event) => {
               const contentArr = Array.isArray(jsonData.content) ? jsonData.content : (Array.isArray(jsonData.paragraphs) ? jsonData.paragraphs : [])
               for (let k = 0; k < contentArr.length; k++) {
                 const item = contentArr[k]
-                if (typeof item === 'string' && item.trim()) {
-                  contentArr[k] = translatedParagraphs[tIdx++] ?? item
-                } else if (item && typeof item === 'object') {
-                  if (item.type === 'text' && typeof item.value === 'string' && item.value.trim()) {
-                    item.value = translatedParagraphs[tIdx++] ?? item.value
-                  } else if (typeof item.value === 'string' && item.value.trim()) {
-                    item.value = translatedParagraphs[tIdx++] ?? item.value
-                  } else if (typeof item.text === 'string' && item.text.trim()) {
-                    item.text = translatedParagraphs[tIdx++] ?? item.text
+                if (shouldTranslateItem(item)) {
+                  const newTxt = translatedParagraphs[tIdx++]
+                  if (newTxt) {
+                    contentArr[k] = updateItemText(item, newTxt)
                   }
                 }
               }

@@ -2147,16 +2147,16 @@ _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw
 const assets = {
   "/index.mjs": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"364ba-BnxxGgRtMndVgi0V+xN9AnbQobA\"",
-    "mtime": "2026-08-15T12:26:48.067Z",
-    "size": 222394,
+    "etag": "\"36ef5-Z8LQCasfK7rzpCPxgRWHx+y8H6I\"",
+    "mtime": "2026-08-15T13:01:16.223Z",
+    "size": 225013,
     "path": "index.mjs"
   },
   "/index.mjs.map": {
     "type": "application/json",
-    "etag": "\"c9694-zdaUKCBI6l/R48bTKQkeICXWPJM\"",
-    "mtime": "2026-08-15T12:26:48.068Z",
-    "size": 824980,
+    "etag": "\"cc60d-0JR598IwcOFoFOSE+9q0SxVr0X0\"",
+    "mtime": "2026-08-15T13:01:16.224Z",
+    "size": 837133,
     "path": "index.mjs.map"
   }
 };
@@ -5289,8 +5289,43 @@ const novels_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProper
   default: novels_get
 }, Symbol.toStringTag, { value: 'Module' }));
 
+function shouldTranslateItem(item) {
+  if (typeof item === "string" && item.trim().length > 0) return true;
+  if (item && typeof item === "object") {
+    if (item.type === "image") return false;
+    if (item.type === "text" && typeof item.value === "string" && item.value.trim().length > 0) return true;
+    if (item.type === "paragraph" && typeof item.text === "string" && item.text.trim().length > 0) return true;
+    if (!item.type && typeof item.value === "string" && !item.value.match(/\.(jpg|jpeg|png|webp|gif|svg)$/i) && item.value.trim().length > 0) return true;
+    if (!item.type && typeof item.text === "string" && item.text.trim().length > 0) return true;
+  }
+  return false;
+}
+function getItemText(item) {
+  if (typeof item === "string") return item.trim();
+  if (item && typeof item === "object") {
+    if (item.type === "text" && typeof item.value === "string") return item.value.trim();
+    if (item.type === "paragraph" && typeof item.text === "string") return item.text.trim();
+    if (!item.type && typeof item.value === "string") return item.value.trim();
+    if (!item.type && typeof item.text === "string") return item.text.trim();
+  }
+  return "";
+}
+function updateItemText(item, newText) {
+  if (typeof item === "string") return newText;
+  if (item && typeof item === "object") {
+    if (item.type === "text" && typeof item.value === "string") {
+      item.value = newText;
+    } else if (item.type === "paragraph" && typeof item.text === "string") {
+      item.text = newText;
+    } else if (!item.type && typeof item.value === "string") {
+      item.value = newText;
+    } else if (!item.type && typeof item.text === "string") {
+      item.text = newText;
+    }
+  }
+  return item;
+}
 const translateAll_post = defineEventHandler(async (event) => {
-  var _a, _b, _c, _d, _e, _f, _g, _h;
   const body = await readBody(event);
   const { slug, engine, geminiApiKey, deeplApiKey, libreUrl, libreApiKey } = body || {};
   if (!slug || typeof slug !== "string") {
@@ -5342,35 +5377,21 @@ const translateAll_post = defineEventHandler(async (event) => {
         const extractedParagraphs = [];
         if (Array.isArray(jsonData)) {
           for (const item of jsonData) {
-            if (typeof item === "string" && item.trim()) {
-              extractedParagraphs.push(item.trim());
-            } else if (item && typeof item === "object") {
-              if (item.type === "text" && typeof item.value === "string" && item.value.trim()) {
-                extractedParagraphs.push(item.value.trim());
-              } else if (typeof item.value === "string" && item.value.trim()) {
-                extractedParagraphs.push(item.value.trim());
-              } else if (typeof item.text === "string" && item.text.trim()) {
-                extractedParagraphs.push(item.text.trim());
-              }
+            if (shouldTranslateItem(item)) {
+              const txt = getItemText(item);
+              if (txt) extractedParagraphs.push(txt);
             }
           }
         } else if (jsonData && typeof jsonData === "object") {
           const contentArr = Array.isArray(jsonData.content) ? jsonData.content : Array.isArray(jsonData.paragraphs) ? jsonData.paragraphs : [];
           for (const item of contentArr) {
-            if (typeof item === "string" && item.trim()) {
-              extractedParagraphs.push(item.trim());
-            } else if (item && typeof item === "object") {
-              if (item.type === "text" && typeof item.value === "string" && item.value.trim()) {
-                extractedParagraphs.push(item.value.trim());
-              } else if (typeof item.value === "string" && item.value.trim()) {
-                extractedParagraphs.push(item.value.trim());
-              } else if (typeof item.text === "string" && item.text.trim()) {
-                extractedParagraphs.push(item.text.trim());
-              }
+            if (shouldTranslateItem(item)) {
+              const txt = getItemText(item);
+              if (txt) extractedParagraphs.push(txt);
             }
           }
         }
-        console.log(`[Batch Translate] (${i + 1}/${chapterFiles.length}) Chapter ${fileName} (.json): found ${extractedParagraphs.length} paragraphs. Translating via '${engine || "google"}'...`);
+        console.log(`[Batch Translate] (${i + 1}/${chapterFiles.length}) Chapter ${fileName} (.json): found ${extractedParagraphs.length} text paragraphs. Translating via '${engine || "google"}'...`);
         if (extractedParagraphs.length > 0) {
           const translatedParagraphs = await translateBatch(extractedParagraphs, {
             engine,
@@ -5384,15 +5405,10 @@ const translateAll_post = defineEventHandler(async (event) => {
             if (Array.isArray(jsonData)) {
               for (let k = 0; k < jsonData.length; k++) {
                 const item = jsonData[k];
-                if (typeof item === "string" && item.trim()) {
-                  jsonData[k] = (_a = translatedParagraphs[tIdx++]) != null ? _a : item;
-                } else if (item && typeof item === "object") {
-                  if (item.type === "text" && typeof item.value === "string" && item.value.trim()) {
-                    item.value = (_b = translatedParagraphs[tIdx++]) != null ? _b : item.value;
-                  } else if (typeof item.value === "string" && item.value.trim()) {
-                    item.value = (_c = translatedParagraphs[tIdx++]) != null ? _c : item.value;
-                  } else if (typeof item.text === "string" && item.text.trim()) {
-                    item.text = (_d = translatedParagraphs[tIdx++]) != null ? _d : item.text;
+                if (shouldTranslateItem(item)) {
+                  const newTxt = translatedParagraphs[tIdx++];
+                  if (newTxt) {
+                    jsonData[k] = updateItemText(item, newTxt);
                   }
                 }
               }
@@ -5401,15 +5417,10 @@ const translateAll_post = defineEventHandler(async (event) => {
               const contentArr = Array.isArray(jsonData.content) ? jsonData.content : Array.isArray(jsonData.paragraphs) ? jsonData.paragraphs : [];
               for (let k = 0; k < contentArr.length; k++) {
                 const item = contentArr[k];
-                if (typeof item === "string" && item.trim()) {
-                  contentArr[k] = (_e = translatedParagraphs[tIdx++]) != null ? _e : item;
-                } else if (item && typeof item === "object") {
-                  if (item.type === "text" && typeof item.value === "string" && item.value.trim()) {
-                    item.value = (_f = translatedParagraphs[tIdx++]) != null ? _f : item.value;
-                  } else if (typeof item.value === "string" && item.value.trim()) {
-                    item.value = (_g = translatedParagraphs[tIdx++]) != null ? _g : item.value;
-                  } else if (typeof item.text === "string" && item.text.trim()) {
-                    item.text = (_h = translatedParagraphs[tIdx++]) != null ? _h : item.text;
+                if (shouldTranslateItem(item)) {
+                  const newTxt = translatedParagraphs[tIdx++];
+                  if (newTxt) {
+                    contentArr[k] = updateItemText(item, newTxt);
                   }
                 }
               }
