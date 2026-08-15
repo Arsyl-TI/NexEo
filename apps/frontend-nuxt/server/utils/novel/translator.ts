@@ -90,6 +90,82 @@ export async function translateBatchDeepL(texts: string[], apiKey: string): Prom
   throw new Error('Invalid response format from DeepL API')
 }
 
+async function translateSingleLibre(
+  t: string,
+  targetUrl: string,
+  source: string,
+  apiKey?: string
+): Promise<string> {
+  // 1. Try direct translation
+  try {
+    const res = await axios.post(
+      `${targetUrl}/translate`,
+      {
+        q: t,
+        source,
+        target: 'id',
+        format: 'text',
+        api_key: apiKey ? apiKey.trim() : undefined
+      },
+      {
+        headers: { 'Content-Type': 'application/json' },
+        timeout: 15000
+      }
+    )
+    if (res.data?.translatedText) return res.data.translatedText
+  } catch {
+    // Direct translation failed (e.g. HTTP 400 because LibreTranslate container lacks direct ko->id or ja->id model)
+  }
+
+  // 2. Try 2-step pivot translation via English if source is not 'en' (e.g. ko -> en -> id)
+  if (source !== 'en') {
+    try {
+      const step1 = await axios.post(
+        `${targetUrl}/translate`,
+        {
+          q: t,
+          source,
+          target: 'en',
+          format: 'text',
+          api_key: apiKey ? apiKey.trim() : undefined
+        },
+        {
+          headers: { 'Content-Type': 'application/json' },
+          timeout: 15000
+        }
+      )
+      const enText = step1.data?.translatedText
+      if (enText) {
+        const step2 = await axios.post(
+          `${targetUrl}/translate`,
+          {
+            q: enText,
+            source: 'en',
+            target: 'id',
+            format: 'text',
+            api_key: apiKey ? apiKey.trim() : undefined
+          },
+          {
+            headers: { 'Content-Type': 'application/json' },
+            timeout: 15000
+          }
+        )
+        if (step2.data?.translatedText) return step2.data.translatedText
+      }
+    } catch {
+      // Pivot translation failed
+    }
+  }
+
+  // 3. Seamless fallback to Google Translate for this paragraph
+  try {
+    const res = await translate(t, { from: source, to: 'id' })
+    return (res as any)?.text ?? t
+  } catch {
+    return t
+  }
+}
+
 export async function translateBatchLibre(texts: string[], apiUrl: string, apiKey?: string, sourceLang?: SourceLanguage): Promise<string[]> {
   const targetUrl = (apiUrl || 'http://localhost:5000').replace(/\/$/, '')
   const results: string[] = []
@@ -100,25 +176,7 @@ export async function translateBatchLibre(texts: string[], apiUrl: string, apiKe
   const batchSize = 5
   for (let i = 0; i < texts.length; i += batchSize) {
     const chunk = texts.slice(i, i + batchSize)
-    const promises = chunk.map(t =>
-      axios.post(
-        `${targetUrl}/translate`,
-        {
-          q: t,
-          source: resolvedSource,
-          target: 'id',
-          format: 'text',
-          api_key: apiKey ? apiKey.trim() : undefined
-        },
-        {
-          headers: { 'Content-Type': 'application/json' },
-          timeout: 30000
-        }
-      ).then(r => r.data?.translatedText ?? t).catch((err) => {
-        console.error('Single paragraph LibreTranslate error:', err?.message)
-        return t
-      })
-    )
+    const promises = chunk.map(t => translateSingleLibre(t, targetUrl, resolvedSource, apiKey))
     const chunkResults = await Promise.all(promises)
     results.push(...chunkResults)
   }
