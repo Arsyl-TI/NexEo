@@ -2147,16 +2147,16 @@ _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw
 const assets = {
   "/index.mjs": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"36ef5-Z8LQCasfK7rzpCPxgRWHx+y8H6I\"",
-    "mtime": "2026-08-15T13:01:16.223Z",
-    "size": 225013,
+    "etag": "\"36f0f-+yyuiNDejxKssoqLLCiOoJwgK4M\"",
+    "mtime": "2026-08-15T13:59:33.387Z",
+    "size": 225039,
     "path": "index.mjs"
   },
   "/index.mjs.map": {
     "type": "application/json",
-    "etag": "\"cc60d-0JR598IwcOFoFOSE+9q0SxVr0X0\"",
-    "mtime": "2026-08-15T13:01:16.224Z",
-    "size": 837133,
+    "etag": "\"cbdf8-LTRWcDmOYt/h+boW68WYClocNy0\"",
+    "mtime": "2026-08-15T13:59:33.387Z",
+    "size": 835064,
     "path": "index.mjs.map"
   }
 };
@@ -4653,7 +4653,7 @@ async function translateBatchLibre(texts, apiUrl, apiKey) {
         `${targetUrl}/translate`,
         {
           q: t,
-          source: "auto",
+          source: "en",
           target: "id",
           format: "text",
           api_key: apiKey ? apiKey.trim() : void 0
@@ -4678,7 +4678,7 @@ async function translateBatchLibre(texts, apiUrl, apiKey) {
 async function translateBatchGoogle(texts) {
   var _a;
   try {
-    const res = await translate(texts, { to: "id" });
+    const res = await translate(texts, { from: "en", to: "id" });
     const rawArr = Array.isArray(res) ? res : [res];
     return rawArr.map((item) => {
       var _a2;
@@ -4688,7 +4688,7 @@ async function translateBatchGoogle(texts) {
     const results = [];
     for (const t of texts) {
       try {
-        const res = await translate(t, { to: "id" });
+        const res = await translate(t, { from: "en", to: "id" });
         results.push((_a = res == null ? void 0 : res.text) != null ? _a : t);
       } catch {
         results.push(t);
@@ -5289,7 +5289,13 @@ const novels_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProper
   default: novels_get
 }, Symbol.toStringTag, { value: 'Module' }));
 
+function isScraperUiNoise(text) {
+  const l = text.toLowerCase();
+  return l.includes("tap the bulb icon") || l.includes("suggest an edit") || l.includes("click a line to suggest") || l.includes("edit suggestion");
+}
 function shouldTranslateItem(item) {
+  const txt = getItemText(item);
+  if (!txt || isScraperUiNoise(txt)) return false;
   if (typeof item === "string" && item.trim().length > 0) return true;
   if (item && typeof item === "object") {
     if (item.type === "image") return false;

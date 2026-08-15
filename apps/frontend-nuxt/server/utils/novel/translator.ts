@@ -79,7 +79,7 @@ export async function translateBatchLibre(texts: string[], apiUrl: string, apiKe
   const targetUrl = (apiUrl || 'http://localhost:5000').replace(/\/$/, '')
   const results: string[] = []
 
-  // Process in small batches of 5 to avoid flooding/crashing LibreTranslate Docker container
+  // Process in small batches of 5 to avoid flooding LibreTranslate Docker container
   const batchSize = 5
   for (let i = 0; i < texts.length; i += batchSize) {
     const chunk = texts.slice(i, i + batchSize)
@@ -88,7 +88,7 @@ export async function translateBatchLibre(texts: string[], apiUrl: string, apiKe
         `${targetUrl}/translate`,
         {
           q: t,
-          source: 'auto',
+          source: 'en',
           target: 'id',
           format: 'text',
           api_key: apiKey ? apiKey.trim() : undefined
@@ -110,7 +110,7 @@ export async function translateBatchLibre(texts: string[], apiUrl: string, apiKe
 
 export async function translateBatchGoogle(texts: string[]): Promise<string[]> {
   try {
-    const res = await translate(texts, { to: 'id' })
+    const res = await translate(texts, { from: 'en', to: 'id' })
     const rawArr = Array.isArray(res) ? res : [res]
     return rawArr.map((item: any) => item.text ?? '')
   } catch (e: any) {
@@ -118,7 +118,7 @@ export async function translateBatchGoogle(texts: string[]): Promise<string[]> {
     const results: string[] = []
     for (const t of texts) {
       try {
-        const res = await translate(t, { to: 'id' })
+        const res = await translate(t, { from: 'en', to: 'id' })
         results.push((res as any)?.text ?? t)
       } catch {
         results.push(t)

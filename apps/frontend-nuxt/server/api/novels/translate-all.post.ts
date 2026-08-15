@@ -3,7 +3,19 @@ import path from 'path'
 import { serverConfig } from '../../utils/config'
 import { translateBatch } from '../../utils/novel/translator'
 
+function isScraperUiNoise(text: string): boolean {
+  const l = text.toLowerCase()
+  return (
+    l.includes('tap the bulb icon') ||
+    l.includes('suggest an edit') ||
+    l.includes('click a line to suggest') ||
+    l.includes('edit suggestion')
+  )
+}
+
 function shouldTranslateItem(item: any): boolean {
+  const txt = getItemText(item)
+  if (!txt || isScraperUiNoise(txt)) return false
   if (typeof item === 'string' && item.trim().length > 0) return true
   if (item && typeof item === 'object') {
     if (item.type === 'image') return false // NEVER touch or translate image nodes!
