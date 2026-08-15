@@ -956,7 +956,7 @@ defineComponent({
   }
 });
 const clientOnlySymbol = /* @__PURE__ */ Symbol.for("nuxt:client-only");
-defineComponent({
+const __nuxt_component_0$1 = defineComponent({
   name: "ClientOnly",
   inheritAttrs: false,
   props: ["fallback", "placeholder", "placeholderTag", "fallbackTag"],
@@ -1024,7 +1024,7 @@ const plugins = [
   pinia_Ab1D_QMMf_egrzVdVYpZ5xs6QSwaKU60pkFvRWVq_9Y
 ];
 const layouts = {
-  default: defineAsyncComponent(() => import("./_nuxt/default-Cpjk-q8_.js").then((m) => m.default || m))
+  default: defineAsyncComponent(() => import("./_nuxt/default-DHQE3e2r.js").then((m) => m.default || m))
 };
 const routeRulesMatcher = _routeRulesMatcher;
 const LayoutLoader = defineComponent({
@@ -1419,6 +1419,7 @@ export {
   useNuxtApp as a,
   useRuntimeConfig as b,
   nuxtLinkDefaults as c,
+  __nuxt_component_0$1 as d,
   entry_default as default,
   encodeRoutePath as e,
   navigateTo as n,

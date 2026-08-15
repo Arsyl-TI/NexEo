@@ -18,6 +18,7 @@ interface _GlobalComponents {
   LayoutMobileNavigation: typeof import("../../components/Layout/MobileNavigation.vue")['default']
   LayoutNavbar: typeof import("../../components/Layout/Navbar.vue")['default']
   LayoutSidebar: typeof import("../../components/Layout/Sidebar.vue")['default']
+  PwaInstallPrompt: typeof import("../../components/PwaInstallPrompt.vue")['default']
   NuxtWelcome: typeof import("../../../../node_modules/.pnpm/nuxt@3.21.11_@oxc-project+t_3a6e6a4a92f6df0081e292eb4e7a9fff/node_modules/nuxt/dist/app/components/welcome.vue")['default']
   NuxtLayout: typeof import("../../../../node_modules/.pnpm/nuxt@3.21.11_@oxc-project+t_3a6e6a4a92f6df0081e292eb4e7a9fff/node_modules/nuxt/dist/app/components/nuxt-layout")['default']
   NuxtErrorBoundary: typeof import("../../../../node_modules/.pnpm/nuxt@3.21.11_@oxc-project+t_3a6e6a4a92f6df0081e292eb4e7a9fff/node_modules/nuxt/dist/app/components/nuxt-error-boundary.vue")['default']
@@ -45,6 +46,7 @@ interface _GlobalComponents {
   LazyLayoutMobileNavigation: LazyComponent<typeof import("../../components/Layout/MobileNavigation.vue")['default']>
   LazyLayoutNavbar: LazyComponent<typeof import("../../components/Layout/Navbar.vue")['default']>
   LazyLayoutSidebar: LazyComponent<typeof import("../../components/Layout/Sidebar.vue")['default']>
+  LazyPwaInstallPrompt: LazyComponent<typeof import("../../components/PwaInstallPrompt.vue")['default']>
   LazyNuxtWelcome: LazyComponent<typeof import("../../../../node_modules/.pnpm/nuxt@3.21.11_@oxc-project+t_3a6e6a4a92f6df0081e292eb4e7a9fff/node_modules/nuxt/dist/app/components/welcome.vue")['default']>
   LazyNuxtLayout: LazyComponent<typeof import("../../../../node_modules/.pnpm/nuxt@3.21.11_@oxc-project+t_3a6e6a4a92f6df0081e292eb4e7a9fff/node_modules/nuxt/dist/app/components/nuxt-layout")['default']>
   LazyNuxtErrorBoundary: LazyComponent<typeof import("../../../../node_modules/.pnpm/nuxt@3.21.11_@oxc-project+t_3a6e6a4a92f6df0081e292eb4e7a9fff/node_modules/nuxt/dist/app/components/nuxt-error-boundary.vue")['default']>

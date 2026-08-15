@@ -14,6 +14,7 @@
 
     <MobileNavigation />
     <CommandPalette />
+    <PwaInstallPrompt />
   </div>
 </template>
 
@@ -22,4 +23,5 @@ import Navbar from '~/components/Layout/Navbar.vue'
 import Sidebar from '~/components/Layout/Sidebar.vue'
 import MobileNavigation from '~/components/Layout/MobileNavigation.vue'
 import CommandPalette from '~/components/CommandPalette.vue'
+import PwaInstallPrompt from '~/components/PwaInstallPrompt.vue'
 </script>

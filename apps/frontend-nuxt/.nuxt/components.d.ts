@@ -18,6 +18,7 @@ export const CommandPalette: typeof import("../components/CommandPalette.vue")['
 export const LayoutMobileNavigation: typeof import("../components/Layout/MobileNavigation.vue")['default']
 export const LayoutNavbar: typeof import("../components/Layout/Navbar.vue")['default']
 export const LayoutSidebar: typeof import("../components/Layout/Sidebar.vue")['default']
+export const PwaInstallPrompt: typeof import("../components/PwaInstallPrompt.vue")['default']
 export const NuxtWelcome: typeof import("../../../node_modules/.pnpm/nuxt@3.21.11_@oxc-project+t_3a6e6a4a92f6df0081e292eb4e7a9fff/node_modules/nuxt/dist/app/components/welcome.vue")['default']
 export const NuxtLayout: typeof import("../../../node_modules/.pnpm/nuxt@3.21.11_@oxc-project+t_3a6e6a4a92f6df0081e292eb4e7a9fff/node_modules/nuxt/dist/app/components/nuxt-layout")['default']
 export const NuxtErrorBoundary: typeof import("../../../node_modules/.pnpm/nuxt@3.21.11_@oxc-project+t_3a6e6a4a92f6df0081e292eb4e7a9fff/node_modules/nuxt/dist/app/components/nuxt-error-boundary.vue")['default']
@@ -45,6 +46,7 @@ export const LazyCommandPalette: LazyComponent<typeof import("../components/Comm
 export const LazyLayoutMobileNavigation: LazyComponent<typeof import("../components/Layout/MobileNavigation.vue")['default']>
 export const LazyLayoutNavbar: LazyComponent<typeof import("../components/Layout/Navbar.vue")['default']>
 export const LazyLayoutSidebar: LazyComponent<typeof import("../components/Layout/Sidebar.vue")['default']>
+export const LazyPwaInstallPrompt: LazyComponent<typeof import("../components/PwaInstallPrompt.vue")['default']>
 export const LazyNuxtWelcome: LazyComponent<typeof import("../../../node_modules/.pnpm/nuxt@3.21.11_@oxc-project+t_3a6e6a4a92f6df0081e292eb4e7a9fff/node_modules/nuxt/dist/app/components/welcome.vue")['default']>
 export const LazyNuxtLayout: LazyComponent<typeof import("../../../node_modules/.pnpm/nuxt@3.21.11_@oxc-project+t_3a6e6a4a92f6df0081e292eb4e7a9fff/node_modules/nuxt/dist/app/components/nuxt-layout")['default']>
 export const LazyNuxtErrorBoundary: LazyComponent<typeof import("../../../node_modules/.pnpm/nuxt@3.21.11_@oxc-project+t_3a6e6a4a92f6df0081e292eb4e7a9fff/node_modules/nuxt/dist/app/components/nuxt-error-boundary.vue")['default']>

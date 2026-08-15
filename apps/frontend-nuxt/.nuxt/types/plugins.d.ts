@@ -17,7 +17,8 @@ type NuxtAppInjections =
   InjectionType<typeof import("../../../../node_modules/.pnpm/nuxt@3.21.11_@oxc-project+t_3a6e6a4a92f6df0081e292eb4e7a9fff/node_modules/nuxt/dist/app/plugins/island-link-navigation.client.js")> &
   InjectionType<typeof import("../../../../node_modules/.pnpm/@pinia+nuxt@1.0.2_magic-str_95d330a9ccd614040f15f890fe90f48b/node_modules/@pinia/nuxt/dist/runtime/plugin.js")> &
   InjectionType<typeof import("../../../../node_modules/.pnpm/nuxt@3.21.11_@oxc-project+t_3a6e6a4a92f6df0081e292eb4e7a9fff/node_modules/nuxt/dist/pages/runtime/plugins/prefetch.client.js")> &
-  InjectionType<typeof import("../../plugins/pinia")>
+  InjectionType<typeof import("../../plugins/pinia")> &
+  InjectionType<typeof import("../../plugins/pwa.client")>
 
 declare module '#app' {
   interface NuxtApp extends NuxtAppInjections { }
