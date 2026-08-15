@@ -20,10 +20,15 @@ export interface NovelConfig {
   thumbnailDir: string
 }
 
+export interface MangaConfig {
+  dir: string
+}
+
 export interface ServerConfig {
   port: number
   video: VideoConfig
   novel: NovelConfig
+  manga: MangaConfig
   uploadDir: string
   sharedFilesDir: string
   cacheDir: string
@@ -71,6 +76,9 @@ export const serverConfig: ServerConfig = {
   novel: {
     dir: path.join(rootDir, 'data', 'novels'),
     thumbnailDir: path.join(rootDir, 'data', 'novels', 'thumbnails')
+  },
+  manga: {
+    dir: process.env['MANGA_DIR'] && fs.existsSync(process.env['MANGA_DIR']) ? process.env['MANGA_DIR'] : (fs.existsSync('D:\\Manga') ? 'D:\\Manga' : path.join(rootDir, 'data', 'manga'))
   },
   uploadDir: path.join(rootDir, 'uploads'),
   sharedFilesDir: path.join(rootDir, 'uploads'),

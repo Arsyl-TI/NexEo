@@ -35,6 +35,18 @@
         {{ link.label }}
       </NuxtLink>
 
+      <div class="px-3 py-2 mt-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Manga & Komik</div>
+      <NuxtLink
+        v-for="link in sidebarLinks.manga"
+        :key="link.label"
+        :to="link.href"
+        class="flex items-center gap-2 px-3 py-1.5 text-sm rounded-md hover:bg-gray-800 transition-colors"
+        :class="{ 'bg-gray-800 text-purple-400 font-medium': link.isActive }"
+      >
+        <span class="w-4 h-4 flex-shrink-0 text-center">{{ link.icon }}</span>
+        {{ link.label }}
+      </NuxtLink>
+
       <div class="px-3 py-2 mt-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Tools</div>
       <NuxtLink
         v-for="link in sidebarLinks.tools"
@@ -79,6 +91,7 @@ interface SidebarLink {
 
 const sidebarLinks = computed<{
   novel: SidebarLink[]
+  manga: SidebarLink[]
   tools: SidebarLink[]
 }>(() => {
   const path = route.path
@@ -88,7 +101,7 @@ const sidebarLinks = computed<{
       {
         label: 'Koleksi Novel',
         href: '/novels',
-        icon: '📚',
+        icon: '📖',
         isActive: path === '/novels' || path.startsWith('/novels/')
       },
       {
@@ -96,6 +109,14 @@ const sidebarLinks = computed<{
         href: '/novel-browser',
         icon: '🔍',
         isActive: path === '/novel-browser'
+      }
+    ],
+    manga: [
+      {
+        label: 'Koleksi Manga',
+        href: '/manga',
+        icon: '🎨',
+        isActive: path === '/manga' || path.startsWith('/manga/')
       }
     ],
     tools: [

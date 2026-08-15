@@ -613,7 +613,7 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-L9HZBkFQ.mjs')
+    component: () => import('./index-BjNJ4pXK.mjs')
   },
   {
     name: "share",
@@ -623,12 +623,17 @@ const _routes = [
   {
     name: "library",
     path: "/library",
-    component: () => import('./library-WcilZlrV.mjs')
+    component: () => import('./library-t77TT1Uc.mjs')
   },
   {
     name: "video-id",
     path: "/video/:id()",
-    component: () => import('./_id_-yysuphj-.mjs')
+    component: () => import('./_id_-DVH7pDgr.mjs')
+  },
+  {
+    name: "manga",
+    path: "/manga",
+    component: () => import('./index-B1j4W6cS.mjs')
   },
   {
     name: "novels",
@@ -643,17 +648,27 @@ const _routes = [
   {
     name: "downloader",
     path: "/downloader",
-    component: () => import('./index-BPqvJ-qM.mjs')
+    component: () => import('./index-Sp-7vlYN.mjs')
+  },
+  {
+    name: "manga-slug",
+    path: "/manga/:slug()",
+    component: () => import('./index-CrGzZAvu.mjs')
   },
   {
     name: "novels-slug",
     path: "/novels/:slug()",
-    component: () => import('./index-Bxa7ycsU.mjs')
+    component: () => import('./index-0YvO4Eaa.mjs')
+  },
+  {
+    name: "manga-slug-chapter",
+    path: "/manga/:slug()/:chapter()",
+    component: () => import('./_chapter_-u3eNpjUj.mjs')
   },
   {
     name: "novels-slug-chapter",
     path: "/novels/:slug()/:chapter()",
-    component: () => import('./_chapter_-Yp9CtV5s.mjs')
+    component: () => import('./_chapter_-D0zaP-Cn.mjs')
   }
 ];
 const validate = /* @__PURE__ */ defineNuxtRouteMiddleware(async (to) => {
@@ -1017,7 +1032,7 @@ const plugins = [
   pinia_Ab1D_QMMf_egrzVdVYpZ5xs6QSwaKU60pkFvRWVq_9Y
 ];
 const layouts = {
-  default: defineAsyncComponent(() => import('./default-B3hqqpu-.mjs').then((m) => m.default || m))
+  default: defineAsyncComponent(() => import('./default-Cpjk-q8_.mjs').then((m) => m.default || m))
 };
 const routeRulesMatcher = _routeRulesMatcher;
 const LayoutLoader = defineComponent({
@@ -1315,7 +1330,7 @@ const _sfc_main$1 = {
     const statusText = _error.statusMessage ?? (is404 ? "Page Not Found" : "Internal Server Error");
     const description = _error.message || _error.toString();
     const stack = void 0;
-    const _Error404 = defineAsyncComponent(() => import('./error-404-C0XyIc30.mjs'));
+    const _Error404 = defineAsyncComponent(() => import('./error-404-o5-Wfmkr.mjs'));
     const _Error = defineAsyncComponent(() => import('./error-500-5hYAtzei.mjs'));
     const ErrorTemplate = is404 ? _Error404 : _Error;
     return (_ctx, _push, _parent, _attrs) => {
@@ -1408,5 +1423,5 @@ let entry;
 }
 const entry_default = ((ssrContext) => entry(ssrContext));
 
-export { _export_sfc as _, useRouter as a, useNuxtApp as b, nuxtLinkDefaults as c, entry_default as default, encodeRoutePath as e, navigateTo as n, resolveRouteObject as r, tryUseNuxtApp as t, useRuntimeConfig as u };
+export { _export_sfc as _, useNuxtApp as a, useRuntimeConfig as b, nuxtLinkDefaults as c, entry_default as default, encodeRoutePath as e, navigateTo as n, resolveRouteObject as r, tryUseNuxtApp as t, useRouter as u };
 //# sourceMappingURL=server.mjs.map

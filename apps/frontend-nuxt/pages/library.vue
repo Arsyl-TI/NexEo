@@ -81,14 +81,14 @@
                   <p class="text-xs text-amber-400 font-mono font-semibold mb-1">
                     📍 Terakhir: {{ item.lastChapterTitle || item.lastChapter }}
                   </p>
-                  <NuxtLink :to="`/novels/${item.slug}`" class="text-[11px] text-muted-foreground hover:text-primary transition-colors">
-                    Halaman Novel →
+                  <NuxtLink :to="item.type === 'manga' ? `/manga/${item.slug}` : `/novels/${item.slug}`" class="text-[11px] text-muted-foreground hover:text-primary transition-colors">
+                    {{ item.type === 'manga' ? 'Halaman Manga →' : 'Halaman Novel →' }}
                   </NuxtLink>
                 </div>
               </div>
 
               <NuxtLink 
-                :to="`/novels/${item.slug}/${encodeURIComponent(item.lastChapter)}`" 
+                :to="item.link" 
                 class="btn-primary px-4 py-2.5 text-xs font-bold shrink-0 shadow-md flex items-center gap-1.5 active:scale-95"
               >
                 <span>▶</span> Lanjutkan
@@ -144,11 +144,13 @@ import { ref, computed, onMounted } from 'vue'
 import { useToast } from '~/composables/useToast'
 
 interface HistoryItem {
+  type: 'novel' | 'manga'
   slug: string
   title: string
   cover?: string
   lastChapter: string
   lastChapterTitle?: string
+  link: string
 }
 
 interface BookmarkItem {
@@ -197,7 +199,7 @@ async function loadLibraryData() {
     const rawBookmarks = localStorage.getItem('novel_bookmarks')
     const savedBookmarks: string[] = rawBookmarks ? JSON.parse(rawBookmarks) : []
 
-    // Load History keys (resume_novel_[slug])
+    // Load History keys (resume_novel_[slug] & resume_manga_[slug])
     const historyList: HistoryItem[] = []
     const bookmarkList: BookmarkItem[] = []
 
@@ -208,9 +210,23 @@ async function loadLibraryData() {
         const lastChapter = localStorage.getItem(key) || ''
         if (slug && lastChapter) {
           historyList.push({
+            type: 'novel',
             slug,
             title: slug.replace(/-/g, ' ').toUpperCase(),
-            lastChapter
+            lastChapter,
+            link: `/novels/${slug}/${encodeURIComponent(lastChapter)}`
+          })
+        }
+      } else if (key && key.startsWith('resume_manga_')) {
+        const slug = key.replace('resume_manga_', '')
+        const lastChapter = localStorage.getItem(key) || ''
+        if (slug && lastChapter) {
+          historyList.push({
+            type: 'manga',
+            slug,
+            title: slug.replace(/-/g, ' ').toUpperCase(),
+            lastChapter,
+            link: `/manga/${slug}/${encodeURIComponent(lastChapter)}`
           })
         }
       }
@@ -219,10 +235,18 @@ async function loadLibraryData() {
     // Enrich history & bookmarks metadata from API
     for (const item of historyList) {
       try {
-        const res = await api.get<{ success?: boolean; data?: any }>(`/novels/${item.slug}`)
-        if (res?.data) {
-          item.title = res.data.title || item.title
-          item.cover = res.data.cover
+        if (item.type === 'novel') {
+          const res = await api.get<{ success?: boolean; data?: any }>(`/novels/${item.slug}`)
+          if (res?.data) {
+            item.title = res.data.title || item.title
+            item.cover = res.data.cover
+          }
+        } else {
+          const res = await api.get<{ success?: boolean; data?: any }>(`/manga/${item.slug}`)
+          if (res?.data) {
+            item.title = res.data.title || item.title
+            item.cover = res.data.cover
+          }
         }
       } catch {}
     }

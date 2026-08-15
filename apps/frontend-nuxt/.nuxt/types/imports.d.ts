@@ -114,6 +114,7 @@ declare global {
   const useLazyFetch: typeof import('../../../../node_modules/.pnpm/nuxt@3.21.11_@oxc-project+t_3a6e6a4a92f6df0081e292eb4e7a9fff/node_modules/nuxt/dist/app/composables/fetch').useLazyFetch
   const useLink: typeof import('vue-router').useLink
   const useLoadingIndicator: typeof import('../../../../node_modules/.pnpm/nuxt@3.21.11_@oxc-project+t_3a6e6a4a92f6df0081e292eb4e7a9fff/node_modules/nuxt/dist/app/composables/loading-indicator').useLoadingIndicator
+  const useMangaStore: typeof import('../../stores/manga').useMangaStore
   const useModel: typeof import('vue').useModel
   const useNuxtApp: typeof import('../../../../node_modules/.pnpm/nuxt@3.21.11_@oxc-project+t_3a6e6a4a92f6df0081e292eb4e7a9fff/node_modules/nuxt/dist/app/nuxt').useNuxtApp
   const useNuxtData: typeof import('../../../../node_modules/.pnpm/nuxt@3.21.11_@oxc-project+t_3a6e6a4a92f6df0081e292eb4e7a9fff/node_modules/nuxt/dist/app/composables/asyncData').useNuxtData
@@ -322,6 +323,7 @@ declare module 'vue' {
     readonly useLazyFetch: UnwrapRef<typeof import('../../../../node_modules/.pnpm/nuxt@3.21.11_@oxc-project+t_3a6e6a4a92f6df0081e292eb4e7a9fff/node_modules/nuxt/dist/app/composables/fetch')['useLazyFetch']>
     readonly useLink: UnwrapRef<typeof import('vue-router')['useLink']>
     readonly useLoadingIndicator: UnwrapRef<typeof import('../../../../node_modules/.pnpm/nuxt@3.21.11_@oxc-project+t_3a6e6a4a92f6df0081e292eb4e7a9fff/node_modules/nuxt/dist/app/composables/loading-indicator')['useLoadingIndicator']>
+    readonly useMangaStore: UnwrapRef<typeof import('../../stores/manga')['useMangaStore']>
     readonly useModel: UnwrapRef<typeof import('vue')['useModel']>
     readonly useNuxtApp: UnwrapRef<typeof import('../../../../node_modules/.pnpm/nuxt@3.21.11_@oxc-project+t_3a6e6a4a92f6df0081e292eb4e7a9fff/node_modules/nuxt/dist/app/nuxt')['useNuxtApp']>
     readonly useNuxtData: UnwrapRef<typeof import('../../../../node_modules/.pnpm/nuxt@3.21.11_@oxc-project+t_3a6e6a4a92f6df0081e292eb4e7a9fff/node_modules/nuxt/dist/app/composables/asyncData')['useNuxtData']>

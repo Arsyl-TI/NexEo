@@ -22,6 +22,18 @@ declare module "nitropack/types" {
     '/api/info': {
       'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/info.get').default>>>>
     }
+    '/api/manga/:slug': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/manga/[slug].get').default>>>>
+    }
+    '/api/manga/:slug/chapter/:chapter': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/manga/[slug]/chapter/[chapter].get').default>>>>
+    }
+    '/api/manga/:slug/chapters': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/manga/[slug]/chapters.get').default>>>>
+    }
+    '/api/manga/library': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/manga/library.get').default>>>>
+    }
     '/api/novel/:slug': {
       'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/novel/[slug].get').default>>>>
     }
@@ -129,6 +141,9 @@ declare module "nitropack/types" {
     }
     '/api/youtube/info': {
       'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/youtube/info.post').default>>>>
+    }
+    '/_manga/**:path': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/routes/_manga/[...path].get').default>>>>
     }
     '/_novels/**:path': {
       'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/routes/_novels/[...path].get').default>>>>

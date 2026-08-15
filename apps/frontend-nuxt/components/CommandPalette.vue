@@ -187,6 +187,22 @@ async function performSearch(q: string) {
       }
     } catch {}
 
+    // 3. Search Manga
+    try {
+      const mangaRes = await api.get<{ success?: boolean; data?: any[] }>('/manga/library')
+      if (mangaRes?.data) {
+        mangaRes.data.filter(m => m.title?.toLowerCase().includes(lowerQ) || m.slug?.toLowerCase().includes(lowerQ)).forEach(m => {
+          results.push({
+            type: 'novel',
+            slug: m.slug,
+            title: m.title,
+            subtitle: `${m.chapterCount || 0} Chapter • Komik`,
+            link: `/manga/${m.slug}`
+          })
+        })
+      }
+    } catch {}
+
     // 3. Search Shared Files
     try {
       const fileRes = await $fetch<any[]>('/api/shared-files')

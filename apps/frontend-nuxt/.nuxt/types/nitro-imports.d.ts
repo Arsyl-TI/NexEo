@@ -61,7 +61,11 @@ declare global {
   const getLocalChapterContent: typeof import('../../server/utils/novel').getLocalChapterContent
   const getLocalChapters: typeof import('../../server/utils/novel').getLocalChapters
   const getLocalIP: typeof import('../../server/utils/network').getLocalIP
+  const getLocalMangaChapters: typeof import('../../server/utils/manga').getLocalMangaChapters
+  const getLocalMangaDetail: typeof import('../../server/utils/manga').getLocalMangaDetail
   const getLocalNovel: typeof import('../../server/utils/novel').getLocalNovel
+  const getMangaChapterPages: typeof import('../../server/utils/manga').getMangaChapterPages
+  const getMangaDir: typeof import('../../server/utils/manga').getMangaDir
   const getMethod: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').getMethod
   const getOrGenerateThumbnail: typeof import('../../server/utils/thumbnail').getOrGenerateThumbnail
   const getProxyRequestHeaders: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').getProxyRequestHeaders
@@ -105,6 +109,7 @@ declare global {
   const isStream: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').isStream
   const isWebResponse: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').isWebResponse
   const lazyEventHandler: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').lazyEventHandler
+  const listLocalManga: typeof import('../../server/utils/manga').listLocalManga
   const listLocalNovels: typeof import('../../server/utils/novel').listLocalNovels
   const listSharedFiles: typeof import('../../server/utils/sharedFiles').listSharedFiles
   const nitroPlugin: typeof import('../../../../node_modules/.pnpm/nitropack@2.13.4_oxc-parser_29676ebf26610b0896453b821c788422/node_modules/nitropack/dist/runtime/internal/plugin').nitroPlugin
@@ -174,7 +179,7 @@ declare global {
   export type { EventHandler, EventHandlerRequest, EventHandlerResponse, EventHandlerObject, H3EventContext } from '../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3'
   import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3')
   // @ts-ignore
-  export type { VideoCategoryConfig, VideoConfig, NovelConfig, ServerConfig } from '../../server/utils/config'
+  export type { VideoCategoryConfig, VideoConfig, NovelConfig, MangaConfig, ServerConfig } from '../../server/utils/config'
   import('../../server/utils/config')
   // @ts-ignore
   export type { NovelServerRepository, LocalChapter, NovelDetail } from '../../server/utils/novel'
@@ -214,6 +219,7 @@ export { buildAssetsURL as __buildAssetsURL, publicAssetsURL as __publicAssetsUR
 export { defineAppConfig } from 'D:/MyProject/NexEo/node_modules/.pnpm/@nuxt+nitro-server@3.21.11__ab6b34050c574ac4ae20c7ed2556094e/node_modules/@nuxt/nitro-server/dist/runtime/utils/config';
 export { serverConfig, formatFileSize } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/config';
 export { saveTasksToFile, getDownloadTasks, createDownloadTask, cancelDownloadTask, deleteDownloadTask } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/downloader';
+export { getMangaDir, listLocalManga, getLocalMangaDetail, getLocalMangaChapters, getMangaChapterPages } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/manga';
 export { getLocalIP } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/network';
 export { NovelServerRepository, novelServerRepo, listLocalNovels, getLocalNovel, getLocalChapters, getLocalChapterContent } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/novel';
 export { NOVEL_SOURCES, scrapeDreamyCatalog, scrapeDreamyNovelDetail, scrapeNoveldexCatalog, scrapeNoveldexNovelDetail, getSourceCatalog } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/novel/catalogScraper';

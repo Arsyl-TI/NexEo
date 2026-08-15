@@ -32,6 +32,7 @@ export { definePageMeta } from '../../../node_modules/.pnpm/nuxt@3.21.11_@oxc-pr
 export { defineLazyHydrationComponent } from '#app/composables/lazy-hydration';
 export { useApi } from '../composables/useApi';
 export { useToast } from '../composables/useToast';
+export { useMangaStore } from '../stores/manga';
 export { useUIStore, ToastItem, ReaderThemeClasses } from '../stores/ui';
 export { useVideoStore } from '../stores/video';
 export { defineStore, acceptHMRUpdate, usePinia, storeToRefs } from '../../../node_modules/.pnpm/@pinia+nuxt@1.0.2_magic-str_95d330a9ccd614040f15f890fe90f48b/node_modules/@pinia/nuxt/dist/runtime/composables';

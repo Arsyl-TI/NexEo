@@ -35,7 +35,7 @@
     "domutils": "3.2.2",
     "dunder-proto": "1.0.1",
     "encoding-sniffer": "0.2.1",
-    "entities": "4.5.0",
+    "entities": "7.0.1",
     "es-define-property": "1.0.1",
     "es-errors": "1.3.0",
     "es-object-atoms": "1.1.2",
