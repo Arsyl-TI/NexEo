@@ -174,10 +174,33 @@ function dismissResume() {
 }
 
 function onTimeUpdate() {
-  if (!videoElement.value || !videoId.value) return
+  if (!videoElement.value || !videoId.value || !video.value) return
   const cur = videoElement.value.currentTime
+  const dur = videoElement.value.duration || 0
   if (cur > 5) {
     localStorage.setItem(`video_resume_${videoId.value}`, String(cur))
+    try {
+      const raw = localStorage.getItem('recent_videos_history')
+      let list: any[] = raw ? JSON.parse(raw) : []
+      list = list.filter(item => item.id !== videoId.value)
+      
+      const pct = dur > 0 ? Math.min(100, Math.round((cur / dur) * 100)) : 0
+      list.unshift({
+        id: videoId.value,
+        title: video.value.title || video.value.name,
+        name: video.value.name,
+        format: video.value.format,
+        folder: video.value.folder,
+        timestamp: cur,
+        duration: dur,
+        timestampFormatted: formatTime(cur),
+        durationFormatted: formatTime(dur),
+        percent: pct,
+        updatedAt: new Date().toISOString()
+      })
+
+      localStorage.setItem('recent_videos_history', JSON.stringify(list.slice(0, 12)))
+    } catch {}
   }
 }
 

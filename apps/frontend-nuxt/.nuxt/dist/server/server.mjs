@@ -605,7 +605,7 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import("./_nuxt/index-j7g5PtfO.js")
+    component: () => import("./_nuxt/index-C3mfIvL_.js")
   },
   {
     name: "share",
@@ -615,7 +615,7 @@ const _routes = [
   {
     name: "video-id",
     path: "/video/:id()",
-    component: () => import("./_nuxt/_id_-BR5tuER7.js")
+    component: () => import("./_nuxt/_id_-D6YP_0A_.js")
   },
   {
     name: "novels",

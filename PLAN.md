@@ -1,31 +1,27 @@
-# Technical Execution Plan: Novel Audiobook TTS Web Speech Engine
+# Technical Execution Plan: Video Playback Continue Watching Carousel
 
-Target File: `apps/frontend-nuxt/pages/novels/[slug]/[chapter].vue`
+Target Files:
+- `apps/frontend-nuxt/pages/video/[id].vue`
+- `apps/frontend-nuxt/pages/index.vue`
 
 ## Step-by-Step Execution Steps
 
-1. **Audiobook Speech State & Voice Enumeration**:
-   - Initialize `window.speechSynthesis` API state.
-   - Load available system voices (prioritizing `id-ID` Bahasa Indonesia and `en-US`).
-   - Track `isSpeaking`, `isPaused`, `currentParagraphIndex`, `speechRate`, and `selectedVoice`.
+1. **Update Video History Tracker (`pages/video/[id].vue`)**:
+   - Save rich watch history object into `localStorage.getItem('recent_videos_history')` whenever video timestamp updates.
+   - History item schema: `{ id, name, title, format, folder, timestamp, duration, timestampFormatted, percent, updatedAt }`.
 
-2. **Audiobook Control Bar UI**:
-   - Add a floating / toolbar widget in `[chapter].vue`:
-     - 🎧 **Audiobook Button** in reader header.
-     - Sticky bottom Audio Player bar when playing:
-       - Play / Pause / Stop buttons
-       - Voice dropdown selector
-       - Playback speed toolbar (`0.75x`, `1.0x`, `1.25x`, `1.5x`, `2.0x`)
-       - Progress indicator (`Paragraf X dari Y`)
+2. **Build "Lanjutkan Menonton" Carousel Component (`pages/index.vue`)**:
+   - Read `recent_videos_history` array on mounted in `pages/index.vue`.
+   - Render a horizontal scrollable card carousel above category selection.
+   - Each card features:
+     - Video thumbnail with hover zoom.
+     - Play button overlay with watch progress percentage bar.
+     - Saved timestamp (e.g. `🍿 Lanjutkan di 14:32`).
+     - 1-Click navigation back into video player.
 
-3. **Speech Synthesis Engine Methods**:
-   - `speakCurrentParagraph()`: Reads current paragraph text, highlights paragraph element with active CSS class (`.tts-active-paragraph`), and auto-scrolls paragraph into view.
-   - `onend` event handler: Advances `currentParagraphIndex` to next paragraph automatically until end of chapter!
-   - `togglePlayPause()` and `stopSpeech()`.
-
-4. **Testing & Typecheck Verification**:
+3. **Testing & Build Verification**:
    - Run `pnpm turbo run typecheck` and `pnpm turbo run build`.
 
-5. **Git Commit & Progress Log**:
-   - Record changes in `PROGRESS.md`.
-   - Commit via `git add . && git commit -m "feat(novel): add Audiobook Web Speech TTS engine to chapter reader"`.
+4. **Git Commit & Progress Log**:
+   - Append log entry in `PROGRESS.md`.
+   - Execute `git add . && git commit -m "feat(video): add Continue Watching playback carousel to video homepage"`.

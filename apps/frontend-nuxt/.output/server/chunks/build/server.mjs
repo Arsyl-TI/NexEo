@@ -613,7 +613,7 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-j7g5PtfO.mjs')
+    component: () => import('./index-C3mfIvL_.mjs')
   },
   {
     name: "share",
@@ -623,7 +623,7 @@ const _routes = [
   {
     name: "video-id",
     path: "/video/:id()",
-    component: () => import('./_id_-BR5tuER7.mjs')
+    component: () => import('./_id_-D6YP_0A_.mjs')
   },
   {
     name: "novels",

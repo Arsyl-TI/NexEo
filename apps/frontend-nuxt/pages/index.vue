@@ -14,6 +14,48 @@
         </button>
       </div>
 
+      <!-- Continue Watching Carousel Section -->
+      <section v-if="!categoryId && recentHistory.length > 0" class="mb-10">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold text-foreground flex items-center gap-2">
+            <span>🍿</span> Lanjutkan Menonton
+          </h2>
+          <button @click="clearRecentHistory" class="text-xs text-muted-foreground hover:text-rose-400 transition-colors">
+            Bersihkan Riwayat
+          </button>
+        </div>
+
+        <div class="flex gap-4 overflow-x-auto pb-4 scrollbar-thin">
+          <NuxtLink 
+            v-for="item in recentHistory" 
+            :key="item.id" 
+            :to="`/video/${encodeURIComponent(item.id)}`" 
+            class="w-60 sm:w-64 shrink-0 group glass-card-hover p-3 shadow-lg rounded-2xl"
+          >
+            <div class="aspect-video rounded-xl overflow-hidden bg-card border border-border/80 group-hover:border-primary mb-2.5 relative shadow-md">
+              <img :src="`/api/video/thumbnail/${encodeURIComponent(item.id)}`" class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300" @error="($event.target as HTMLImageElement).style.display='none'" />
+              <div class="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent"></div>
+              
+              <div class="absolute bottom-2 left-2 right-2 flex items-center justify-between text-[10px] text-white font-mono">
+                <span class="bg-black/70 px-2 py-0.5 rounded-md">⏱️ {{ item.timestampFormatted }}</span>
+                <span class="bg-primary/90 px-2 py-0.5 rounded-md font-bold">{{ item.percent }}%</span>
+              </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="w-full h-1.5 bg-card border border-border/60 rounded-full overflow-hidden mb-2">
+              <div class="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full" :style="{ width: `${item.percent}%` }"></div>
+            </div>
+
+            <h4 class="font-bold text-xs text-foreground truncate group-hover:text-primary transition-colors mb-0.5">{{ item.title || item.name }}</h4>
+            <p class="text-[10px] text-muted-foreground font-mono flex items-center justify-between">
+              <span>📁 {{ item.folder }}</span>
+              <span class="uppercase text-primary font-bold">{{ item.format }}</span>
+            </p>
+          </NuxtLink>
+        </div>
+      </section>
+
       <!-- YouTube Downloader Modal -->
       <div v-if="showYtModal" @click.self="showYtModal = false" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-card border border-border rounded-3xl max-w-xl w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
@@ -194,6 +236,7 @@ const folders = ref<VideoFolder[]>([])
 const selectedFolder = ref<VideoFolder | null>(null)
 const videos = ref<VideoItem[]>([])
 const loading = ref(false)
+const recentHistory = ref<any[]>([])
 
 // YouTube Downloader Modal State
 const showYtModal = ref(false)
@@ -203,6 +246,21 @@ const ytTargetCategory = ref('youtube')
 const ytCustomSubfolder = ref('')
 const isFetchingInfo = ref(false)
 const isDownloading = ref(false)
+
+function loadRecentHistory() {
+  if (typeof window === 'undefined') return
+  try {
+    const raw = localStorage.getItem('recent_videos_history')
+    recentHistory.value = raw ? JSON.parse(raw) : []
+  } catch {}
+}
+
+function clearRecentHistory() {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('recent_videos_history')
+    recentHistory.value = []
+  }
+}
 
 const navigateToCategory = (id: string) => {
   router.push({ path: '/', query: { category: id } })
@@ -292,6 +350,7 @@ async function executeYtDownload() {
 }
 
 onMounted(async () => {
+  loadRecentHistory()
   await videoStore.fetchCategories()
   await loadCategoryData()
 })
