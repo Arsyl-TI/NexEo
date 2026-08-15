@@ -37,6 +37,16 @@
           <option value="full">100% Asli</option>
         </select>
 
+        <!-- Auto Scroll Button for Webtoon Mode -->
+        <button 
+          v-if="readerMode === 'webtoon'"
+          @click="toggleAutoScroll" 
+          :class="['px-3 py-1.5 rounded-full text-xs font-semibold border transition-all flex items-center gap-1.5 shadow-sm active:scale-95', isAutoScrolling ? 'bg-amber-600 text-white border-amber-500 animate-pulse' : 'bg-background border border-border text-foreground hover:bg-border/60']"
+          title="Auto-Scroll Otomatis (Shortcut: Space)"
+        >
+          <span>📜</span> {{ isAutoScrolling ? 'Auto-Scroll Aktif' : 'Auto Scroll' }}
+        </button>
+
         <a 
           :href="`/api/manga/${slug}/chapter/${encodeURIComponent(chapter)}/export?format=cbz`" 
           download 
@@ -226,6 +236,32 @@
 
     </main>
 
+    <!-- Floating Auto-Scroll Control Bar for Webtoon Mode -->
+    <div v-if="readerMode === 'webtoon' && isAutoScrolling" class="fixed bottom-4 left-4 right-4 max-w-md mx-auto z-40 bg-card/95 border border-amber-500/50 rounded-2xl p-3 shadow-2xl backdrop-blur-xl flex items-center justify-between gap-3 animate-fade-in">
+      <div class="flex items-center gap-2">
+        <span class="text-lg animate-spin">📜</span>
+        <div>
+          <h4 class="text-xs font-bold text-foreground">Auto-Scroll Aktif</h4>
+          <p class="text-[10px] text-muted-foreground font-mono">Kecepatan: {{ autoScrollSpeedMultiplier }}x (Tekan Space untuk pause)</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-1.5">
+        <button 
+          v-for="mult in [0.5, 1.0, 2.0, 3.0, 5.0]" 
+          :key="mult"
+          @click="setScrollSpeedMultiplier(mult)"
+          :class="['px-2 py-1 rounded-lg text-xs font-mono font-bold transition-all', autoScrollSpeedMultiplier === mult ? 'bg-amber-500 text-black shadow-md' : 'bg-background border border-border text-muted-foreground hover:text-foreground']"
+        >
+          {{ mult }}x
+        </button>
+
+        <button @click="stopAutoScroll" class="ml-1 px-3 py-1 rounded-lg bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-bold hover:bg-rose-500/30">
+          ⏸ Hentikan
+        </button>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -249,6 +285,51 @@ const chaptersList = ref<any[]>([])
 const readerMode = ref<'webtoon' | 'flip' | 'double'>('webtoon')
 const fitMode = ref<'width' | 'height' | 'full'>('width')
 const readingDir = ref<'rtl' | 'ltr'>('rtl')
+
+// Auto-Scroll State
+const isAutoScrolling = ref(false)
+const autoScrollSpeedMultiplier = ref(1.0)
+let autoScrollTimer: any = null
+
+function toggleAutoScroll() {
+  if (isAutoScrolling.value) {
+    stopAutoScroll()
+  } else {
+    startAutoScroll()
+  }
+}
+
+function startAutoScroll() {
+  if (typeof window === 'undefined') return
+  isAutoScrolling.value = true
+  if (autoScrollTimer) clearInterval(autoScrollTimer)
+
+  autoScrollTimer = setInterval(() => {
+    if (!isAutoScrolling.value) return
+    const scrollStep = 2 * autoScrollSpeedMultiplier.value
+    window.scrollBy({ top: scrollStep, behavior: 'instant' as any })
+
+    // Auto-stop at bottom of chapter page
+    if (window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 15) {
+      stopAutoScroll()
+    }
+  }, 16)
+}
+
+function stopAutoScroll() {
+  isAutoScrolling.value = false
+  if (autoScrollTimer) {
+    clearInterval(autoScrollTimer)
+    autoScrollTimer = null
+  }
+}
+
+function setScrollSpeedMultiplier(mult: number) {
+  autoScrollSpeedMultiplier.value = mult
+  if (isAutoScrolling.value) {
+    startAutoScroll()
+  }
+}
 
 const pages = computed(() => mangaStore.currentChapterPages)
 
@@ -376,7 +457,7 @@ function handleScroll() {
   const scrollTop = window.scrollY
   const docHeight = document.documentElement.scrollHeight - window.innerHeight
   if (docHeight > 0) {
-    readPercent.value = Math.min(100, Math.round((scrollTop / docHeight) * 100))
+    readPercent.value = Math.min(100, Math.max(0, Math.round((scrollTop / docHeight) * 100)))
   }
 }
 
@@ -385,7 +466,10 @@ function handleKeyDown(e: KeyboardEvent) {
   if (tag === 'input' || tag === 'textarea' || tag === 'select') return
 
   if (readerMode.value === 'webtoon') {
-    if (e.key === 'ArrowLeft' && prevChapter.value) goToPrevChapter()
+    if (e.code === 'Space') {
+      e.preventDefault()
+      toggleAutoScroll()
+    } else if (e.key === 'ArrowLeft' && prevChapter.value) goToPrevChapter()
     else if (e.key === 'ArrowRight' && nextChapter.value) goToNextChapter()
     else if (e.key === 'f' || e.key === 'F') immersive.value = !immersive.value
   } else if (readerMode.value === 'flip') {
@@ -410,6 +494,7 @@ function handleKeyDown(e: KeyboardEvent) {
 async function loadChapter() {
   loading.value = true
   currentPageIndex.value = 0
+  stopAutoScroll()
   try {
     await mangaStore.fetchMangaDetail(slug)
     if (mangaStore.currentManga?.chapters) {
@@ -432,8 +517,8 @@ onMounted(() => {
   readerMode.value = mangaStore.readerMode
   fitMode.value = mangaStore.fitMode
   readingDir.value = mangaStore.readingDirection
-
   void loadChapter()
+
   if (typeof window !== 'undefined') {
     window.addEventListener('scroll', handleScroll)
     window.addEventListener('keydown', handleKeyDown)
@@ -441,6 +526,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  stopAutoScroll()
   if (typeof window !== 'undefined') {
     window.removeEventListener('scroll', handleScroll)
     window.removeEventListener('keydown', handleKeyDown)

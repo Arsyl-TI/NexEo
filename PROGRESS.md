@@ -183,3 +183,13 @@
   - **Interactive Search Toolbar**: Added 🔍 **Cari Teks** search bar with live text input and result counter (`X / Y`).
   - **Luminous Keyword Highlighting**: Automatically wraps matching query occurrences with glowing amber `<mark class="search-highlight">` elements without breaking HTML tags.
   - **Previous / Next Match Navigation**: Added `▲` and `▼` navigation buttons that smoothly scroll the current active match into view (`scrollIntoView({ behavior: 'smooth', block: 'center' })`) with a vivid pulsing active ring (`.search-highlight.active-match`).
+
+---
+
+## Feature 17: Manga Webtoon Hands-Free Auto-Scroll Engine
+- **Files Modified**:
+  - `apps/frontend-nuxt/pages/manga/[slug]/[chapter].vue`
+- **Implementation Highlights**:
+  - **Hands-Free Auto-Scroll Loop**: Smooth 60fps continuous auto-scroll engine for vertical Webtoons and Manhwa.
+  - **Floating Controls Widget**: Bottom glassmorphic widget with Play/Pause button, speed pills (`0.5x`, `1.0x`, `2.0x`, `3.0x`, `5.0x`), and Spacebar hotkey toggle.
+  - **Smart End Detection**: Automatically detects when the reader reaches the end of the chapter and stops scrolling smoothly.

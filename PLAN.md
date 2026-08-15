@@ -1,21 +1,22 @@
-# Technical Execution Plan: Feature 16 - Novel Text Keyword In-Chapter Search & Highlighter
+# Technical Execution Plan: Feature 17 - Manga Webtoon Hands-Free Auto-Scroll Engine
 
 ## Overview
-Add a dedicated in-chapter text search and highlight bar to the Novel Reader (`pages/novels/[slug]/[chapter].vue`). Allows users to search for any word/phrase inside long novel chapters, see total match counts, navigate between matches using `▲`/`▼` keys or buttons, and visually highlight all matching text with luminous markers.
+Add a smooth, hands-free auto-scrolling engine for vertical manga and webtoon reading in `pages/manga/[slug]/[chapter].vue`. Readers can sit back and let long webtoon chapters scroll down automatically at an adjustable speed (`0.5x` to `5.0x`).
 
 ## Target File:
-- `apps/frontend-nuxt/pages/novels/[slug]/[chapter].vue`
+- `apps/frontend-nuxt/pages/manga/[slug]/[chapter].vue`
 
 ## Step-by-Step Implementation Steps:
-1. **Search Toolbar & UI Controls**:
-   - Add a 🔍 **"Cari Teks"** toggle button in the reader header toolbar.
-   - Expandable floating search bar with search input, match counter badge (`X / Y`), `▲ Sebelumnya`, `▼ Selanjutnya`, and `✕ Tutup`.
-2. **Text Highlighting Logic**:
-   - Create computed/rendered paragraph builder that replaces matching text queries with `<mark class="bg-amber-400/30 text-amber-200 border-b-2 border-amber-400 px-0.5 rounded">...</mark>`.
-   - Track `activeMatchIndex` (0 to total matches - 1).
-3. **Smooth Scroll & Navigation**:
-   - When active match changes, scroll the target paragraph smoothly into view using `element.scrollIntoView({ behavior: 'smooth', block: 'center' })`.
-   - Highlight the current active match with a distinct border/glow.
+1. **Auto-Scroll Engine State**:
+   - `isAutoScrolling = ref(false)`
+   - `autoScrollSpeed = ref(1.5)` (pixels per frame interval)
+   - `scrollInterval: any = null`
+2. **Floating Auto-Scroll Controller Widget**:
+   - Add 📜 **Auto-Scroll** button in the Manga reader toolbar.
+   - Floating glassmorphic widget at bottom of screen with Play/Pause button (`▶ Auto Scroll` / `⏸ Hentikan`), speed selector buttons (`0.5x`, `1.0x`, `2.0x`, `3.0x`, `5.0x`), and Spacebar toggle support.
+3. **Smooth Animation Loop**:
+   - Use `requestAnimationFrame` or high-frequency interval (`window.scrollBy({ top: speed })`).
+   - Automatically stop when reaching the end of the page (`window.scrollY + window.innerHeight >= document.body.scrollHeight - 10`).
 4. **Verification**:
    - Run `pnpm turbo run typecheck` across all monorepo packages.
 5. **Logging & Git Commit**:
