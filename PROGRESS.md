@@ -90,3 +90,14 @@
     - ☕ **Kafe Santai (Coffee Shop)**: Warm ambient room noise.
   - Added 🌧️ **Suara Relaksasi** button in reader toolbar and a floating ambient sound control drawer with preset sound selectors and master volume slider (`0%` - `100%`).
   - Safe audio lifecycle management pausing/cleaning up `AudioContext` on page unmount.
+
+---
+
+## Feature 9: Novel Reading Pomodoro Focus & Sleep Timer Suite
+- **Files Modified**:
+  - `apps/frontend-nuxt/pages/novels/[slug]/[chapter].vue`
+- **Implementation Highlights**:
+  - Added ⏱️ **Timer** button to the Novel Reader toolbar with a live countdown indicator (`⏱️ MM:SS`).
+  - Interactive timer modal with presets (15m, 25m Pomodoro, 45m, 60m 1 Jam) and quick extend (`+5 Menit`).
+  - **Gentle Musical Chime**: Synthesizes a soft 3-tone harmonic chime (C5-E5-G5) via Web Audio API on timer completion.
+  - **Sleep Mode Auto-Pause**: Automatically shuts off active Audiobook Speech synthesis and Ambient Sound generators when the timer expires to prevent overnight battery/audio drain.

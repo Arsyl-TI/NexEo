@@ -28,6 +28,14 @@
           <span>🌧️</span> {{ ambientIsPlaying ? getAmbientLabel(ambientSelected) : 'Suara Relaksasi' }}
         </button>
 
+        <!-- Pomodoro & Sleep Timer Button -->
+        <button 
+          @click="showTimerModal = true" 
+          :class="['px-3 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5 shadow-md active:scale-95', timerActive ? 'bg-amber-600 text-white font-mono animate-pulse' : 'bg-card border border-border text-foreground hover:bg-border/60']"
+        >
+          <span>⏱️</span> {{ timerActive ? formatTimerDisplay(timerRemaining) : 'Timer' }}
+        </button>
+
         <!-- In-Chapter Search Button -->
         <button @click="showTextSearch = !showTextSearch" class="px-3 py-1.5 rounded-full text-xs font-semibold transition-colors bg-card border border-border text-foreground hover:bg-border/60 flex items-center gap-1.5">
           <span>🔍</span> Cari Teks
@@ -245,6 +253,67 @@
           <button @click="executeTranslation" :disabled="isTranslating" class="flex-1 px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium flex items-center justify-center gap-2 shadow-lg disabled:opacity-50">
             <span v-if="isTranslating" class="spinner border-2 w-4 h-4"></span>
             <span>{{ isTranslating ? 'Menerjemahkan...' : 'Mulai Terjemahkan' }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Focus & Sleep Timer Modal -->
+    <div v-if="showTimerModal" @click.self="showTimerModal = false" class="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
+      <div class="bg-card border border-border rounded-3xl max-w-sm w-full p-6 shadow-2xl relative">
+        <button @click="showTimerModal = false" class="absolute top-4 right-4 text-muted-foreground hover:text-foreground text-sm p-1 rounded-lg">✕</button>
+
+        <h2 class="text-base font-bold text-foreground mb-1 flex items-center gap-2">
+          <span>⏱️</span> Timer Fokus & Waktu Tidur
+        </h2>
+        <p class="text-xs text-muted-foreground mb-5">Atur batas waktu membaca dengan pengingat & auto-pause</p>
+
+        <!-- Active Timer View -->
+        <div v-if="timerActive" class="text-center py-4 bg-card/60 border border-border rounded-2xl mb-4">
+          <p class="text-xs text-muted-foreground mb-1">Sisa Waktu Membaca:</p>
+          <div class="text-4xl font-extrabold font-mono text-primary mb-3">{{ formatTimerDisplay(timerRemaining) }}</div>
+          <div class="flex items-center justify-center gap-2">
+            <button @click="extendTimer(5)" class="px-3 py-1.5 bg-card hover:bg-border border border-border rounded-xl text-xs font-semibold text-foreground">
+              +5 Menit
+            </button>
+            <button @click="stopTimer" class="px-3.5 py-1.5 bg-rose-500/20 text-rose-300 border border-rose-500/30 hover:bg-rose-500/30 rounded-xl text-xs font-bold">
+              Hentikan Timer
+            </button>
+          </div>
+        </div>
+
+        <!-- Set Timer View -->
+        <div v-else class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-muted-foreground mb-2">Pilih Durasi Waktu</label>
+            <div class="grid grid-cols-2 gap-2">
+              <button 
+                v-for="p in timerPresets" 
+                :key="p.mins"
+                @click="selectedTimerMins = p.mins"
+                :class="['p-2.5 rounded-xl text-xs font-semibold border transition-all text-center', selectedTimerMins === p.mins ? 'bg-primary text-white border-primary shadow-md' : 'bg-background border-border text-foreground hover:bg-border/60']"
+              >
+                {{ p.label }}
+              </button>
+            </div>
+          </div>
+
+          <div class="pt-2 space-y-2 border-t border-border/50">
+            <label class="flex items-center gap-2 text-xs text-foreground cursor-pointer">
+              <input type="checkbox" v-model="timerPlayChime" class="rounded accent-primary w-4 h-4" />
+              <span>🔔 Bunyikan lonceng lembut saat selesai</span>
+            </label>
+            <label class="flex items-center gap-2 text-xs text-foreground cursor-pointer">
+              <input type="checkbox" v-model="timerAutoStopAudio" class="rounded accent-primary w-4 h-4" />
+              <span>🛑 Hentikan Audiobook & Suara (Sleep Mode)</span>
+            </label>
+          </div>
+
+          <button 
+            @click="startTimer" 
+            class="w-full py-2.5 bg-primary hover:bg-primary/90 text-white rounded-xl text-xs font-bold shadow-lg transition-all flex items-center justify-center gap-1.5 mt-2"
+          >
+            <span>▶ Mulai Timer</span>
           </button>
         </div>
       </div>
@@ -608,6 +677,84 @@ function stopAmbient() {
   }
 }
 
+// Focus & Sleep Timer State
+const showTimerModal = ref(false)
+const timerActive = ref(false)
+const timerRemaining = ref(0)
+const selectedTimerMins = ref(25)
+const timerPlayChime = ref(true)
+const timerAutoStopAudio = ref(true)
+let timerInterval: any = null
+
+const timerPresets = [
+  { mins: 15, label: '15 Menit' },
+  { mins: 25, label: '25 Menit (Pomodoro)' },
+  { mins: 45, label: '45 Menit' },
+  { mins: 60, label: '60 Menit (1 Jam)' }
+]
+
+function formatTimerDisplay(seconds: number): string {
+  const m = Math.floor(seconds / 60)
+  const s = seconds % 60
+  return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
+}
+
+function playSoftChime() {
+  if (typeof window === 'undefined') return
+  try {
+    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext
+    const ctx = new AudioCtx()
+    const tones = [523.25, 659.25, 783.99] // C5, E5, G5 major triad chime
+    tones.forEach((freq, i) => {
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.type = 'sine'
+      osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.18)
+      gain.gain.setValueAtTime(0.12, ctx.currentTime + i * 0.18)
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + i * 0.18 + 0.8)
+      osc.connect(gain)
+      gain.connect(ctx.destination)
+      osc.start(ctx.currentTime + i * 0.18)
+      osc.stop(ctx.currentTime + i * 0.18 + 0.8)
+    })
+  } catch {}
+}
+
+function startTimer() {
+  timerRemaining.value = selectedTimerMins.value * 60
+  timerActive.value = true
+  showTimerModal.value = false
+
+  if (timerInterval) clearInterval(timerInterval)
+  timerInterval = setInterval(() => {
+    if (timerRemaining.value > 0) {
+      timerRemaining.value--
+    } else {
+      stopTimer()
+      if (timerPlayChime.value) playSoftChime()
+      if (timerAutoStopAudio.value) {
+        stopAudiobook()
+        stopAmbient()
+      }
+      success('Waktu membaca selesai! Istirahat sejenak.')
+    }
+  }, 1000)
+}
+
+function extendTimer(mins: number) {
+  timerRemaining.value += mins * 60
+  success(`Timer ditambah +${mins} menit`)
+}
+
+function stopTimer() {
+  timerActive.value = false
+  timerRemaining.value = 0
+  if (timerInterval) {
+    clearInterval(timerInterval)
+    timerInterval = null
+  }
+}
+
 const paragraphTexts = computed(() => {
   const contentToRender = translatedContent.value || chapterContent.value
   if (!contentToRender) return []
@@ -939,6 +1086,7 @@ onMounted(() => {
 onBeforeUnmount(() => {
   stopAudiobook()
   stopAmbient()
+  stopTimer()
   if (typeof window !== 'undefined') {
     window.removeEventListener('scroll', handleScroll)
     window.removeEventListener('keydown', handleKeyDown)
