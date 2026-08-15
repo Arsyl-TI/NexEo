@@ -149,29 +149,16 @@
 
 ---
 
-## Feature 14: Manga Online Search & Auto-Downloader Suite (MangaDex Direct API)
+## Feature 14: Multi-Provider Manga Online Engine (MangaDex, WestManga, Komiku.id)
 - **Files Modified**:
   - `apps/frontend-nuxt/server/utils/manga/online.ts`
   - `apps/frontend-nuxt/server/api/manga/online/search.get.ts`
   - `apps/frontend-nuxt/server/api/manga/online/detail.get.ts`
   - `apps/frontend-nuxt/server/api/manga/online/download.post.ts`
   - `apps/frontend-nuxt/pages/manga/browse.vue`
-  - `apps/frontend-nuxt/pages/manga/index.vue`
 - **Implementation Highlights**:
-  - **MangaDex Official API Integration**: Full search across thousands of manga/manhwa titles with direct Indonesian translation filter (`lang=id`).
-  - **Interactive Manga Detail & Chapter Explorer**: Displays cover, tags, authors, and real-time chapter feed with scanlation group credits.
-  - **1-Click Chapter Downloader to Local Library**: Downloads and saves all high-resolution chapter images directly into the server's `data/manga/[slug]/[chapter]/` storage disk so they become immediately readable locally/offline across LAN.
-  - **Batch Chapter Downloader**: Added "📥 Unduh Semua Bab" action to queue sequential chapter downloads automatically.
-
----
-
-## Performance Optimization: Manga Online High-Speed Caching & 4-Worker Concurrent Downloader
-- **Files Modified**:
-  - `apps/frontend-nuxt/server/utils/manga/online.ts`
-  - `apps/frontend-nuxt/server/api/manga/online/cover.get.ts`
-  - `apps/frontend-nuxt/pages/manga/browse.vue`
-- **Implementation Highlights**:
-  - **Server-Side In-Memory Cache (15-Min TTL)**: Pencarian dan detail bab kini disimpan di memory cache server. Pencarian ulang dan navigasi antar judul merespons instan (0ms latency).
-  - **Local Cover Image Proxy Stream (`/api/manga/online/cover`)**: Menghilangkan *rate-limiting* / koneksi tersendat dari CDN MangaDex langsung. Gambar cover di-stream dan di-cache lokal dengan header `Cache-Control: immutable`.
-  - **4-Worker Parallel Concurrent Downloader**: Mengunduh 4 gambar halaman secara paralel bersamaan, memangkas waktu unduh 1 chapter dari ~25 detik menjadi ~3-4 detik.
-  - **Frontend Debouncing & GPU-Accelerated Skeleton Loader**: Menambahkan *debounce* input 400ms, animasi *skeleton placeholder*, serta `decoding="async"` untuk mencegah lag rendering layout pada peramban.
+  - **Multiple Indonesian Providers**:
+    - 🌟 **MangaDex (API)**: Official REST API with direct Indonesian translation filters.
+    - ⚡ **WestManga**: Scraping adapter for Indonesian Manhwa & Manhua releases.
+    - 📖 **Komiku.id**: Scraping adapter for Indonesian Japanese Manga releases.
+  - **Universal Search & Detail Router**: Single unified interface switching seamlessly between providers with in-memory caching and high-speed multi-worker downloading.

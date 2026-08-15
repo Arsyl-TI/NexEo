@@ -8,21 +8,36 @@
           <span>←</span> Kembali ke Koleksi Lokal
         </NuxtLink>
 
-        <div class="flex items-center gap-2">
-          <span class="px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 border border-primary/30 text-primary flex items-center gap-1.5 shadow-sm">
-            <span>⚡</span> Provider: <b>MangaDex API (Cached)</b>
-          </span>
+        <!-- Provider Selection Pills -->
+        <div class="flex items-center bg-card/80 border border-border rounded-2xl p-1 gap-1">
+          <button 
+            v-for="p in providers"
+            :key="p.id"
+            @click="changeProvider(p.id)"
+            :class="['px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5', selectedProvider === p.id ? 'bg-primary text-white shadow-md' : 'text-muted-foreground hover:text-foreground']"
+          >
+            <span>{{ p.icon }}</span> {{ p.name }}
+          </button>
         </div>
       </div>
 
       <!-- Main Banner Search Box -->
       <div class="bg-card/70 border border-border/80 rounded-3xl p-6 sm:p-8 mb-8 shadow-2xl backdrop-blur-xl relative overflow-hidden">
         <div class="relative z-10">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="px-3 py-1 rounded-full text-xs font-bold bg-primary/10 border border-primary/30 text-primary">
+              Sumber: {{ activeProviderInfo?.name }}
+            </span>
+            <span class="text-xs text-muted-foreground font-medium hidden sm:inline">
+              • {{ activeProviderInfo?.desc }}
+            </span>
+          </div>
+
           <h1 class="text-2xl sm:text-4xl font-extrabold text-foreground tracking-tight flex items-center gap-3 mb-2">
-            <span>🌐</span> Cari Manga & Manhwa Online
+            <span>🌐</span> Jelajah Manga & Manhwa Online
           </h1>
           <p class="text-xs sm:text-sm text-muted-foreground mb-6 max-w-2xl">
-            Cari ribuan judul komik & terjemahan Bahasa Indonesia langsung dari server MangaDex, lalu simpan ke disk lokal server untuk dibaca secara offline / LAN.
+            Cari dan jelajahi ribuan judul komik terjemahan Bahasa Indonesia dari berbagai sumber terpercaya, lalu simpan ke disk lokal server untuk dibaca offline / LAN.
           </p>
 
           <form @submit.prevent="triggerImmediateSearch" class="flex flex-col sm:flex-row gap-3">
@@ -37,8 +52,13 @@
               <span class="absolute left-4 top-3.5 text-base text-muted-foreground">🔍</span>
             </div>
 
-            <!-- Language Filter Selector -->
-            <select v-model="selectedLang" @change="triggerImmediateSearch" class="bg-background border border-border rounded-2xl px-4 py-3 text-xs font-semibold text-foreground focus:outline-none focus:border-primary shrink-0 cursor-pointer">
+            <!-- Language Filter Selector (visible for MangaDex) -->
+            <select 
+              v-if="selectedProvider === 'mangadex'"
+              v-model="selectedLang" 
+              @change="triggerImmediateSearch" 
+              class="bg-background border border-border rounded-2xl px-4 py-3 text-xs font-semibold text-foreground focus:outline-none focus:border-primary shrink-0 cursor-pointer"
+            >
               <option value="id">🇮🇩 Bahasa Indonesia</option>
               <option value="en">🇬🇧 English</option>
               <option value="all">🌐 Semua Bahasa</option>
@@ -66,7 +86,7 @@
         <div class="text-4xl mb-3">🔍</div>
         <h3 class="text-base font-bold text-foreground mb-1">Tidak Ada Manga Ditemukan</h3>
         <p class="text-xs text-muted-foreground max-w-md mx-auto leading-relaxed">
-          Coba gunakan kata kunci judul lain atau ubah filter bahasa ke "Semua Bahasa".
+          Coba gunakan kata kunci lain atau ganti sumber komik (MangaDex, WestManga, atau Komiku).
         </p>
       </div>
 
@@ -92,6 +112,11 @@
               <div v-else class="flex flex-col items-center justify-center w-full h-full text-xs text-muted-foreground p-4 text-center">
                 <span class="text-2xl mb-1">🎨</span>
                 <span>No Cover</span>
+              </div>
+
+              <!-- Provider Tag Badge -->
+              <div class="absolute top-2 left-2 bg-black/80 backdrop-blur-md border border-border text-sky-300 text-[9px] font-mono px-1.5 py-0.5 rounded font-bold shadow uppercase">
+                {{ item.provider }}
               </div>
 
               <!-- Status Badge -->
@@ -123,7 +148,7 @@
 
         <div v-if="detailLoading" class="flex flex-col items-center justify-center py-20">
           <div class="spinner mb-4"></div>
-          <p class="text-xs text-muted-foreground font-medium">Memuat daftar bab...</p>
+          <p class="text-xs text-muted-foreground font-medium">Memuat daftar bab komik...</p>
         </div>
 
         <div v-else-if="activeMangaDetail" class="space-y-6">
@@ -134,6 +159,15 @@
             </div>
 
             <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 mb-2">
+                <span class="px-2.5 py-0.5 rounded-md bg-primary/20 text-primary border border-primary/30 text-[10px] font-bold uppercase">
+                  {{ activeMangaDetail.provider }}
+                </span>
+                <span class="text-xs text-muted-foreground font-mono">
+                  {{ activeChapters.length }} Chapter Terdeteksi
+                </span>
+              </div>
+
               <h2 class="text-xl sm:text-3xl font-extrabold text-foreground tracking-tight leading-tight mb-2">{{ activeMangaDetail.title }}</h2>
               <p class="text-xs text-muted-foreground mb-3 font-medium">Author: <span class="text-foreground font-bold">{{ activeMangaDetail.author }}</span></p>
 
@@ -172,7 +206,7 @@
             </div>
 
             <div v-if="activeChapters.length === 0" class="text-center py-12 bg-background border border-border rounded-2xl text-xs text-muted-foreground">
-              Belum ada chapter Bahasa Indonesia untuk judul ini di MangaDex. Coba ubah filter ke bahasa lain.
+              Belum ada chapter untuk judul ini.
             </div>
 
             <!-- Scrollable Chapter Rows -->
@@ -184,7 +218,7 @@
               >
                 <div class="min-w-0 pr-2">
                   <h4 class="font-bold text-foreground truncate">{{ ch.title }}</h4>
-                  <p class="text-[10px] text-muted-foreground truncate">{{ ch.scanlationGroup }}</p>
+                  <p class="text-[10px] text-muted-foreground truncate">{{ ch.scanlationGroup || activeMangaDetail.provider }}</p>
                 </div>
 
                 <button 
@@ -205,12 +239,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useToast } from '~/composables/useToast'
-import type { OnlineMangaItem, OnlineMangaChapter } from '~/server/utils/manga/online'
+import type { OnlineMangaItem, OnlineMangaChapter, MangaProviderType } from '~/server/utils/manga/online'
 
 const { success, error: showError } = useToast()
 
+const selectedProvider = ref<MangaProviderType>('mangadex')
 const searchQuery = ref('')
 const selectedLang = ref<'id' | 'en' | 'all'>('id')
 const loading = ref(false)
@@ -223,7 +258,20 @@ const activeChapters = ref<OnlineMangaChapter[]>([])
 const downloadingChapters = ref<Record<string, boolean>>({})
 const isBatchDownloading = ref(false)
 
+const providers: { id: MangaProviderType; name: string; icon: string; desc: string }[] = [
+  { id: 'mangadex', name: 'MangaDex (API)', icon: '🌟', desc: 'Database scanlation global terlengkap & cepat' },
+  { id: 'westmanga', name: 'WestManga', icon: '⚡', desc: 'Portal terjemahan Manhwa & Manhua Indonesia' },
+  { id: 'komiku', name: 'Komiku.id', icon: '📖', desc: 'Koleksi Manga Jepang terjemahan Indonesia' }
+]
+
+const activeProviderInfo = computed(() => providers.find(p => p.id === selectedProvider.value))
+
 let debounceTimer: any = null
+
+function changeProvider(provider: MangaProviderType) {
+  selectedProvider.value = provider
+  void executeSearch()
+}
 
 function handleSearchInput() {
   if (debounceTimer) clearTimeout(debounceTimer)
@@ -243,7 +291,8 @@ async function executeSearch() {
     const res = await $fetch<{ success: boolean; data: OnlineMangaItem[] }>('/api/manga/online/search', {
       params: {
         q: searchQuery.value,
-        lang: selectedLang.value
+        lang: selectedLang.value,
+        provider: selectedProvider.value
       }
     })
     if (res?.data) {
@@ -266,7 +315,8 @@ async function openMangaDetail(item: OnlineMangaItem) {
     const res = await $fetch<{ success: boolean; data: { manga: OnlineMangaItem; chapters: OnlineMangaChapter[] } }>('/api/manga/online/detail', {
       params: {
         id: item.id,
-        lang: selectedLang.value
+        lang: selectedLang.value,
+        provider: item.provider || selectedProvider.value
       }
     })
     if (res?.data) {
@@ -296,7 +346,8 @@ async function downloadChapter(ch: OnlineMangaChapter) {
         chapterTitle: ch.title,
         coverUrl: activeMangaDetail.value.cover,
         author: activeMangaDetail.value.author,
-        description: activeMangaDetail.value.description
+        description: activeMangaDetail.value.description,
+        provider: activeMangaDetail.value.provider
       }
     })
 
@@ -329,7 +380,8 @@ async function downloadAllChapters() {
           chapterTitle: ch.title,
           coverUrl: activeMangaDetail.value.cover,
           author: activeMangaDetail.value.author,
-          description: activeMangaDetail.value.description
+          description: activeMangaDetail.value.description,
+          provider: activeMangaDetail.value.provider
         }
       })
       successCount++

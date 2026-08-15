@@ -60,6 +60,8 @@ declare global {
   const getFoldersByCategory: typeof import('../../server/utils/video').getFoldersByCategory
   const getHeader: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').getHeader
   const getHeaders: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').getHeaders
+  const getKomikuChapterPages: typeof import('../../server/utils/manga/online').getKomikuChapterPages
+  const getKomikuDetail: typeof import('../../server/utils/manga/online').getKomikuDetail
   const getLocalChapterContent: typeof import('../../server/utils/novel').getLocalChapterContent
   const getLocalChapters: typeof import('../../server/utils/novel').getLocalChapters
   const getLocalIP: typeof import('../../server/utils/network').getLocalIP
@@ -93,11 +95,15 @@ declare global {
   const getSession: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').getSession
   const getSharedFilePath: typeof import('../../server/utils/sharedFiles').getSharedFilePath
   const getSourceCatalog: typeof import('../../server/utils/novel/catalogScraper').getSourceCatalog
+  const getUniversalChapterPages: typeof import('../../server/utils/manga/online').getUniversalChapterPages
+  const getUniversalMangaDetail: typeof import('../../server/utils/manga/online').getUniversalMangaDetail
   const getValidatedQuery: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').getValidatedQuery
   const getValidatedRouterParams: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').getValidatedRouterParams
   const getVideoById: typeof import('../../server/utils/video').getVideoById
   const getVideoCategories: typeof import('../../server/utils/video').getVideoCategories
   const getVideosByFolder: typeof import('../../server/utils/video').getVideosByFolder
+  const getWestMangaChapterPages: typeof import('../../server/utils/manga/online').getWestMangaChapterPages
+  const getWestMangaDetail: typeof import('../../server/utils/manga/online').getWestMangaDetail
   const getYoutubeMetadata: typeof import('../../server/utils/youtubeDownloader').getYoutubeMetadata
   const handleCacheHeaders: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').handleCacheHeaders
   const handleCors: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').handleCors
@@ -137,8 +143,11 @@ declare global {
   const scrapeNoveldexCatalog: typeof import('../../server/utils/novel/catalogScraper').scrapeNoveldexCatalog
   const scrapeNoveldexNovelDetail: typeof import('../../server/utils/novel/catalogScraper').scrapeNoveldexNovelDetail
   const sealSession: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').sealSession
+  const searchKomiku: typeof import('../../server/utils/manga/online').searchKomiku
   const searchMangaDex: typeof import('../../server/utils/manga/online').searchMangaDex
+  const searchUniversalManga: typeof import('../../server/utils/manga/online').searchUniversalManga
   const searchVideos: typeof import('../../server/utils/video').searchVideos
+  const searchWestManga: typeof import('../../server/utils/manga/online').searchWestManga
   const send: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').send
   const sendError: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').sendError
   const sendIterable: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').sendIterable
@@ -187,7 +196,7 @@ declare global {
   export type { VideoCategoryConfig, VideoConfig, NovelConfig, MangaConfig, ServerConfig } from '../../server/utils/config'
   import('../../server/utils/config')
   // @ts-ignore
-  export type { OnlineMangaItem, OnlineMangaChapter } from '../../server/utils/manga/online'
+  export type { MangaProviderType, OnlineMangaItem, OnlineMangaChapter } from '../../server/utils/manga/online'
   import('../../server/utils/manga/online')
   // @ts-ignore
   export type { NovelServerRepository, LocalChapter, NovelDetail } from '../../server/utils/novel'
@@ -228,7 +237,7 @@ export { defineAppConfig } from 'D:/MyProject/NexEo/node_modules/.pnpm/@nuxt+nit
 export { serverConfig, formatFileSize } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/config';
 export { saveTasksToFile, getDownloadTasks, createDownloadTask, cancelDownloadTask, deleteDownloadTask } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/downloader';
 export { getMangaDir, listLocalManga, getLocalMangaDetail, getLocalMangaChapters, getMangaChapterPages } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/manga';
-export { searchMangaDex, getMangaDexDetail, getMangaDexChapterPages, downloadChapterToLocal } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/manga/online';
+export { searchMangaDex, getMangaDexDetail, getMangaDexChapterPages, searchWestManga, getWestMangaDetail, getWestMangaChapterPages, searchKomiku, getKomikuDetail, getKomikuChapterPages, searchUniversalManga, getUniversalMangaDetail, getUniversalChapterPages, downloadChapterToLocal } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/manga/online';
 export { getLocalIP } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/network';
 export { NovelServerRepository, novelServerRepo, listLocalNovels, getLocalNovel, getLocalChapters, getLocalChapterContent } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/novel';
 export { NOVEL_SOURCES, scrapeDreamyCatalog, scrapeDreamyNovelDetail, scrapeNoveldexCatalog, scrapeNoveldexNovelDetail, getSourceCatalog } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/novel/catalogScraper';

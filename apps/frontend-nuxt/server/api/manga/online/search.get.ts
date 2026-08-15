@@ -1,12 +1,13 @@
-import { searchMangaDex } from '../../../utils/manga/online'
+import { searchUniversalManga, type MangaProviderType } from '../../../utils/manga/online'
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
   const q = typeof query.q === 'string' ? query.q : ''
   const lang = typeof query.lang === 'string' ? query.lang : 'id'
+  const provider = (typeof query.provider === 'string' ? query.provider : 'mangadex') as MangaProviderType
 
   try {
-    const results = await searchMangaDex(q, lang)
+    const results = await searchUniversalManga(q, provider, lang)
     return {
       success: true,
       data: results
