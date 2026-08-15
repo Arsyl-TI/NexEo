@@ -75,3 +75,18 @@
   - Built streaming archive exporter endpoint `GET /api/manga/[slug]/chapter/[chapter]/export?format=cbz` using `adm-zip` to bundle all manga chapter pages sequentially into standard comic reader format (`.cbz` or `.zip`).
   - Added **"📥 CBZ"** download button next to each chapter in the Manga Detail catalog (`pages/manga/[slug]/index.vue`).
   - Added **"📥 CBZ"** download button to the Manga Reader header toolbar (`pages/manga/[slug]/[chapter].vue`) for instant 1-click chapter export.
+
+---
+
+## Feature 8: Novel Relaxing Ambient Soundscape Engine (Web Audio API)
+- **Files Modified**:
+  - `apps/frontend-nuxt/pages/novels/[slug]/[chapter].vue`
+- **Implementation Highlights**:
+  - Built native Web Audio API procedural sound synthesizer engine requiring **0 external MP3 downloads / 100% offline**:
+    - 🌧️ **Hujan Rintik (Soft Rain)**: Pink noise with filtered atmospheric resonance.
+    - 🪵 **Api Unggun (Cozy Campfire)**: Brown noise with randomized wood crackle clicks.
+    - 🌊 **Ombak Laut (Ocean Waves)**: Deep brownian noise with slow periodic LFO swell.
+    - 🍃 **Angin Sejuk (Breeze)**: Band-pass oscillating white noise.
+    - ☕ **Kafe Santai (Coffee Shop)**: Warm ambient room noise.
+  - Added 🌧️ **Suara Relaksasi** button in reader toolbar and a floating ambient sound control drawer with preset sound selectors and master volume slider (`0%` - `100%`).
+  - Safe audio lifecycle management pausing/cleaning up `AudioContext` on page unmount.

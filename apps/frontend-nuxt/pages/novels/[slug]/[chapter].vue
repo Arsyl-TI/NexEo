@@ -20,6 +20,14 @@
           <span>🎧</span> {{ isSpeaking ? 'Audiobook Aktif' : 'Audiobook Suara' }}
         </button>
 
+        <!-- Ambient Soundscape Button -->
+        <button 
+          @click="toggleAmbientDrawer" 
+          :class="['px-3 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5 shadow-md active:scale-95', ambientIsPlaying ? 'bg-sky-600 text-white animate-pulse' : 'bg-card border border-border text-foreground hover:bg-border/60']"
+        >
+          <span>🌧️</span> {{ ambientIsPlaying ? getAmbientLabel(ambientSelected) : 'Suara Relaksasi' }}
+        </button>
+
         <!-- In-Chapter Search Button -->
         <button @click="showTextSearch = !showTextSearch" class="px-3 py-1.5 rounded-full text-xs font-semibold transition-colors bg-card border border-border text-foreground hover:bg-border/60 flex items-center gap-1.5">
           <span>🔍</span> Cari Teks
@@ -93,6 +101,60 @@
         </select>
 
         <button @click="showAudiobookBar = false" class="text-xs text-muted-foreground hover:text-foreground p-1">✕</button>
+      </div>
+    </div>
+
+    <!-- Sticky Floating Ambient Soundscape Player Widget Bar -->
+    <div v-if="showAmbientBar" class="fixed bottom-20 left-4 right-4 max-w-lg mx-auto z-40 bg-card/95 border border-sky-500/40 rounded-2xl p-4 shadow-2xl backdrop-blur-xl flex flex-col gap-3 animate-fade-in">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-sky-500/20 text-sky-400 border border-sky-500/30 flex items-center justify-center text-base shrink-0">
+            🌧️
+          </div>
+          <div>
+            <h4 class="text-xs font-bold text-foreground">Suara Alam & Relaksasi (Web Audio)</h4>
+            <p class="text-[10px] text-muted-foreground">Synthesizer instan tanpa kuota data / 100% offline</p>
+          </div>
+        </div>
+        <button @click="showAmbientBar = false" class="text-xs text-muted-foreground hover:text-foreground p-1">✕</button>
+      </div>
+
+      <!-- Sound Selector Pills -->
+      <div class="grid grid-cols-3 sm:grid-cols-5 gap-1.5">
+        <button 
+          v-for="s in ambientOptions" 
+          :key="s.id"
+          @click="selectAmbientSound(s.id)"
+          :class="['px-2 py-1.5 rounded-xl text-[11px] font-semibold transition-all flex flex-col items-center gap-0.5 text-center', ambientSelected === s.id && ambientIsPlaying ? 'bg-sky-600 text-white shadow-md' : 'bg-background border border-border/80 text-muted-foreground hover:text-foreground']"
+        >
+          <span class="text-sm">{{ s.icon }}</span>
+          <span class="truncate w-full">{{ s.name }}</span>
+        </button>
+      </div>
+
+      <!-- Play / Volume Controls -->
+      <div class="flex items-center justify-between gap-3 pt-1 border-t border-border/50">
+        <button 
+          @click="togglePlayPauseAmbient" 
+          class="px-3.5 py-1.5 rounded-xl text-xs font-bold shadow-md transition-all flex items-center gap-1.5"
+          :class="ambientIsPlaying ? 'bg-sky-600 hover:bg-sky-700 text-white' : 'bg-primary hover:bg-primary/90 text-white'"
+        >
+          <span>{{ ambientIsPlaying ? '⏹ Matikan' : '▶ Putar Suara' }}</span>
+        </button>
+
+        <div class="flex items-center gap-2 flex-1 max-w-[180px]">
+          <span class="text-xs text-muted-foreground">🔊</span>
+          <input 
+            type="range" 
+            min="0" 
+            max="1" 
+            step="0.05" 
+            v-model.number="ambientVolume" 
+            @input="updateAmbientVolume"
+            class="w-full h-1.5 bg-background rounded-lg appearance-none cursor-pointer accent-sky-500"
+          />
+          <span class="text-[10px] font-mono text-muted-foreground w-8 text-right">{{ Math.round(ambientVolume * 100) }}%</span>
+        </div>
       </div>
     </div>
 
@@ -267,6 +329,284 @@ const transConfig = ref({
   libreUrl: 'http://localhost:5000',
   libreApiKey: ''
 })
+
+// Web Audio API Relaxing Ambient Soundscape Engine
+type AmbientType = 'rain' | 'campfire' | 'waves' | 'wind' | 'cafe'
+
+class AmbientSoundEngine {
+  ctx: AudioContext | null = null
+  gainNode: GainNode | null = null
+  currentType: AmbientType | null = null
+  isPlaying = false
+  volume = 0.5
+
+  noiseSource: AudioBufferSourceNode | null = null
+  filter: BiquadFilterNode | null = null
+  modulator: OscillatorNode | null = null
+  modGain: GainNode | null = null
+  timerInterval: any = null
+
+  init() {
+    if (!this.ctx && typeof window !== 'undefined') {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext
+      this.ctx = new AudioCtx()
+      this.gainNode = this.ctx.createGain()
+      this.gainNode.gain.setValueAtTime(this.volume, this.ctx.currentTime)
+      this.gainNode.connect(this.ctx.destination)
+    }
+  }
+
+  setVolume(val: number) {
+    this.volume = Math.max(0, Math.min(1, val))
+    if (this.gainNode && this.ctx) {
+      this.gainNode.gain.setValueAtTime(this.volume, this.ctx.currentTime)
+    }
+  }
+
+  createPinkNoiseBuffer(): AudioBuffer {
+    const bufferSize = this.ctx!.sampleRate * 4
+    const buffer = this.ctx!.createBuffer(1, bufferSize, this.ctx!.sampleRate)
+    const output = buffer.getChannelData(0)
+    let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0
+    for (let i = 0; i < bufferSize; i++) {
+      const white = Math.random() * 2 - 1
+      b0 = 0.99886 * b0 + white * 0.0555179
+      b1 = 0.99332 * b1 + white * 0.0750759
+      b2 = 0.96900 * b2 + white * 0.1538520
+      b3 = 0.86650 * b3 + white * 0.3104856
+      b4 = 0.55000 * b4 + white * 0.5329522
+      b5 = -0.7616 * b5 - white * 0.0168980
+      output[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.11
+      b6 = white * 0.115926
+    }
+    return buffer
+  }
+
+  createBrownNoiseBuffer(): AudioBuffer {
+    const bufferSize = this.ctx!.sampleRate * 4
+    const buffer = this.ctx!.createBuffer(1, bufferSize, this.ctx!.sampleRate)
+    const output = buffer.getChannelData(0)
+    let lastOut = 0.0
+    for (let i = 0; i < bufferSize; i++) {
+      const white = Math.random() * 2 - 1
+      output[i] = (lastOut + (0.02 * white)) / 1.02
+      lastOut = output[i]
+      output[i] *= 3.5
+    }
+    return buffer
+  }
+
+  createWhiteNoiseBuffer(): AudioBuffer {
+    const bufferSize = this.ctx!.sampleRate * 4
+    const buffer = this.ctx!.createBuffer(1, bufferSize, this.ctx!.sampleRate)
+    const output = buffer.getChannelData(0)
+    for (let i = 0; i < bufferSize; i++) {
+      output[i] = (Math.random() * 2 - 1) * 0.2
+    }
+    return buffer
+  }
+
+  stop() {
+    if (this.timerInterval) {
+      clearInterval(this.timerInterval)
+      this.timerInterval = null
+    }
+    try {
+      this.noiseSource?.stop()
+      this.noiseSource?.disconnect()
+      this.filter?.disconnect()
+      this.modulator?.stop()
+      this.modulator?.disconnect()
+      this.modGain?.disconnect()
+    } catch {}
+    this.noiseSource = null
+    this.filter = null
+    this.modulator = null
+    this.modGain = null
+    this.isPlaying = false
+  }
+
+  play(type: AmbientType) {
+    this.init()
+    if (this.ctx?.state === 'suspended') {
+      this.ctx.resume()
+    }
+    this.stop()
+    this.currentType = type
+
+    if (type === 'rain') {
+      const buffer = this.createPinkNoiseBuffer()
+      this.noiseSource = this.ctx!.createBufferSource()
+      this.noiseSource.buffer = buffer
+      this.noiseSource.loop = true
+
+      this.filter = this.ctx!.createBiquadFilter()
+      this.filter.type = 'lowpass'
+      this.filter.frequency.setValueAtTime(1400, this.ctx!.currentTime)
+
+      this.noiseSource.connect(this.filter)
+      this.filter.connect(this.gainNode!)
+      this.noiseSource.start()
+    } else if (type === 'campfire') {
+      const buffer = this.createBrownNoiseBuffer()
+      this.noiseSource = this.ctx!.createBufferSource()
+      this.noiseSource.buffer = buffer
+      this.noiseSource.loop = true
+
+      this.filter = this.ctx!.createBiquadFilter()
+      this.filter.type = 'lowpass'
+      this.filter.frequency.setValueAtTime(800, this.ctx!.currentTime)
+
+      this.noiseSource.connect(this.filter)
+      this.filter.connect(this.gainNode!)
+      this.noiseSource.start()
+
+      this.timerInterval = setInterval(() => {
+        if (!this.isPlaying || !this.ctx) return
+        if (Math.random() > 0.4) {
+          const osc = this.ctx.createOscillator()
+          const crackleGain = this.ctx.createGain()
+          osc.type = 'sawtooth'
+          osc.frequency.setValueAtTime(200 + Math.random() * 800, this.ctx.currentTime)
+          crackleGain.gain.setValueAtTime(0.08, this.ctx.currentTime)
+          crackleGain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.04)
+          osc.connect(crackleGain)
+          crackleGain.connect(this.gainNode!)
+          osc.start()
+          osc.stop(this.ctx.currentTime + 0.04)
+        }
+      }, 120)
+    } else if (type === 'waves') {
+      const buffer = this.createBrownNoiseBuffer()
+      this.noiseSource = this.ctx!.createBufferSource()
+      this.noiseSource.buffer = buffer
+      this.noiseSource.loop = true
+
+      this.filter = this.ctx!.createBiquadFilter()
+      this.filter.type = 'lowpass'
+      this.filter.frequency.setValueAtTime(600, this.ctx!.currentTime)
+
+      this.modGain = this.ctx!.createGain()
+      this.modGain.gain.setValueAtTime(0.5, this.ctx!.currentTime)
+
+      this.modulator = this.ctx!.createOscillator()
+      this.modulator.type = 'sine'
+      this.modulator.frequency.setValueAtTime(0.12, this.ctx!.currentTime)
+
+      const modScale = this.ctx!.createGain()
+      modScale.gain.setValueAtTime(0.35, this.ctx!.currentTime)
+
+      this.modulator.connect(modScale)
+      modScale.connect(this.modGain.gain)
+
+      this.noiseSource.connect(this.filter)
+      this.filter.connect(this.modGain)
+      this.modGain.connect(this.gainNode!)
+
+      this.noiseSource.start()
+      this.modulator.start()
+    } else if (type === 'wind') {
+      const buffer = this.createWhiteNoiseBuffer()
+      this.noiseSource = this.ctx!.createBufferSource()
+      this.noiseSource.buffer = buffer
+      this.noiseSource.loop = true
+
+      this.filter = this.ctx!.createBiquadFilter()
+      this.filter.type = 'bandpass'
+      this.filter.frequency.setValueAtTime(500, this.ctx!.currentTime)
+      this.filter.Q.setValueAtTime(3.0, this.ctx!.currentTime)
+
+      this.modulator = this.ctx!.createOscillator()
+      this.modulator.type = 'sine'
+      this.modulator.frequency.setValueAtTime(0.18, this.ctx!.currentTime)
+
+      const modScale = this.ctx!.createGain()
+      modScale.gain.setValueAtTime(300, this.ctx!.currentTime)
+
+      this.modulator.connect(modScale)
+      modScale.connect(this.filter.frequency)
+
+      this.noiseSource.connect(this.filter)
+      this.filter.connect(this.gainNode!)
+
+      this.noiseSource.start()
+      this.modulator.start()
+    } else if (type === 'cafe') {
+      const buffer = this.createPinkNoiseBuffer()
+      this.noiseSource = this.ctx!.createBufferSource()
+      this.noiseSource.buffer = buffer
+      this.noiseSource.loop = true
+
+      this.filter = this.ctx!.createBiquadFilter()
+      this.filter.type = 'lowpass'
+      this.filter.frequency.setValueAtTime(700, this.ctx!.currentTime)
+
+      this.noiseSource.connect(this.filter)
+      this.filter.connect(this.gainNode!)
+      this.noiseSource.start()
+    }
+
+    this.isPlaying = true
+  }
+}
+
+const showAmbientBar = ref(false)
+const ambientIsPlaying = ref(false)
+const ambientSelected = ref<AmbientType>('rain')
+const ambientVolume = ref(0.5)
+
+const ambientOptions: { id: AmbientType; name: string; icon: string }[] = [
+  { id: 'rain', name: 'Hujan Rintik', icon: '🌧️' },
+  { id: 'campfire', name: 'Api Unggun', icon: '🪵' },
+  { id: 'waves', name: 'Ombak Laut', icon: '🌊' },
+  { id: 'wind', name: 'Angin Sejuk', icon: '🍃' },
+  { id: 'cafe', name: 'Kafe Santai', icon: '☕' }
+]
+
+const getAmbientLabel = (id: AmbientType) => {
+  const found = ambientOptions.find(o => o.id === id)
+  return found ? `${found.icon} ${found.name}` : 'Suara Relaksasi'
+}
+
+let ambientEngine: AmbientSoundEngine | null = null
+
+function toggleAmbientDrawer() {
+  showAmbientBar.value = !showAmbientBar.value
+}
+
+function selectAmbientSound(type: AmbientType) {
+  ambientSelected.value = type
+  if (ambientIsPlaying.value) {
+    if (!ambientEngine) ambientEngine = new AmbientSoundEngine()
+    ambientEngine.play(type)
+  }
+}
+
+function togglePlayPauseAmbient() {
+  if (!ambientEngine) ambientEngine = new AmbientSoundEngine()
+  if (ambientIsPlaying.value) {
+    ambientEngine.stop()
+    ambientIsPlaying.value = false
+  } else {
+    ambientEngine.setVolume(ambientVolume.value)
+    ambientEngine.play(ambientSelected.value)
+    ambientIsPlaying.value = true
+    showAmbientBar.value = true
+  }
+}
+
+function updateAmbientVolume() {
+  if (ambientEngine) {
+    ambientEngine.setVolume(ambientVolume.value)
+  }
+}
+
+function stopAmbient() {
+  if (ambientEngine) {
+    ambientEngine.stop()
+    ambientIsPlaying.value = false
+  }
+}
 
 const paragraphTexts = computed(() => {
   const contentToRender = translatedContent.value || chapterContent.value
@@ -598,6 +938,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   stopAudiobook()
+  stopAmbient()
   if (typeof window !== 'undefined') {
     window.removeEventListener('scroll', handleScroll)
     window.removeEventListener('keydown', handleKeyDown)

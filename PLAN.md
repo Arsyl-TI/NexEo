@@ -1,27 +1,31 @@
-# Technical Execution Plan: Manga Chapter Offline CBZ / ZIP Exporter
+# Technical Execution Plan: Novel Relaxing Ambient Soundscape Engine (Web Audio API)
 
-Target Files:
-- `apps/frontend-nuxt/server/api/manga/[slug]/chapter/[chapter]/export.get.ts`
-- `apps/frontend-nuxt/pages/manga/[slug]/index.vue`
-- `apps/frontend-nuxt/pages/manga/[slug]/[chapter].vue`
+Target File:
+- `apps/frontend-nuxt/pages/novels/[slug]/[chapter].vue`
 
 ## Step-by-Step Execution Steps
 
-1. **Build Manga Chapter Export Nitro API Endpoint (`server/api/manga/[slug]/chapter/[chapter]/export.get.ts`)**:
-   - Locate manga chapter folder in `data/manga/[slug]/[chapter]`.
-   - Read query parameter `format` (`cbz` or `zip`, default `cbz`).
-   - Use `adm-zip` to bundle all page images (`.jpg`, `.jpeg`, `.png`, `.webp`, `.gif`) in sequential numerical order.
-   - Stream the generated `.cbz` or `.zip` file with `Content-Type: application/vnd.comicbook+zip` (for CBZ) or `application/zip` and `Content-Disposition: attachment; filename="..."`.
+1. **Native Web Audio API Ambient Synthesizer**:
+   - Create zero-dependency sound generators using `AudioContext`, `BiquadFilterNode`, `GainNode`, and procedural noise buffers:
+     - 🌧️ **Hujan Rintik (Soft Rain)**: Pink noise passed through a low-pass filter with gentle frequency modulation.
+     - 🪵 **Api Unggun (Cozy Campfire)**: Brown noise with randomized crackle impulses.
+     - 🌊 **Ombak Laut (Ocean Waves)**: Low-frequency modulated brownian noise with slow periodic volume swell.
+     - 🍃 **Angin Sejuk (Breeze)**: Band-pass filtered white noise with smooth oscillating resonance.
+     - ☕ **Kafe Santai (Coffee Shop)**: Multi-layer warm room noise tone.
 
-2. **Add Export UI to Manga Detail Page (`pages/manga/[slug]/index.vue`)**:
-   - In each chapter row in the chapter list, add a quick **"📥 Unduh (.cbz)"** button.
+2. **Ambient Soundscape Control Drawer / Modal**:
+   - Add a 🌧️ **Suara Relaksasi** button to the Novel Reader top toolbar.
+   - Build a sleek floating ambient player with:
+     - Preset sound selectors (Rain, Campfire, Waves, Wind, Cafe).
+     - Master volume slider (`0%` - `100%`).
+     - Play / Pause toggle with pulse animation.
 
-3. **Add Export Button to Manga Reader Header (`pages/manga/[slug]/[chapter].vue`)**:
-   - Add a download icon button in the reader top toolbar to easily export current chapter as CBZ.
+3. **Lifecycle & Clean Up**:
+   - Automatically pause/close `AudioContext` when navigating away or unmounting page.
 
 4. **Testing & Build Verification**:
-   - Run `pnpm turbo run typecheck` across all monorepo packages.
+   - Run `pnpm turbo run typecheck` across monorepo packages.
 
 5. **Git Commit & Progress Log**:
-   - Append completed feature entry to `PROGRESS.md`.
-   - Execute `git add . && git commit -m "feat(manga): add offline CBZ/ZIP chapter exporter endpoint and download buttons"`.
+   - Append log entry in `PROGRESS.md`.
+   - Execute `git add . && git commit -m "feat(novel): add Web Audio API relaxing ambient soundscape engine"`.
