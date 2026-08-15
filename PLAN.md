@@ -1,26 +1,28 @@
-# Technical Execution Plan: Video Subtitle Sync, External Track Loader, & Theater/PiP Suite
+# Technical Execution Plan: Novel Multi-Chapter EPUB Exporter
 
-Target File:
-- `apps/frontend-nuxt/pages/video/[id].vue`
+Target Files:
+- `apps/frontend-nuxt/server/api/novels/[slug]/export-epub.get.ts`
+- `apps/frontend-nuxt/pages/novels/[slug]/index.vue`
 
 ## Step-by-Step Execution Steps
 
-1. **Client-side External Subtitle (.srt / .vtt) Drag & Drop Loader**:
-   - Allow loading external `.srt` / `.vtt` subtitle files directly into the video player via file picker or drag-drop.
-   - Built-in SRT to WebVTT client converter (`URL.createObjectURL(blob)`).
-   - Attach `<track>` element dynamically to the video.
+1. **Build Valid EPUB 3 Exporter API Endpoint (`server/api/novels/[slug]/export-epub.get.ts`)**:
+   - Read novel metadata (`title`, `author`, `description`, `cover`, `tags`) and all chapter files (`.txt` and `.json`) in `data/novels/[slug]`.
+   - Build standard EPUB package structure using `adm-zip`:
+     - `mimetype`: `application/epub+zip` (stored uncompressed).
+     - `META-INF/container.xml`: Points to `OEBPS/content.opf`.
+     - `OEBPS/content.opf`: Manifest listing all chapter XHTML documents, cover image, and spine reading order.
+     - `OEBPS/toc.ncx` & `OEBPS/nav.xhtml`: Standard navigation / Table of Contents.
+     - `OEBPS/chapter_*.xhtml`: Formatted HTML chapters with clean typography styles (`OEBPS/style.css`).
+     - `OEBPS/cover.jpg`: Cover image if available.
+   - Stream resulting `.epub` buffer with `Content-Type: application/epub+zip` and `Content-Disposition: attachment; filename="${slug}.epub"`.
 
-2. **Subtitle Delay Sync Controller**:
-   - Provide sub-second offset adjustment (`-500ms`, `-100ms`, `+100ms`, `+500ms`, `Reset 0ms`).
-   - Adjusts active WebVTT cue start & end timestamps in real time.
+2. **Add EPUB Download Action to Novel Detail Page (`pages/novels/[slug]/index.vue`)**:
+   - Add **"📚 Unduh EPUB (.epub)"** button in the header action area next to the `.txt` export button.
 
-3. **Picture-in-Picture (PiP) & Theater Mode**:
-   - Add 1-click Picture-in-Picture button (`video.requestPictureInPicture()`).
-   - Add Theater Mode expand button to toggle wide cinema view (`max-w-7xl` or full container).
+3. **Testing & Build Verification**:
+   - Run `pnpm turbo run typecheck` across all monorepo packages.
 
-4. **Testing & Build Verification**:
-   - Run `pnpm turbo run typecheck` across monorepo packages.
-
-5. **Git Commit & Progress Log**:
-   - Append completed feature entry to `PROGRESS.md`.
-   - Execute `git add . && git commit -m "feat(video): add external subtitle loader, delay sync, and theater/PiP controls"`.
+4. **Git Commit & Progress Log**:
+   - Append log entry in `PROGRESS.md`.
+   - Execute `git add . && git commit -m "feat(novel): add EPUB 3 e-book packaging exporter endpoint and UI download button"`.

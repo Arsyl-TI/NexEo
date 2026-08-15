@@ -61,6 +61,9 @@ declare module "nitropack/types" {
     '/api/novels/:slug/chapters': {
       'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/novels/[slug]/chapters.get').default>>>>
     }
+    '/api/novels/:slug/export-epub': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/novels/[slug]/export-epub.get').default>>>>
+    }
     '/api/novels/:slug/export': {
       'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/novels/[slug]/export.get').default>>>>
     }

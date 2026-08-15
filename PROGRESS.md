@@ -112,3 +112,16 @@
   - **Subtitle Delay Offset Controller**: Added live sub-second subtitle sync adjuster (`-0.5s`, `-0.1s`, `+0.1s`, `+0.5s`, and `Reset`) to fix out-of-sync audio & subtitles.
   - **Theater Mode (Cinema Width Expansion)**: Added 🎭 **Mode Bioskop** toggle button to expand video canvas width for an immersive viewing experience.
   - **Picture-in-Picture & Keyboard Shortcuts**: Added 📺 **PiP** button and ⌨️ pintasan keyboard modal (`Space/K`, `J/L`, `F`, `T`, `M`, `P`).
+
+---
+
+## Feature 11: Novel Multi-Chapter EPUB 3 E-Book Exporter
+- **Files Modified**:
+  - `apps/frontend-nuxt/server/api/novels/[slug]/export-epub.get.ts`
+  - `apps/frontend-nuxt/pages/novels/[slug]/index.vue`
+- **Implementation Highlights**:
+  - Created full-spec **EPUB 3** packaging engine (`GET /api/novels/[slug]/export-epub`) compiling entire multi-chapter novels into standard e-book files (`.epub`):
+    - Includes `META-INF/container.xml`, `OEBPS/content.opf`, `OEBPS/toc.ncx`, `OEBPS/nav.xhtml`, and typographic styling (`OEBPS/style.css`).
+    - Automatic cover image embedding and metadata retention (author, description, title).
+    - Perfect compatibility with Apple Books, Kindle, Kobo, Moon+ Reader, and ReadEra.
+  - Added **"📚 Unduh E-Book (.epub)"** button to Novel detail page (`pages/novels/[slug]/index.vue`).

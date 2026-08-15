@@ -75,6 +75,16 @@
                 <span>📥</span> Unduh Seluruh Chapter (.txt)
               </a>
 
+              <!-- Export Novel EPUB Button -->
+              <a 
+                :href="`/api/novels/${slug}/export-epub`" 
+                target="_blank" 
+                download 
+                class="w-full py-2.5 px-4 rounded-xl text-xs font-semibold bg-sky-500/15 border border-sky-500/30 text-sky-300 hover:bg-sky-500/25 transition-all flex items-center justify-center gap-2 shadow-sm"
+              >
+                <span>📚</span> Unduh E-Book (.epub)
+              </a>
+
               <!-- Source Link Button -->
               <a v-if="novel.sourceUrl" :href="novel.sourceUrl" target="_blank" class="w-full py-2.5 px-4 rounded-xl text-xs font-semibold bg-card/60 border border-border/80 text-muted-foreground hover:text-foreground hover:bg-border/60 transition-all flex items-center justify-center gap-2">
                 <span>🌐</span> Buka Sumber Asli ↗
