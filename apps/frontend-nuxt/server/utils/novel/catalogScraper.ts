@@ -19,6 +19,7 @@ export interface CatalogNovel {
 }
 
 export const NOVEL_SOURCES: NovelSource[] = [
+  { id: 'sakuranovel', name: 'SakuraNovel.id (Indo)', url: 'https://sakuranovel.id' },
   { id: 'dreamy-translations', name: 'Dreamy Translations', url: 'https://dreamy-translations.com' },
   { id: 'noveldex', name: 'Noveldex', url: 'https://noveldex.io' }
 ]
@@ -407,8 +408,95 @@ export async function scrapeNoveldexNovelDetail(slug: string): Promise<CatalogNo
   }
 }
 
+// ----------------------------------------------------
+// 3. SAKURANOVEL.ID SCRAPER (WP REST API)
+// ----------------------------------------------------
+
+export async function scrapeSakuraCatalog(): Promise<CatalogNovel[]> {
+  const baseUrl = 'https://sakuranovel.id'
+  const headers = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
+  const novels: CatalogNovel[] = []
+
+  try {
+    for (let page = 1; page <= 3; page++) {
+      const res = await axios.get(`${baseUrl}/wp-json/wp/v2/categories?per_page=100&page=${page}&orderby=count&order=desc`, { headers, timeout: 15000 })
+      const categories = res.data
+      if (!Array.isArray(categories) || categories.length === 0) break
+
+      for (const cat of categories) {
+        if (cat.count > 0 && cat.slug !== 'uncategorized') {
+          novels.push({
+            id: cat.slug,
+            slug: cat.slug,
+            title: cat.name,
+            sourceUrl: `${baseUrl}/category/${cat.slug}/`,
+            description: `Novel terjemahan Bahasa Indonesia: ${cat.name} (${cat.count} chapter).`
+          })
+        }
+      }
+    }
+  } catch (err: any) {
+    console.error('[SakuraCatalog Error]', err.message)
+  }
+  return novels
+}
+
+export async function scrapeSakuraNovelDetail(slug: string): Promise<CatalogNovel & { chapters: Array<{ title: string; url: string; file: string; contentHtml?: string }> }> {
+  const baseUrl = 'https://sakuranovel.id'
+  const headers = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
+
+  // 1. Fetch category by slug
+  const catRes = await axios.get(`${baseUrl}/wp-json/wp/v2/categories?slug=${encodeURIComponent(slug)}`, { headers, timeout: 15000 })
+  const categories = catRes.data
+  if (!Array.isArray(categories) || categories.length === 0) {
+    throw new Error(`Category not found for slug: ${slug}`)
+  }
+
+  const cat = categories[0]
+  const catId = cat.id
+  const title = cat.name
+
+  // 2. Fetch all chapter posts for this category
+  const chapters: Array<{ title: string; url: string; file: string; contentHtml?: string }> = []
+  let page = 1
+  let totalPages = 1
+
+  do {
+    const postsRes = await axios.get(`${baseUrl}/wp-json/wp/v2/posts?categories=${catId}&per_page=100&page=${page}&order=asc`, { headers, timeout: 20000 })
+    const posts = postsRes.data
+    totalPages = parseInt(postsRes.headers['x-wp-totalpages'] || '1', 10)
+
+    if (Array.isArray(posts)) {
+      for (const p of posts) {
+        const chTitle = p.title?.rendered ? cheerio.load(p.title.rendered).text().trim() : `Chapter ${chapters.length + 1}`
+        const chUrl = p.link || `${baseUrl}/${p.slug}`
+        chapters.push({
+          title: chTitle,
+          url: chUrl,
+          file: `chapter-${chapters.length + 1}.json`,
+          contentHtml: p.content?.rendered
+        })
+      }
+    }
+    page++
+  } while (page <= totalPages && page <= 10)
+
+  return {
+    id: slug,
+    slug,
+    title,
+    author: 'SakuraNovel',
+    description: `Novel terjemahan Bahasa Indonesia dari SakuraNovel: ${title} (${chapters.length} chapter).`,
+    tags: ['SakuraNovel', 'Bahasa Indonesia'],
+    sourceUrl: `${baseUrl}/category/${slug}/`,
+    chapters
+  }
+}
+
 export async function getSourceCatalog(sourceId: string): Promise<CatalogNovel[]> {
-  if (sourceId === 'dreamy-translations') {
+  if (sourceId === 'sakuranovel') {
+    return await scrapeSakuraCatalog()
+  } else if (sourceId === 'dreamy-translations') {
     return await scrapeDreamyCatalog()
   } else if (sourceId === 'noveldex') {
     return await scrapeNoveldexCatalog()

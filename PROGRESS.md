@@ -226,3 +226,14 @@
   - **Live Mikoroku DB Scraper Engine**: Integrated `https://raw.githubusercontent.com/moemaomao/mymangadata/main/all-manga.json` live catalog database and `https://www.mikoroku.top/feeds/posts/default` Blogger post feeds.
   - **Search, Detail, & Chapter Page Extractor**: Search titles & descriptions instantly, extract chapter posts, and parse high-resolution page images.
   - **Provider Switcher Pill**: Added `🌸 Mikoroku (Indo)` provider pill in `pages/manga/browse.vue`.
+
+---
+
+## Feature 21: SakuraNovel.id Indonesian Light Novel Provider Integration
+- **Files Modified**:
+  - `apps/frontend-nuxt/server/utils/novel/catalogScraper.ts`
+  - `apps/frontend-nuxt/server/api/novels/sources/[source]/novel/[slug].get.ts`
+- **Implementation Highlights**:
+  - **WP REST API Bypass Scraper**: Intercepts `https://sakuranovel.id/wp-json/wp/v2/categories` and `https://sakuranovel.id/wp-json/wp/v2/posts` to bypass Cloudflare turnstile protection cleanly.
+  - **Full Novel Catalog & Chapter Extractor**: Scrapes novel titles, chapter listings, and full Indonesian translated text content for 1-click import into local NexEo novel library.
+  - **Source Provider Integration**: Added `SakuraNovel.id (Indo)` to `NOVEL_SOURCES` dropdown in Online Novel importer.

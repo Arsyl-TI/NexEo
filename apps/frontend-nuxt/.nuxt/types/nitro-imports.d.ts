@@ -144,6 +144,8 @@ declare global {
   const scrapeDreamyNovelDetail: typeof import('../../server/utils/novel/catalogScraper').scrapeDreamyNovelDetail
   const scrapeNoveldexCatalog: typeof import('../../server/utils/novel/catalogScraper').scrapeNoveldexCatalog
   const scrapeNoveldexNovelDetail: typeof import('../../server/utils/novel/catalogScraper').scrapeNoveldexNovelDetail
+  const scrapeSakuraCatalog: typeof import('../../server/utils/novel/catalogScraper').scrapeSakuraCatalog
+  const scrapeSakuraNovelDetail: typeof import('../../server/utils/novel/catalogScraper').scrapeSakuraNovelDetail
   const sealSession: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').sealSession
   const searchKomiku: typeof import('../../server/utils/manga/online').searchKomiku
   const searchMangaDex: typeof import('../../server/utils/manga/online').searchMangaDex
@@ -243,7 +245,7 @@ export { getMangaDir, listLocalManga, getLocalMangaDetail, getLocalMangaChapters
 export { searchMangaDex, getMangaDexDetail, getMangaDexChapterPages, searchKomiku, getKomikuDetail, getKomikuChapterPages, searchMikoroku, getMikorokuDetail, getMikorokuChapterPages, searchWestManga, getWestMangaDetail, getWestMangaChapterPages, searchUniversalManga, getUniversalMangaDetail, getUniversalChapterPages, downloadChapterToLocal } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/manga/online';
 export { getLocalIP } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/network';
 export { NovelServerRepository, novelServerRepo, listLocalNovels, getLocalNovel, getLocalChapters, getLocalChapterContent } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/novel';
-export { NOVEL_SOURCES, scrapeDreamyCatalog, scrapeDreamyNovelDetail, scrapeNoveldexCatalog, scrapeNoveldexNovelDetail, getSourceCatalog } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/novel/catalogScraper';
+export { NOVEL_SOURCES, scrapeDreamyCatalog, scrapeDreamyNovelDetail, scrapeNoveldexCatalog, scrapeNoveldexNovelDetail, scrapeSakuraCatalog, scrapeSakuraNovelDetail, getSourceCatalog } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/novel/catalogScraper';
 export { importEpubFile } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/novel/epubImporter';
 export { importNovelFromSource } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/novel/massScraper';
 export { detectSourceLanguage, translateWithGemini, translateBatchDeepL, translateBatchLibre, translateBatchGoogle, translateBatch } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/novel/translator';

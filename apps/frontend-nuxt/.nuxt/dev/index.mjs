@@ -2144,22 +2144,7 @@ const plugins = [
 _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw
 ];
 
-const assets = {
-  "/index.mjs": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"41673-K/nEQ2I+i9eiJMcxZmRQj7YsrbY\"",
-    "mtime": "2026-08-15T16:49:14.833Z",
-    "size": 267891,
-    "path": "index.mjs"
-  },
-  "/index.mjs.map": {
-    "type": "application/json",
-    "etag": "\"f4b50-YVLKeHLYv/ou0YHgx0Lttt/MieM\"",
-    "mtime": "2026-08-15T16:49:14.833Z",
-    "size": 1002320,
-    "path": "index.mjs.map"
-  }
-};
+const assets = {};
 
 function readAsset (id) {
   const serverDir = dirname$1(fileURLToPath(globalThis._importMeta_.url));
@@ -2855,6 +2840,7 @@ const _lazy_Pz82FG = () => Promise.resolve().then(function () { return translate
 const _lazy_Zmywsc = () => Promise.resolve().then(function () { return translate_post$1; });
 const _lazy_kuWKbu = () => Promise.resolve().then(function () { return qrcode_get$1; });
 const _lazy_g3fDtd = () => Promise.resolve().then(function () { return _filename__delete$1; });
+const _lazy_lVgSa2 = () => Promise.resolve().then(function () { return downloadZip_post$1; });
 const _lazy_fqf94D = () => Promise.resolve().then(function () { return _filename__get$1; });
 const _lazy_T_vAxt = () => Promise.resolve().then(function () { return index_get$1; });
 const _lazy_u0k32j = () => Promise.resolve().then(function () { return upload_post$3; });
@@ -2914,6 +2900,7 @@ const handlers = [
   { route: '/api/novels/translate', handler: _lazy_Zmywsc, lazy: true, middleware: false, method: "post" },
   { route: '/api/qrcode', handler: _lazy_kuWKbu, lazy: true, middleware: false, method: "get" },
   { route: '/api/shared-files/:filename', handler: _lazy_g3fDtd, lazy: true, middleware: false, method: "delete" },
+  { route: '/api/shared-files/download-zip', handler: _lazy_lVgSa2, lazy: true, middleware: false, method: "post" },
   { route: '/api/shared-files/download/:filename', handler: _lazy_fqf94D, lazy: true, middleware: false, method: "get" },
   { route: '/api/shared-files', handler: _lazy_T_vAxt, lazy: true, middleware: false, method: "get" },
   { route: '/api/shared-files/upload', handler: _lazy_u0k32j, lazy: true, middleware: false, method: "post" },
@@ -4494,6 +4481,152 @@ async function getKomikuChapterPages(chapterIdOrUrl) {
     return [];
   }
 }
+const MIKOROKU_DB_URL = "https://raw.githubusercontent.com/moemaomao/mymangadata/main/all-manga.json";
+let mikorokuCatalogCache = null;
+let mikorokuCatalogExpiry = 0;
+async function fetchMikorokuCatalog() {
+  const now = Date.now();
+  if (mikorokuCatalogCache && mikorokuCatalogExpiry > now) {
+    return mikorokuCatalogCache;
+  }
+  try {
+    const res = await axios.get(MIKOROKU_DB_URL, { timeout: 1e4 });
+    if (Array.isArray(res.data)) {
+      mikorokuCatalogCache = res.data;
+      mikorokuCatalogExpiry = now + CACHE_TTL;
+      return res.data;
+    }
+  } catch (err) {
+    console.error("[Mikoroku DB Error]", err.message);
+  }
+  return mikorokuCatalogCache || [];
+}
+async function searchMikoroku(query) {
+  const cacheKey = `mikoroku_${query.trim().toLowerCase()}`;
+  const now = Date.now();
+  if (searchCache.has(cacheKey)) {
+    const cached = searchCache.get(cacheKey);
+    if (cached.expiry > now) return cached.data;
+  }
+  try {
+    const catalog = await fetchMikorokuCatalog();
+    const q = query.trim().toLowerCase();
+    const filtered = q ? catalog.filter(
+      (m) => {
+        var _a, _b, _c, _d;
+        return ((_a = m.title) == null ? void 0 : _a.toLowerCase().includes(q)) || ((_b = m.altTitle) == null ? void 0 : _b.toLowerCase().includes(q)) || ((_c = m.slug) == null ? void 0 : _c.toLowerCase().includes(q)) || ((_d = m.desc) == null ? void 0 : _d.toLowerCase().includes(q));
+      }
+    ) : catalog;
+    const results = filtered.map((item) => {
+      const title = item.title || "Untitled";
+      const slug = item.slug || title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+      let cover = item.img || item.cover || null;
+      if (cover && !cover.startsWith("http")) {
+        cover = `https://mikoroku.com/${cover}`;
+      }
+      return {
+        id: slug,
+        title,
+        slug,
+        cover,
+        author: item.author || item.artist || "Mikoroku",
+        description: item.desc || item.synopsis || "Komik Bahasa Indonesia dari Mikoroku.",
+        status: item.status || "Ongoing",
+        tags: Array.isArray(item.genres) ? item.genres : ["Manga", "Mikoroku", "Bahasa Indonesia"],
+        provider: "mikoroku",
+        availableLanguages: ["id"],
+        url: `https://mikoroku.com/detail?slug=${slug}`
+      };
+    });
+    searchCache.set(cacheKey, { data: results, expiry: now + CACHE_TTL });
+    return results;
+  } catch (err) {
+    console.error("[Mikoroku Search Error]", err.message);
+    return [];
+  }
+}
+async function getMikorokuDetail(slug) {
+  var _a, _b;
+  const cacheKey = `mikoroku_detail_${slug}`;
+  const now = Date.now();
+  if (detailCache.has(cacheKey)) {
+    const cached = detailCache.get(cacheKey);
+    if (cached.expiry > now) return cached.data;
+  }
+  try {
+    const catalog = await fetchMikorokuCatalog();
+    const item = catalog.find((m) => {
+      var _a2;
+      return m.slug === slug || ((_a2 = m.title) == null ? void 0 : _a2.toLowerCase()) === slug.replace(/-/g, " ");
+    });
+    if (!item) return null;
+    const title = item.title || slug;
+    let cover = item.img || item.cover || null;
+    if (cover && !cover.startsWith("http")) {
+      cover = `https://mikoroku.com/${cover}`;
+    }
+    const feedUrl = `https://www.mikoroku.top/feeds/posts/default?alt=json&max-results=200&q=${encodeURIComponent(title)}`;
+    const feedRes = await axios.get(feedUrl, { timeout: 1e4 });
+    const entries = ((_b = (_a = feedRes.data) == null ? void 0 : _a.feed) == null ? void 0 : _b.entry) || [];
+    const chapters = entries.map((e, idx) => {
+      var _a2, _b2, _c, _d, _e;
+      const chTitle = ((_a2 = e.title) == null ? void 0 : _a2.$t) || `Chapter ${idx + 1}`;
+      const contentHtml = ((_b2 = e.content) == null ? void 0 : _b2.$t) || ((_c = e.summary) == null ? void 0 : _c.$t) || "";
+      const numMatch = chTitle.match(/chapter\s*(\d+(\.\d+)?)/i) || chTitle.match(/\bch\b\.?\s*(\d+(\.\d+)?)/i) || chTitle.match(/\d+/);
+      const chapterNum = numMatch ? numMatch[1] || numMatch[0] : String(idx + 1);
+      const chPayload = JSON.stringify({ title: chTitle, html: contentHtml });
+      const chId = Buffer.from(chPayload).toString("base64url");
+      return {
+        id: chId,
+        chapter: chapterNum,
+        title: chTitle,
+        language: "id",
+        publishDate: ((_d = e.published) == null ? void 0 : _d.$t) || ((_e = e.updated) == null ? void 0 : _e.$t),
+        scanlationGroup: "Mikoroku"
+      };
+    });
+    chapters.sort((a, b) => parseFloat(a.chapter || "0") - parseFloat(b.chapter || "0"));
+    const manga = {
+      id: slug,
+      title,
+      slug,
+      cover,
+      author: item.author || "Mikoroku",
+      description: item.desc || "Komik Bahasa Indonesia dari Mikoroku.",
+      status: item.status || "ongoing",
+      tags: Array.isArray(item.genres) ? item.genres : ["Manga", "Mikoroku"],
+      provider: "mikoroku",
+      availableLanguages: ["id"],
+      chapterCount: chapters.length,
+      url: `https://mikoroku.com/detail?slug=${slug}`
+    };
+    const result = { manga, chapters };
+    detailCache.set(cacheKey, { data: result, expiry: now + CACHE_TTL });
+    return result;
+  } catch (err) {
+    console.error("[Mikoroku Detail Error]", err.message);
+    return null;
+  }
+}
+async function getMikorokuChapterPages(chapterId) {
+  try {
+    const raw = Buffer.from(chapterId, "base64url").toString("utf-8");
+    const payload = JSON.parse(raw);
+    const html = payload.html || "";
+    const $ = cheerio.load(html);
+    const images = [];
+    $("img").each((_, el) => {
+      const src = $(el).attr("src") || $(el).attr("data-src") || "";
+      if (src && src.startsWith("http") && !src.includes("banner")) {
+        images.push(src.trim());
+      }
+    });
+    return images;
+  } catch (err) {
+    console.error("[Mikoroku Pages Error]", err.message);
+    return [];
+  }
+}
 const WESTMANGA_MIRRORS = [
   "https://westmanga.co",
   "https://v1.westmanga.my",
@@ -4639,6 +4772,9 @@ async function getWestMangaChapterPages(chapterIdOrUrl) {
   return getKomikuChapterPages(chapterIdOrUrl);
 }
 async function searchUniversalManga(query, provider = "mangadex", lang = "id") {
+  if (provider === "mikoroku") {
+    return searchMikoroku(query);
+  }
   if (provider === "westmanga") {
     return searchWestManga(query);
   }
@@ -4648,6 +4784,9 @@ async function searchUniversalManga(query, provider = "mangadex", lang = "id") {
   return searchMangaDex(query, lang);
 }
 async function getUniversalMangaDetail(id, provider = "mangadex", lang = "id") {
+  if (provider === "mikoroku") {
+    return getMikorokuDetail(id);
+  }
   if (provider === "westmanga") {
     return getWestMangaDetail(id);
   }
@@ -4657,6 +4796,9 @@ async function getUniversalMangaDetail(id, provider = "mangadex", lang = "id") {
   return getMangaDexDetail(id, lang);
 }
 async function getUniversalChapterPages(chapterId, provider = "mangadex") {
+  if (provider === "mikoroku") {
+    return getMikorokuChapterPages(chapterId);
+  }
   if (provider === "westmanga") {
     return getWestMangaChapterPages(chapterId);
   }
@@ -4679,7 +4821,7 @@ async function downloadWorker(urls, concurrency = 4) {
             timeout: 2e4,
             headers: {
               "User-Agent": DEFAULT_HEADERS["User-Agent"],
-              "Referer": current.referer || "https://komiku.org/"
+              "Referer": current.referer || "https://mikoroku.com/"
             }
           });
           fs.writeFileSync(current.dest, Buffer.from(res.data));
@@ -4730,7 +4872,7 @@ async function downloadChapterToLocal(options) {
     if (!fs.existsSync(chapterDir)) {
       fs.mkdirSync(chapterDir, { recursive: true });
     }
-    const referer = provider === "westmanga" ? "https://westmanga.co/" : provider === "komiku" ? "https://komiku.org/" : "https://mangadex.org/";
+    const referer = provider === "mikoroku" ? "https://mikoroku.com/" : provider === "westmanga" ? "https://westmanga.co/" : provider === "komiku" ? "https://komiku.org/" : "https://mangadex.org/";
     const tasks = pageUrls.map((pageUrl, i) => {
       const ext = path.extname(pageUrl.split("?")[0]) || ".jpg";
       const pageFileName = `${(i + 1).toString().padStart(3, "0")}${ext}`;
@@ -6600,6 +6742,50 @@ const _filename__delete = defineEventHandler((event) => {
 const _filename__delete$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
   default: _filename__delete
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const downloadZip_post = defineEventHandler(async (event) => {
+  const body = await readBody(event);
+  const filenames = (body == null ? void 0 : body.filenames) || [];
+  if (!Array.isArray(filenames) || filenames.length === 0) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: "Daftar nama file tidak valid atau kosong"
+    });
+  }
+  const uploadDir = serverConfig.uploadDir;
+  if (!fs.existsSync(uploadDir)) {
+    throw createError({
+      statusCode: 404,
+      statusMessage: "Direktori berkas terbagi tidak ditemukan"
+    });
+  }
+  const zip = new AdmZip();
+  let addedCount = 0;
+  for (const filename of filenames) {
+    const safeName = path.basename(filename);
+    const filePath = path.join(uploadDir, safeName);
+    if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+      zip.addLocalFile(filePath);
+      addedCount++;
+    }
+  }
+  if (addedCount === 0) {
+    throw createError({
+      statusCode: 404,
+      statusMessage: "Tidak ada berkas valid yang dapat dikemas ke ZIP"
+    });
+  }
+  const zipBuffer = zip.toBuffer();
+  setHeader(event, "Content-Type", "application/zip");
+  setHeader(event, "Content-Disposition", 'attachment; filename="nexeo-shared-files.zip"');
+  setHeader(event, "Content-Length", zipBuffer.length);
+  return zipBuffer;
+});
+
+const downloadZip_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: downloadZip_post
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const _filename__get = defineEventHandler((event) => {
