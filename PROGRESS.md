@@ -125,3 +125,13 @@
     - Automatic cover image embedding and metadata retention (author, description, title).
     - Perfect compatibility with Apple Books, Kindle, Kobo, Moon+ Reader, and ReadEra.
   - Added **"📚 Unduh E-Book (.epub)"** button to Novel detail page (`pages/novels/[slug]/index.vue`).
+
+---
+
+## Feature 12: Downloader Batch Multi-URL Queue Manager & Status Filters
+- **Files Modified**:
+  - `apps/frontend-nuxt/pages/downloader/index.vue`
+- **Implementation Highlights**:
+  - **Batch Multi-URL Insertion Mode**: Added tab switcher to paste 10+ direct download links at once with line-by-line parsing and smart filename auto-detection.
+  - **Status Filter Tabs**: Added quick tabs `Semua`, `⚡ Aktif (Downloading/Pending)`, `✓ Selesai`, and `❌ Gagal/Batal`.
+  - **1-Click Retry & Batch Clear**: Added `🔄 Ulangi` button on failed tasks to quickly restart downloads, and `🗑️ Bersihkan Selesai` to prune completed tasks from history.
