@@ -17,7 +17,6 @@ export default defineEventHandler(async (event) => {
   }
 
   const files = fs.readdirSync(novelDir)
-  // Support both .txt and .json chapter files
   const chapterFiles = files.filter(f => {
     const l = f.toLowerCase()
     return (l.endsWith('.txt') || l.endsWith('.json')) && !l.includes('meta') && !l.includes('index') && !l.includes('cover')
@@ -37,8 +36,6 @@ export default defineEventHandler(async (event) => {
     const fileName = chapterFiles[i]
     if (!fileName) continue
 
-    console.log(`[Batch Translate] (${i + 1}/${chapterFiles.length}) Translating chapter ${fileName} using engine '${engine || 'google'}'...`)
-
     const filePath = path.join(novelDir, fileName)
     const ext = path.extname(fileName).toLowerCase()
 
@@ -46,6 +43,8 @@ export default defineEventHandler(async (event) => {
       if (ext === '.txt') {
         const content = fs.readFileSync(filePath, 'utf-8')
         const paragraphs = content.split(/\r?\n/).filter(p => p.trim().length > 0)
+
+        console.log(`[Batch Translate] (${i + 1}/${chapterFiles.length}) Chapter ${fileName} (.txt): found ${paragraphs.length} paragraphs. Translating via '${engine || 'google'}'...`)
 
         if (paragraphs.length > 0) {
           const translatedParagraphs = await translateBatch(paragraphs, {
@@ -65,20 +64,43 @@ export default defineEventHandler(async (event) => {
         const rawJson = fs.readFileSync(filePath, 'utf-8')
         const jsonData = JSON.parse(rawJson)
 
-        let paragraphsToTranslate: string[] = []
+        const extractedParagraphs: string[] = []
 
         if (Array.isArray(jsonData)) {
-          paragraphsToTranslate = jsonData.filter(p => typeof p === 'string' && p.trim().length > 0)
+          for (const item of jsonData) {
+            if (typeof item === 'string' && item.trim()) {
+              extractedParagraphs.push(item.trim())
+            } else if (item && typeof item === 'object') {
+              if (item.type === 'text' && typeof item.value === 'string' && item.value.trim()) {
+                extractedParagraphs.push(item.value.trim())
+              } else if (typeof item.value === 'string' && item.value.trim()) {
+                extractedParagraphs.push(item.value.trim())
+              } else if (typeof item.text === 'string' && item.text.trim()) {
+                extractedParagraphs.push(item.text.trim())
+              }
+            }
+          }
         } else if (jsonData && typeof jsonData === 'object') {
-          if (Array.isArray(jsonData.paragraphs)) {
-            paragraphsToTranslate = jsonData.paragraphs.filter((p: any) => typeof p === 'string' && p.trim().length > 0)
-          } else if (Array.isArray(jsonData.content)) {
-            paragraphsToTranslate = jsonData.content.filter((p: any) => typeof p === 'string' && p.trim().length > 0)
+          const contentArr = Array.isArray(jsonData.content) ? jsonData.content : (Array.isArray(jsonData.paragraphs) ? jsonData.paragraphs : [])
+          for (const item of contentArr) {
+            if (typeof item === 'string' && item.trim()) {
+              extractedParagraphs.push(item.trim())
+            } else if (item && typeof item === 'object') {
+              if (item.type === 'text' && typeof item.value === 'string' && item.value.trim()) {
+                extractedParagraphs.push(item.value.trim())
+              } else if (typeof item.value === 'string' && item.value.trim()) {
+                extractedParagraphs.push(item.value.trim())
+              } else if (typeof item.text === 'string' && item.text.trim()) {
+                extractedParagraphs.push(item.text.trim())
+              }
+            }
           }
         }
 
-        if (paragraphsToTranslate.length > 0) {
-          const translatedParagraphs = await translateBatch(paragraphsToTranslate, {
+        console.log(`[Batch Translate] (${i + 1}/${chapterFiles.length}) Chapter ${fileName} (.json): found ${extractedParagraphs.length} paragraphs. Translating via '${engine || 'google'}'...`)
+
+        if (extractedParagraphs.length > 0) {
+          const translatedParagraphs = await translateBatch(extractedParagraphs, {
             engine,
             geminiApiKey,
             deeplApiKey,
@@ -87,15 +109,38 @@ export default defineEventHandler(async (event) => {
           })
 
           if (translatedParagraphs && translatedParagraphs.length > 0) {
+            let tIdx = 0
             if (Array.isArray(jsonData)) {
-              fs.writeFileSync(filePath, JSON.stringify(translatedParagraphs, null, 2), 'utf-8')
+              for (let k = 0; k < jsonData.length; k++) {
+                const item = jsonData[k]
+                if (typeof item === 'string' && item.trim()) {
+                  jsonData[k] = translatedParagraphs[tIdx++] ?? item
+                } else if (item && typeof item === 'object') {
+                  if (item.type === 'text' && typeof item.value === 'string' && item.value.trim()) {
+                    item.value = translatedParagraphs[tIdx++] ?? item.value
+                  } else if (typeof item.value === 'string' && item.value.trim()) {
+                    item.value = translatedParagraphs[tIdx++] ?? item.value
+                  } else if (typeof item.text === 'string' && item.text.trim()) {
+                    item.text = translatedParagraphs[tIdx++] ?? item.text
+                  }
+                }
+              }
+              fs.writeFileSync(filePath, JSON.stringify(jsonData, null, 2), 'utf-8')
             } else if (jsonData && typeof jsonData === 'object') {
-              if (Array.isArray(jsonData.paragraphs)) {
-                jsonData.paragraphs = translatedParagraphs
-              } else if (Array.isArray(jsonData.content)) {
-                jsonData.content = translatedParagraphs
-              } else {
-                jsonData.paragraphs = translatedParagraphs
+              const contentArr = Array.isArray(jsonData.content) ? jsonData.content : (Array.isArray(jsonData.paragraphs) ? jsonData.paragraphs : [])
+              for (let k = 0; k < contentArr.length; k++) {
+                const item = contentArr[k]
+                if (typeof item === 'string' && item.trim()) {
+                  contentArr[k] = translatedParagraphs[tIdx++] ?? item
+                } else if (item && typeof item === 'object') {
+                  if (item.type === 'text' && typeof item.value === 'string' && item.value.trim()) {
+                    item.value = translatedParagraphs[tIdx++] ?? item.value
+                  } else if (typeof item.value === 'string' && item.value.trim()) {
+                    item.value = translatedParagraphs[tIdx++] ?? item.value
+                  } else if (typeof item.text === 'string' && item.text.trim()) {
+                    item.text = translatedParagraphs[tIdx++] ?? item.text
+                  }
+                }
               }
               fs.writeFileSync(filePath, JSON.stringify(jsonData, null, 2), 'utf-8')
             }

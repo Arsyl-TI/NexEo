@@ -2147,16 +2147,16 @@ _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw
 const assets = {
   "/index.mjs": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"3642a-WB8Q0ab9sioLWZs0rAYuMOuNHCc\"",
-    "mtime": "2026-08-15T12:26:32.585Z",
-    "size": 222250,
+    "etag": "\"364ba-BnxxGgRtMndVgi0V+xN9AnbQobA\"",
+    "mtime": "2026-08-15T12:26:48.067Z",
+    "size": 222394,
     "path": "index.mjs"
   },
   "/index.mjs.map": {
     "type": "application/json",
-    "etag": "\"c93c9-310/uHP6Zl9MScDb5oOUBENge5M\"",
-    "mtime": "2026-08-15T12:26:32.585Z",
-    "size": 824265,
+    "etag": "\"c9694-zdaUKCBI6l/R48bTKQkeICXWPJM\"",
+    "mtime": "2026-08-15T12:26:48.068Z",
+    "size": 824980,
     "path": "index.mjs.map"
   }
 };
@@ -5290,6 +5290,7 @@ const novels_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProper
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const translateAll_post = defineEventHandler(async (event) => {
+  var _a, _b, _c, _d, _e, _f, _g, _h;
   const body = await readBody(event);
   const { slug, engine, geminiApiKey, deeplApiKey, libreUrl, libreApiKey } = body || {};
   if (!slug || typeof slug !== "string") {
@@ -5315,13 +5316,13 @@ const translateAll_post = defineEventHandler(async (event) => {
   for (let i = 0; i < chapterFiles.length; i++) {
     const fileName = chapterFiles[i];
     if (!fileName) continue;
-    console.log(`[Batch Translate] (${i + 1}/${chapterFiles.length}) Translating chapter ${fileName} using engine '${engine || "google"}'...`);
     const filePath = path.join(novelDir, fileName);
     const ext = path.extname(fileName).toLowerCase();
     try {
       if (ext === ".txt") {
         const content = fs.readFileSync(filePath, "utf-8");
         const paragraphs = content.split(/\r?\n/).filter((p) => p.trim().length > 0);
+        console.log(`[Batch Translate] (${i + 1}/${chapterFiles.length}) Chapter ${fileName} (.txt): found ${paragraphs.length} paragraphs. Translating via '${engine || "google"}'...`);
         if (paragraphs.length > 0) {
           const translatedParagraphs = await translateBatch(paragraphs, {
             engine,
@@ -5338,18 +5339,40 @@ const translateAll_post = defineEventHandler(async (event) => {
       } else if (ext === ".json") {
         const rawJson = fs.readFileSync(filePath, "utf-8");
         const jsonData = JSON.parse(rawJson);
-        let paragraphsToTranslate = [];
+        const extractedParagraphs = [];
         if (Array.isArray(jsonData)) {
-          paragraphsToTranslate = jsonData.filter((p) => typeof p === "string" && p.trim().length > 0);
+          for (const item of jsonData) {
+            if (typeof item === "string" && item.trim()) {
+              extractedParagraphs.push(item.trim());
+            } else if (item && typeof item === "object") {
+              if (item.type === "text" && typeof item.value === "string" && item.value.trim()) {
+                extractedParagraphs.push(item.value.trim());
+              } else if (typeof item.value === "string" && item.value.trim()) {
+                extractedParagraphs.push(item.value.trim());
+              } else if (typeof item.text === "string" && item.text.trim()) {
+                extractedParagraphs.push(item.text.trim());
+              }
+            }
+          }
         } else if (jsonData && typeof jsonData === "object") {
-          if (Array.isArray(jsonData.paragraphs)) {
-            paragraphsToTranslate = jsonData.paragraphs.filter((p) => typeof p === "string" && p.trim().length > 0);
-          } else if (Array.isArray(jsonData.content)) {
-            paragraphsToTranslate = jsonData.content.filter((p) => typeof p === "string" && p.trim().length > 0);
+          const contentArr = Array.isArray(jsonData.content) ? jsonData.content : Array.isArray(jsonData.paragraphs) ? jsonData.paragraphs : [];
+          for (const item of contentArr) {
+            if (typeof item === "string" && item.trim()) {
+              extractedParagraphs.push(item.trim());
+            } else if (item && typeof item === "object") {
+              if (item.type === "text" && typeof item.value === "string" && item.value.trim()) {
+                extractedParagraphs.push(item.value.trim());
+              } else if (typeof item.value === "string" && item.value.trim()) {
+                extractedParagraphs.push(item.value.trim());
+              } else if (typeof item.text === "string" && item.text.trim()) {
+                extractedParagraphs.push(item.text.trim());
+              }
+            }
           }
         }
-        if (paragraphsToTranslate.length > 0) {
-          const translatedParagraphs = await translateBatch(paragraphsToTranslate, {
+        console.log(`[Batch Translate] (${i + 1}/${chapterFiles.length}) Chapter ${fileName} (.json): found ${extractedParagraphs.length} paragraphs. Translating via '${engine || "google"}'...`);
+        if (extractedParagraphs.length > 0) {
+          const translatedParagraphs = await translateBatch(extractedParagraphs, {
             engine,
             geminiApiKey,
             deeplApiKey,
@@ -5357,15 +5380,38 @@ const translateAll_post = defineEventHandler(async (event) => {
             libreApiKey
           });
           if (translatedParagraphs && translatedParagraphs.length > 0) {
+            let tIdx = 0;
             if (Array.isArray(jsonData)) {
-              fs.writeFileSync(filePath, JSON.stringify(translatedParagraphs, null, 2), "utf-8");
+              for (let k = 0; k < jsonData.length; k++) {
+                const item = jsonData[k];
+                if (typeof item === "string" && item.trim()) {
+                  jsonData[k] = (_a = translatedParagraphs[tIdx++]) != null ? _a : item;
+                } else if (item && typeof item === "object") {
+                  if (item.type === "text" && typeof item.value === "string" && item.value.trim()) {
+                    item.value = (_b = translatedParagraphs[tIdx++]) != null ? _b : item.value;
+                  } else if (typeof item.value === "string" && item.value.trim()) {
+                    item.value = (_c = translatedParagraphs[tIdx++]) != null ? _c : item.value;
+                  } else if (typeof item.text === "string" && item.text.trim()) {
+                    item.text = (_d = translatedParagraphs[tIdx++]) != null ? _d : item.text;
+                  }
+                }
+              }
+              fs.writeFileSync(filePath, JSON.stringify(jsonData, null, 2), "utf-8");
             } else if (jsonData && typeof jsonData === "object") {
-              if (Array.isArray(jsonData.paragraphs)) {
-                jsonData.paragraphs = translatedParagraphs;
-              } else if (Array.isArray(jsonData.content)) {
-                jsonData.content = translatedParagraphs;
-              } else {
-                jsonData.paragraphs = translatedParagraphs;
+              const contentArr = Array.isArray(jsonData.content) ? jsonData.content : Array.isArray(jsonData.paragraphs) ? jsonData.paragraphs : [];
+              for (let k = 0; k < contentArr.length; k++) {
+                const item = contentArr[k];
+                if (typeof item === "string" && item.trim()) {
+                  contentArr[k] = (_e = translatedParagraphs[tIdx++]) != null ? _e : item;
+                } else if (item && typeof item === "object") {
+                  if (item.type === "text" && typeof item.value === "string" && item.value.trim()) {
+                    item.value = (_f = translatedParagraphs[tIdx++]) != null ? _f : item.value;
+                  } else if (typeof item.value === "string" && item.value.trim()) {
+                    item.value = (_g = translatedParagraphs[tIdx++]) != null ? _g : item.value;
+                  } else if (typeof item.text === "string" && item.text.trim()) {
+                    item.text = (_h = translatedParagraphs[tIdx++]) != null ? _h : item.text;
+                  }
+                }
               }
               fs.writeFileSync(filePath, JSON.stringify(jsonData, null, 2), "utf-8");
             }
