@@ -260,6 +260,7 @@ const isBatchDownloading = ref(false)
 
 const providers: { id: MangaProviderType; name: string; icon: string; desc: string }[] = [
   { id: 'mangadex', name: 'MangaDex (API)', icon: '🌟', desc: 'Database scanlation global terlengkap & cepat' },
+  { id: 'mikoroku', name: 'Mikoroku (Indo)', icon: '🌸', desc: 'Portal Manga Bahasa Indonesia dari Mikoroku' },
   { id: 'westmanga', name: 'WestManga', icon: '⚡', desc: 'Portal terjemahan Manhwa & Manhua Indonesia' },
   { id: 'komiku', name: 'Komiku.id', icon: '📖', desc: 'Koleksi Manga Jepang terjemahan Indonesia' }
 ]

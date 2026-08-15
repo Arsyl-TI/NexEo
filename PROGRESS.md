@@ -215,3 +215,14 @@
   - **Precision Speed Range Slider**: Continuous range slider (`0.25x` to `3.0x` with `0.05x` step) with live numeric speed badge.
   - **Comprehensive Speed Presets**: Added 10 instant speed pills (`0.25x`, `0.5x`, `0.75x`, `1.0x`, `1.25x`, `1.5x`, `1.75x`, `2.0x`, `2.5x`, `3.0x`).
   - **Pitch Correction Toggle (Vocal Timbre Saver)**: Integrated 🎵 **"Koreksi Pitch"** toggle setting `preservesPitch` on the HTML5 video element so fast audio stays natural and clear instead of sounding like chipmunk voices.
+
+---
+
+## Feature 20: Mikoroku.com Indonesian Manga Provider Integration
+- **Files Modified**:
+  - `apps/frontend-nuxt/server/utils/manga/online.ts`
+  - `apps/frontend-nuxt/pages/manga/browse.vue`
+- **Implementation Highlights**:
+  - **Live Mikoroku DB Scraper Engine**: Integrated `https://raw.githubusercontent.com/moemaomao/mymangadata/main/all-manga.json` live catalog database and `https://www.mikoroku.top/feeds/posts/default` Blogger post feeds.
+  - **Search, Detail, & Chapter Page Extractor**: Search titles & descriptions instantly, extract chapter posts, and parse high-resolution page images.
+  - **Provider Switcher Pill**: Added `🌸 Mikoroku (Indo)` provider pill in `pages/manga/browse.vue`.

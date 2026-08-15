@@ -73,6 +73,8 @@ declare global {
   const getMangaDexDetail: typeof import('../../server/utils/manga/online').getMangaDexDetail
   const getMangaDir: typeof import('../../server/utils/manga').getMangaDir
   const getMethod: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').getMethod
+  const getMikorokuChapterPages: typeof import('../../server/utils/manga/online').getMikorokuChapterPages
+  const getMikorokuDetail: typeof import('../../server/utils/manga/online').getMikorokuDetail
   const getOrGenerateThumbnail: typeof import('../../server/utils/thumbnail').getOrGenerateThumbnail
   const getProxyRequestHeaders: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').getProxyRequestHeaders
   const getQuery: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').getQuery
@@ -145,6 +147,7 @@ declare global {
   const sealSession: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').sealSession
   const searchKomiku: typeof import('../../server/utils/manga/online').searchKomiku
   const searchMangaDex: typeof import('../../server/utils/manga/online').searchMangaDex
+  const searchMikoroku: typeof import('../../server/utils/manga/online').searchMikoroku
   const searchUniversalManga: typeof import('../../server/utils/manga/online').searchUniversalManga
   const searchVideos: typeof import('../../server/utils/video').searchVideos
   const searchWestManga: typeof import('../../server/utils/manga/online').searchWestManga
@@ -237,7 +240,7 @@ export { defineAppConfig } from 'D:/MyProject/NexEo/node_modules/.pnpm/@nuxt+nit
 export { serverConfig, formatFileSize } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/config';
 export { saveTasksToFile, getDownloadTasks, createDownloadTask, cancelDownloadTask, deleteDownloadTask } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/downloader';
 export { getMangaDir, listLocalManga, getLocalMangaDetail, getLocalMangaChapters, getMangaChapterPages } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/manga';
-export { searchMangaDex, getMangaDexDetail, getMangaDexChapterPages, searchKomiku, getKomikuDetail, getKomikuChapterPages, searchWestManga, getWestMangaDetail, getWestMangaChapterPages, searchUniversalManga, getUniversalMangaDetail, getUniversalChapterPages, downloadChapterToLocal } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/manga/online';
+export { searchMangaDex, getMangaDexDetail, getMangaDexChapterPages, searchKomiku, getKomikuDetail, getKomikuChapterPages, searchMikoroku, getMikorokuDetail, getMikorokuChapterPages, searchWestManga, getWestMangaDetail, getWestMangaChapterPages, searchUniversalManga, getUniversalMangaDetail, getUniversalChapterPages, downloadChapterToLocal } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/manga/online';
 export { getLocalIP } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/network';
 export { NovelServerRepository, novelServerRepo, listLocalNovels, getLocalNovel, getLocalChapters, getLocalChapterContent } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/novel';
 export { NOVEL_SOURCES, scrapeDreamyCatalog, scrapeDreamyNovelDetail, scrapeNoveldexCatalog, scrapeNoveldexNovelDetail, getSourceCatalog } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/novel/catalogScraper';

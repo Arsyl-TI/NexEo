@@ -4,7 +4,7 @@ import axios from 'axios'
 import * as cheerio from 'cheerio'
 import { serverConfig } from '../config'
 
-export type MangaProviderType = 'mangadex' | 'westmanga' | 'komiku'
+export type MangaProviderType = 'mangadex' | 'westmanga' | 'komiku' | 'mikoroku'
 
 export interface OnlineMangaItem {
   id: string
@@ -423,7 +423,176 @@ export async function getKomikuChapterPages(chapterIdOrUrl: string): Promise<str
 }
 
 // -------------------------------------------------------------
-// 3. WESTMANGA MULTI-MIRROR PROVIDER
+// 3. MIKOROKU (MIKOROKU.COM / MIKOROKU.TOP)
+// -------------------------------------------------------------
+const MIKOROKU_DB_URL = 'https://raw.githubusercontent.com/moemaomao/mymangadata/main/all-manga.json'
+
+let mikorokuCatalogCache: any[] | null = null
+let mikorokuCatalogExpiry = 0
+
+async function fetchMikorokuCatalog(): Promise<any[]> {
+  const now = Date.now()
+  if (mikorokuCatalogCache && mikorokuCatalogExpiry > now) {
+    return mikorokuCatalogCache
+  }
+  try {
+    const res = await axios.get(MIKOROKU_DB_URL, { timeout: 10000 })
+    if (Array.isArray(res.data)) {
+      mikorokuCatalogCache = res.data
+      mikorokuCatalogExpiry = now + CACHE_TTL
+      return res.data
+    }
+  } catch (err: any) {
+    console.error('[Mikoroku DB Error]', err.message)
+  }
+  return mikorokuCatalogCache || []
+}
+
+export async function searchMikoroku(query: string): Promise<OnlineMangaItem[]> {
+  const cacheKey = `mikoroku_${query.trim().toLowerCase()}`
+  const now = Date.now()
+  if (searchCache.has(cacheKey)) {
+    const cached = searchCache.get(cacheKey)!
+    if (cached.expiry > now) return cached.data
+  }
+
+  try {
+    const catalog = await fetchMikorokuCatalog()
+    const q = query.trim().toLowerCase()
+
+    const filtered = q
+      ? catalog.filter(m => 
+          m.title?.toLowerCase().includes(q) || 
+          m.altTitle?.toLowerCase().includes(q) ||
+          m.slug?.toLowerCase().includes(q) ||
+          m.desc?.toLowerCase().includes(q)
+        )
+      : catalog
+
+    const results: OnlineMangaItem[] = filtered.map(item => {
+      const title = item.title || 'Untitled'
+      const slug = item.slug || title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+      let cover = item.img || item.cover || null
+      if (cover && !cover.startsWith('http')) {
+        cover = `https://mikoroku.com/${cover}`
+      }
+
+      return {
+        id: slug,
+        title,
+        slug,
+        cover,
+        author: item.author || item.artist || 'Mikoroku',
+        description: item.desc || item.synopsis || 'Komik Bahasa Indonesia dari Mikoroku.',
+        status: item.status || 'Ongoing',
+        tags: Array.isArray(item.genres) ? item.genres : ['Manga', 'Mikoroku', 'Bahasa Indonesia'],
+        provider: 'mikoroku',
+        availableLanguages: ['id'],
+        url: `https://mikoroku.com/detail?slug=${slug}`
+      }
+    })
+
+    searchCache.set(cacheKey, { data: results, expiry: now + CACHE_TTL })
+    return results
+  } catch (err: any) {
+    console.error('[Mikoroku Search Error]', err.message)
+    return []
+  }
+}
+
+export async function getMikorokuDetail(slug: string): Promise<{ manga: OnlineMangaItem; chapters: OnlineMangaChapter[] } | null> {
+  const cacheKey = `mikoroku_detail_${slug}`
+  const now = Date.now()
+  if (detailCache.has(cacheKey)) {
+    const cached = detailCache.get(cacheKey)!
+    if (cached.expiry > now) return cached.data
+  }
+
+  try {
+    const catalog = await fetchMikorokuCatalog()
+    const item = catalog.find(m => m.slug === slug || m.title?.toLowerCase() === slug.replace(/-/g, ' '))
+    if (!item) return null
+
+    const title = item.title || slug
+    let cover = item.img || item.cover || null
+    if (cover && !cover.startsWith('http')) {
+      cover = `https://mikoroku.com/${cover}`
+    }
+
+    const feedUrl = `https://www.mikoroku.top/feeds/posts/default?alt=json&max-results=200&q=${encodeURIComponent(title)}`
+    const feedRes = await axios.get(feedUrl, { timeout: 10000 })
+    const entries = feedRes.data?.feed?.entry || []
+
+    const chapters: OnlineMangaChapter[] = entries.map((e: any, idx: number) => {
+      const chTitle = e.title?.$t || `Chapter ${idx + 1}`
+      const contentHtml = e.content?.$t || e.summary?.$t || ''
+      const numMatch = chTitle.match(/chapter\s*(\d+(\.\d+)?)/i) || chTitle.match(/\bch\b\.?\s*(\d+(\.\d+)?)/i) || chTitle.match(/\d+/)
+      const chapterNum = numMatch ? numMatch[1] || numMatch[0] : String(idx + 1)
+
+      const chPayload = JSON.stringify({ title: chTitle, html: contentHtml })
+      const chId = Buffer.from(chPayload).toString('base64url')
+
+      return {
+        id: chId,
+        chapter: chapterNum,
+        title: chTitle,
+        language: 'id',
+        publishDate: e.published?.$t || e.updated?.$t,
+        scanlationGroup: 'Mikoroku'
+      }
+    })
+
+    chapters.sort((a, b) => parseFloat(a.chapter || '0') - parseFloat(b.chapter || '0'))
+
+    const manga: OnlineMangaItem = {
+      id: slug,
+      title,
+      slug,
+      cover,
+      author: item.author || 'Mikoroku',
+      description: item.desc || 'Komik Bahasa Indonesia dari Mikoroku.',
+      status: item.status || 'ongoing',
+      tags: Array.isArray(item.genres) ? item.genres : ['Manga', 'Mikoroku'],
+      provider: 'mikoroku',
+      availableLanguages: ['id'],
+      chapterCount: chapters.length,
+      url: `https://mikoroku.com/detail?slug=${slug}`
+    }
+
+    const result = { manga, chapters }
+    detailCache.set(cacheKey, { data: result, expiry: now + CACHE_TTL })
+    return result
+  } catch (err: any) {
+    console.error('[Mikoroku Detail Error]', err.message)
+    return null
+  }
+}
+
+export async function getMikorokuChapterPages(chapterId: string): Promise<string[]> {
+  try {
+    const raw = Buffer.from(chapterId, 'base64url').toString('utf-8')
+    const payload = JSON.parse(raw)
+    const html = payload.html || ''
+
+    const $ = cheerio.load(html)
+    const images: string[] = []
+
+    $('img').each((_, el) => {
+      const src = $(el).attr('src') || $(el).attr('data-src') || ''
+      if (src && src.startsWith('http') && !src.includes('banner')) {
+        images.push(src.trim())
+      }
+    })
+
+    return images
+  } catch (err: any) {
+    console.error('[Mikoroku Pages Error]', err.message)
+    return []
+  }
+}
+
+// -------------------------------------------------------------
+// 4. WESTMANGA MULTI-MIRROR PROVIDER
 // (westmanga.co, v1.westmanga.my, v1.westmanga.top)
 // -------------------------------------------------------------
 const WESTMANGA_MIRRORS = [
@@ -489,7 +658,7 @@ export async function searchWestManga(query: string): Promise<OnlineMangaItem[]>
     } catch {}
   }
 
-  // Fallback: If SPA returns initial skeleton, query Komiku database for seamless Indonesian reader experience
+  // Fallback: If SPA returns initial skeleton, query Komiku database
   return searchKomiku(query)
 }
 
@@ -597,9 +766,12 @@ export async function getWestMangaChapterPages(chapterIdOrUrl: string): Promise<
 }
 
 // -------------------------------------------------------------
-// 4. UNIFIED MULTI-PROVIDER ROUTER
+// 5. UNIFIED MULTI-PROVIDER ROUTER
 // -------------------------------------------------------------
 export async function searchUniversalManga(query: string, provider: MangaProviderType = 'mangadex', lang = 'id'): Promise<OnlineMangaItem[]> {
+  if (provider === 'mikoroku') {
+    return searchMikoroku(query)
+  }
   if (provider === 'westmanga') {
     return searchWestManga(query)
   }
@@ -610,6 +782,9 @@ export async function searchUniversalManga(query: string, provider: MangaProvide
 }
 
 export async function getUniversalMangaDetail(id: string, provider: MangaProviderType = 'mangadex', lang = 'id'): Promise<{ manga: OnlineMangaItem; chapters: OnlineMangaChapter[] } | null> {
+  if (provider === 'mikoroku') {
+    return getMikorokuDetail(id)
+  }
   if (provider === 'westmanga') {
     return getWestMangaDetail(id)
   }
@@ -620,6 +795,9 @@ export async function getUniversalMangaDetail(id: string, provider: MangaProvide
 }
 
 export async function getUniversalChapterPages(chapterId: string, provider: MangaProviderType = 'mangadex'): Promise<string[]> {
+  if (provider === 'mikoroku') {
+    return getMikorokuChapterPages(chapterId)
+  }
   if (provider === 'westmanga') {
     return getWestMangaChapterPages(chapterId)
   }
@@ -630,7 +808,7 @@ export async function getUniversalChapterPages(chapterId: string, provider: Mang
 }
 
 // -------------------------------------------------------------
-// 5. HIGH-SPEED CONCURRENT DOWNLOAD ENGINE (POOL OF 4 WORKERS)
+// 6. HIGH-SPEED CONCURRENT DOWNLOAD ENGINE (POOL OF 4 WORKERS)
 // -------------------------------------------------------------
 async function downloadWorker(urls: { url: string; dest: string; referer?: string }[], concurrency = 4): Promise<void> {
   let index = 0
@@ -648,7 +826,7 @@ async function downloadWorker(urls: { url: string; dest: string; referer?: strin
             timeout: 20000,
             headers: {
               'User-Agent': DEFAULT_HEADERS['User-Agent'],
-              'Referer': current.referer || 'https://komiku.org/'
+              'Referer': current.referer || 'https://mikoroku.com/'
             }
           })
           fs.writeFileSync(current.dest, Buffer.from(res.data))
@@ -720,9 +898,11 @@ export async function downloadChapterToLocal(options: {
       fs.mkdirSync(chapterDir, { recursive: true })
     }
 
-    const referer = provider === 'westmanga' 
-      ? 'https://westmanga.co/' 
-      : (provider === 'komiku' ? 'https://komiku.org/' : 'https://mangadex.org/')
+    const referer = provider === 'mikoroku'
+      ? 'https://mikoroku.com/'
+      : (provider === 'westmanga' 
+        ? 'https://westmanga.co/' 
+        : (provider === 'komiku' ? 'https://komiku.org/' : 'https://mangadex.org/'))
 
     const tasks = pageUrls.map((pageUrl, i) => {
       const ext = path.extname(pageUrl.split('?')[0]) || '.jpg'
