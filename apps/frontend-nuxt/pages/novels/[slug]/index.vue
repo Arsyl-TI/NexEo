@@ -31,11 +31,20 @@
           <!-- LEFT SIDEBAR: Poster Cover & Main Action Buttons -->
           <div class="w-full lg:w-72 shrink-0 flex flex-col items-center lg:items-start">
             <!-- Main Cover Card -->
-            <div class="w-48 sm:w-60 lg:w-full aspect-[2/3] rounded-2xl overflow-hidden border border-border/80 shadow-[0_20px_50px_rgba(0,0,0,0.7)] bg-card mb-5 relative group">
-              <img v-if="novel.cover" :src="getThumbnailUrl(novel.cover)" class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500" loading="lazy" @error="($event.target as HTMLImageElement).style.display='none'">
-              <div v-else class="flex flex-col items-center justify-center h-full text-muted-foreground text-xs p-4 text-center">
-                <span>📖</span>
-                <span class="mt-2">No Cover Available</span>
+            <div class="w-48 sm:w-60 lg:w-full aspect-[2/3] rounded-2xl overflow-hidden border border-border/80 shadow-[0_20px_50px_rgba(0,0,0,0.7)] bg-gradient-to-br from-card to-background mb-5 relative group flex items-center justify-center">
+              <img 
+                v-if="novel.cover && !coverHasError" 
+                :src="getThumbnailUrl(novel.cover)" 
+                class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500" 
+                loading="lazy" 
+                @error="coverHasError = true"
+              />
+              <div v-else class="flex flex-col items-center justify-center h-full text-muted-foreground text-xs p-6 text-center">
+                <div class="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-3xl mb-3 text-primary shadow-inner">
+                  📖
+                </div>
+                <span class="font-bold text-foreground text-sm line-clamp-2">{{ novel.title }}</span>
+                <span class="text-[11px] text-muted-foreground mt-1 font-mono">Sampul Novel</span>
               </div>
             </div>
 
@@ -180,9 +189,8 @@
                   class="group flex items-center justify-between p-3.5 rounded-xl bg-card/60 hover:bg-card border border-border/60 hover:border-primary/50 transition-all shadow-sm"
                 >
                   <div class="flex items-center gap-3 min-w-0">
-                    <div class="w-8 h-10 rounded-md overflow-hidden bg-card border border-border shrink-0">
-                      <img v-if="novel.cover" :src="getThumbnailUrl(novel.cover)" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity">
-                      <div v-else class="w-full h-full flex items-center justify-center text-[10px]">📖</div>
+                    <div class="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 text-primary flex items-center justify-center text-xs shrink-0 group-hover:bg-primary group-hover:text-white transition-all shadow-sm">
+                      📄
                     </div>
                     <span class="text-xs font-semibold text-foreground group-hover:text-primary transition-colors truncate">
                       {{ c.title }}
@@ -361,9 +369,14 @@ const novelGenres = computed(() => {
     .map((g, idx) => ({ name: g, style: styles[idx % styles.length] }))
 })
 
-const getThumbnailUrl = (pathStr: string) => {
-  if (pathStr.startsWith('http')) return pathStr
-  return `/api/thumbnails/${encodeURIComponent(pathStr)}`
+const coverHasError = ref(false)
+
+const getThumbnailUrl = (pathStr?: string) => {
+  if (!pathStr) return ''
+  if (pathStr.startsWith('http') || pathStr.startsWith('/') || pathStr.startsWith('data:')) {
+    return pathStr
+  }
+  return `/_novels/${slug}/${pathStr}`
 }
 
 async function loadNovelDetail() {

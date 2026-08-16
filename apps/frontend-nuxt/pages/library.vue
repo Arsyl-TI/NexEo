@@ -169,8 +169,10 @@ const { success } = useToast()
 
 const getThumbnailUrl = (pathStr: string) => {
   if (!pathStr) return ''
-  if (pathStr.startsWith('http')) return pathStr
-  return `/api/thumbnails/${encodeURIComponent(pathStr)}`
+  if (pathStr.startsWith('http') || pathStr.startsWith('/') || pathStr.startsWith('data:')) {
+    return pathStr
+  }
+  return pathStr
 }
 
 const filteredHistory = computed(() => {
