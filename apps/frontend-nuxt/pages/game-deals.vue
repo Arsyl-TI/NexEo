@@ -169,10 +169,15 @@
                   loading="lazy"
                 />
 
-                <!-- Discount Tag -->
-                <span class="absolute top-2 left-2 bg-rose-600 text-white font-mono font-extrabold text-xs px-2 py-0.5 rounded-md shadow-md">
-                  -{{ deal.savings }}
-                </span>
+                <!-- Discount Tag & All-Time Low Badge -->
+                <div class="absolute top-2 left-2 flex flex-col gap-1 items-start">
+                  <span class="bg-rose-600 text-white font-mono font-extrabold text-xs px-2 py-0.5 rounded-md shadow-md">
+                    -{{ deal.savings }}
+                  </span>
+                  <span v-if="deal.isAllTimeLow" class="bg-gradient-to-r from-amber-500 to-orange-500 text-black font-extrabold text-[9px] px-1.5 py-0.2 rounded shadow-md uppercase animate-pulse">
+                    🔥 RECORD LOW
+                  </span>
+                </div>
 
                 <!-- Store Name Badge -->
                 <span class="absolute top-2 right-2 bg-black/80 backdrop-blur-md text-white text-[10px] font-bold px-2 py-0.5 rounded border border-white/20">

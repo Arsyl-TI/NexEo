@@ -25,6 +25,9 @@ declare module "nitropack/types" {
     '/api/games/freebies': {
       'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/games/freebies.get').default>>>>
     }
+    '/api/games/lookup': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/games/lookup.get').default>>>>
+    }
     '/api/games/stores': {
       'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/games/stores.get').default>>>>
     }

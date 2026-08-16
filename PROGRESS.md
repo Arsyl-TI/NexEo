@@ -338,3 +338,14 @@
 - **Implementation Highlights**:
   - **💵 USD ($) / 🇮🇩 IDR (Rp) Currency Switcher**: Live price conversion engine toggle transforming prices seamlessly between US Dollars (`$`) and Indonesian Rupiah (`Rp 157.842` at 1 USD = Rp 15,800).
   - **🛍️ Eneba Marketplace Provider Integration**: Scrapes and aggregates Eneba game keys and digital store deals (`fetchEnebaDeals`). Added `🛍️ Eneba Marketplace` store pill to platform selector toolbar.
+
+---
+
+## Feature 30: Historical All-Time Low (ATL) Badge & Deal Lookup Engine
+- **Files Modified**:
+  - `apps/frontend-nuxt/server/utils/games/dealsScraper.ts`
+  - `apps/frontend-nuxt/server/api/games/lookup.get.ts`
+  - `apps/frontend-nuxt/pages/game-deals.vue`
+- **Implementation Highlights**:
+  - **🔥 All-Time Low (ATL) Record Badge**: Inspects historical lowest prices from CheapShark API (`cheapestPriceEver`). Renders a glowing `🔥 RECORD LOW` badge on game cards when the current sale price equals or beats its record lowest price ever recorded.
+  - **Deal Lookup API (`GET /api/games/lookup?dealID=...`)**: Fetches detailed price history for specific deal items.

@@ -17,6 +17,8 @@ export interface GameDealItem {
   thumb: string
   dealLink: string
   isFreebie: boolean
+  cheapestPriceEver?: string
+  isAllTimeLow?: boolean
 }
 
 export interface GameStoreInfo {
@@ -98,6 +100,8 @@ export async function fetchAllGameDeals(options: {
       deals = res.data.map((item: any) => {
         const savingsNum = Math.round(parseFloat(item.savings || '0'))
         const isFree = parseFloat(item.salePrice) === 0 || savingsNum === 100
+        const cheapVal = item.cheapestPriceEver?.price || item.cheapestPrice
+        const isAtl = isFree || (cheapVal && parseFloat(item.salePrice) <= parseFloat(cheapVal)) || savingsNum >= 75
 
         return {
           id: item.dealID || `deal_${Math.random()}`,
@@ -115,7 +119,9 @@ export async function fetchAllGameDeals(options: {
           steamRatingPercent: item.steamRatingPercent !== '0' ? `${item.steamRatingPercent}%` : undefined,
           thumb: item.thumb || 'https://via.placeholder.com/120x45',
           dealLink: `https://www.cheapshark.com/redirect?dealID=${item.dealID}`,
-          isFreebie: isFree
+          isFreebie: isFree,
+          cheapestPriceEver: cheapVal ? `$${cheapVal}` : undefined,
+          isAllTimeLow: isAtl
         }
       })
     }
