@@ -69,12 +69,22 @@ export async function fetchAllGameDeals(options: {
       params.title = options.title
     }
     if (options.sortBy) {
-      params.sortBy = options.sortBy // 'Savings', 'Price', 'Metacritic', 'Reviews', 'Title'
+      const s = options.sortBy.toLowerCase()
+      if (s === 'price') params.sortBy = 'Price'
+      else if (s === 'title') params.sortBy = 'Title'
+      else if (s === 'metacritic') params.sortBy = 'Metacritic'
+      else if (s === 'reviews') params.sortBy = 'Reviews'
+      else params.sortBy = 'Savings'
+    } else {
+      params.sortBy = 'Savings'
     }
 
     const res = await axios.get('https://www.cheapshark.com/api/1.0/deals', {
       params,
-      timeout: 8000
+      timeout: 10000,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      }
     })
 
     if (Array.isArray(res.data)) {

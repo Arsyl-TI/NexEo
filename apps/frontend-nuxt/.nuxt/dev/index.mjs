@@ -2810,6 +2810,9 @@ const _lazy_E62Vr_ = () => Promise.resolve().then(function () { return tasks_get
 const _lazy_PeXua1 = () => Promise.resolve().then(function () { return tasks_post$1; });
 const _lazy_vyH4_j = () => Promise.resolve().then(function () { return _id__delete$5; });
 const _lazy_EY18Ms = () => Promise.resolve().then(function () { return cancel_post$1; });
+const _lazy_w4KFBg = () => Promise.resolve().then(function () { return deals_get$1; });
+const _lazy_rcV7tF = () => Promise.resolve().then(function () { return freebies_get$1; });
+const _lazy_Z0N87f = () => Promise.resolve().then(function () { return stores_get$1; });
 const _lazy_aplgqS = () => Promise.resolve().then(function () { return accounts_get$1; });
 const _lazy_V3wS1c = () => Promise.resolve().then(function () { return accounts_post$1; });
 const _lazy_1e6DBx = () => Promise.resolve().then(function () { return _id__delete$3; });
@@ -2877,6 +2880,9 @@ const handlers = [
   { route: '/api/downloader/tasks', handler: _lazy_PeXua1, lazy: true, middleware: false, method: "post" },
   { route: '/api/downloader/tasks/:id', handler: _lazy_vyH4_j, lazy: true, middleware: false, method: "delete" },
   { route: '/api/downloader/tasks/:id/cancel', handler: _lazy_EY18Ms, lazy: true, middleware: false, method: "post" },
+  { route: '/api/games/deals', handler: _lazy_w4KFBg, lazy: true, middleware: false, method: "get" },
+  { route: '/api/games/freebies', handler: _lazy_rcV7tF, lazy: true, middleware: false, method: "get" },
+  { route: '/api/games/stores', handler: _lazy_Z0N87f, lazy: true, middleware: false, method: "get" },
   { route: '/api/gdrive/pool/accounts', handler: _lazy_aplgqS, lazy: true, middleware: false, method: "get" },
   { route: '/api/gdrive/pool/accounts', handler: _lazy_V3wS1c, lazy: true, middleware: false, method: "post" },
   { route: '/api/gdrive/pool/accounts/:id', handler: _lazy_1e6DBx, lazy: true, middleware: false, method: "delete" },
@@ -3840,6 +3846,212 @@ const cancel_post = defineEventHandler((event) => {
 const cancel_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
   default: cancel_post
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const STORE_MAP = {
+  "1": "Steam",
+  "25": "Epic Games Store",
+  "11": "Ubisoft Store",
+  "7": "GOG.com",
+  "15": "Fanatical",
+  "2": "GamersGate",
+  "3": "GreenManGaming",
+  "8": "EA Origin"
+};
+let cachedDeals = [];
+let lastDealsFetchTime = 0;
+const CACHE_TTL_MS = 10 * 60 * 1e3;
+async function fetchAllGameDeals(options) {
+  const now = Date.now();
+  if (!options.title && !options.storeID && cachedDeals.length > 0 && now - lastDealsFetchTime < CACHE_TTL_MS) {
+    return filterAndSortDeals(cachedDeals, options);
+  }
+  try {
+    const params = {
+      pageSize: 60,
+      onSale: options.onSaleOnly !== false ? 1 : 0
+    };
+    if (options.storeID && options.storeID !== "all") {
+      params.storeID = options.storeID;
+    }
+    if (options.title) {
+      params.title = options.title;
+    }
+    if (options.sortBy) {
+      params.sortBy = options.sortBy;
+    }
+    const res = await axios.get("https://www.cheapshark.com/api/1.0/deals", {
+      params,
+      timeout: 8e3
+    });
+    if (Array.isArray(res.data)) {
+      const deals = res.data.map((item) => {
+        const savingsNum = Math.round(parseFloat(item.savings || "0"));
+        const isFree = parseFloat(item.salePrice) === 0 || savingsNum === 100;
+        return {
+          id: item.dealID || `deal_${Math.random()}`,
+          title: item.title,
+          dealID: item.dealID,
+          storeID: item.storeID,
+          storeName: STORE_MAP[item.storeID] || `Store #${item.storeID}`,
+          gameID: item.gameID,
+          salePrice: parseFloat(item.salePrice) === 0 ? "GRATIS" : `$${item.salePrice}`,
+          normalPrice: `$${item.normalPrice}`,
+          savings: `${savingsNum}%`,
+          savingsPercent: savingsNum,
+          metacriticScore: item.metacriticScore !== "0" ? item.metacriticScore : void 0,
+          steamRatingText: item.steamRatingText !== "0" ? item.steamRatingText : void 0,
+          steamRatingPercent: item.steamRatingPercent !== "0" ? `${item.steamRatingPercent}%` : void 0,
+          thumb: item.thumb || "https://via.placeholder.com/120x45",
+          dealLink: `https://www.cheapshark.com/redirect?dealID=${item.dealID}`,
+          isFreebie: isFree
+        };
+      });
+      if (!options.title && (!options.storeID || options.storeID === "all")) {
+        cachedDeals = deals;
+        lastDealsFetchTime = now;
+      }
+      return filterAndSortDeals(deals, options);
+    }
+    return [];
+  } catch (err) {
+    console.error("[GameDeals Error] Failed to fetch CheapShark deals:", err.message);
+    return cachedDeals.length > 0 ? filterAndSortDeals(cachedDeals, options) : [];
+  }
+}
+async function fetchEpicFreebies() {
+  var _a, _b, _c, _d;
+  try {
+    const res = await axios.get("https://store-site-backend-static-ipv4.ak.epicgames.com/freeGamesPromotions?locale=en-US&country=US&allowCountries=US", {
+      timeout: 8e3
+    });
+    const elements = ((_d = (_c = (_b = (_a = res.data) == null ? void 0 : _a.data) == null ? void 0 : _b.Catalog) == null ? void 0 : _c.searchStore) == null ? void 0 : _d.elements) || [];
+    const freebies = [];
+    elements.forEach((item) => {
+      var _a2, _b2, _c2, _d2, _e, _f, _g, _h, _i, _j, _k, _l;
+      const isCurrentlyFree = (_b2 = (_a2 = item.promotions) == null ? void 0 : _a2.promotionalOffers) == null ? void 0 : _b2.some(
+        (offerGroup) => {
+          var _a3;
+          return (_a3 = offerGroup.promotionalOffers) == null ? void 0 : _a3.some((off) => {
+            var _a4;
+            return ((_a4 = off.discountSetting) == null ? void 0 : _a4.discountPercentage) === 0;
+          });
+        }
+      );
+      if (isCurrentlyFree || ((_d2 = (_c2 = item.price) == null ? void 0 : _c2.totalPrice) == null ? void 0 : _d2.discountPrice) === 0) {
+        let image = (_f = (_e = item.keyImages) == null ? void 0 : _e.find((img) => img.type === "OfferImageWide" || img.type === "Thumbnail")) == null ? void 0 : _f.url;
+        if (!image && ((_g = item.keyImages) == null ? void 0 : _g.length) > 0) image = item.keyImages[0].url;
+        freebies.push({
+          id: `epic_free_${item.id}`,
+          title: item.title,
+          dealID: item.id,
+          storeID: "25",
+          storeName: "Epic Games Store",
+          gameID: item.id,
+          salePrice: "GRATIS (100% OFF)",
+          normalPrice: ((_i = (_h = item.price) == null ? void 0 : _h.totalPrice) == null ? void 0 : _i.originalPrice) ? `$${(item.price.totalPrice.originalPrice / 100).toFixed(2)}` : "GRATIS",
+          savings: "100%",
+          savingsPercent: 100,
+          thumb: image || "https://via.placeholder.com/300x160",
+          dealLink: `https://store.epicgames.com/p/${((_l = (_k = (_j = item.catalogNs) == null ? void 0 : _j.mappings) == null ? void 0 : _k[0]) == null ? void 0 : _l.pageSlug) || item.productSlug || item.urlSlug || ""}`,
+          isFreebie: true
+        });
+      }
+    });
+    return freebies;
+  } catch (err) {
+    console.error("[Epic Freebies Error]:", err.message);
+    return [];
+  }
+}
+function filterAndSortDeals(deals, options) {
+  let filtered = [...deals];
+  if (options.storeID && options.storeID !== "all") {
+    filtered = filtered.filter((d) => d.storeID === options.storeID);
+  }
+  if (options.lowerPrice !== void 0) {
+    filtered = filtered.filter((d) => d.savingsPercent >= options.lowerPrice);
+  }
+  if (options.sortBy === "savings") {
+    filtered.sort((a, b) => b.savingsPercent - a.savingsPercent);
+  } else if (options.sortBy === "title") {
+    filtered.sort((a, b) => a.title.localeCompare(b.title));
+  }
+  return filtered;
+}
+
+const deals_get = defineEventHandler(async (event) => {
+  const query = getQuery$1(event);
+  const storeID = query.storeID || "all";
+  const title = query.title || "";
+  const sortBy = query.sortBy || "savings";
+  const minDiscount = query.minDiscount ? parseInt(query.minDiscount, 10) : 0;
+  try {
+    const deals = await fetchAllGameDeals({
+      storeID,
+      title,
+      sortBy,
+      lowerPrice: minDiscount
+    });
+    return {
+      success: true,
+      data: deals
+    };
+  } catch (err) {
+    throw createError({ statusCode: 500, statusMessage: err.message });
+  }
+});
+
+const deals_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: deals_get
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const freebies_get = defineEventHandler(async () => {
+  try {
+    const epicFreebies = await fetchEpicFreebies();
+    const cheapSharkDeals = await fetchAllGameDeals({ onSaleOnly: true });
+    const cheapSharkFreebies = cheapSharkDeals.filter((d) => d.isFreebie);
+    const combined = [...epicFreebies];
+    cheapSharkFreebies.forEach((csItem) => {
+      if (!combined.some((item) => item.title.toLowerCase() === csItem.title.toLowerCase())) {
+        combined.push(csItem);
+      }
+    });
+    return {
+      success: true,
+      data: combined
+    };
+  } catch (err) {
+    throw createError({ statusCode: 500, statusMessage: err.message });
+  }
+});
+
+const freebies_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: freebies_get
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const stores_get = defineEventHandler(async () => {
+  const stores = [
+    { storeID: "all", storeName: "Semua Store", icon: "\u{1F6D2}" },
+    { storeID: "1", storeName: "Steam Store", icon: "\u{1F3AE}" },
+    { storeID: "25", storeName: "Epic Games Store", icon: "\u26A1" },
+    { storeID: "11", storeName: "Ubisoft Store", icon: "\u{1F6E1}\uFE0F" },
+    { storeID: "7", storeName: "GOG.com", icon: "\u{1F4DC}" },
+    { storeID: "15", storeName: "Fanatical / Microsoft", icon: "\u{1F7E9}" },
+    { storeID: "3", storeName: "GreenManGaming", icon: "\u{1F7E2}" },
+    { storeID: "8", storeName: "EA Origin", icon: "\u{1F534}" }
+  ];
+  return {
+    success: true,
+    data: stores
+  };
+});
+
+const stores_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: stores_get
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const DATA_DIR = path.join(process.cwd(), "server", "data");
