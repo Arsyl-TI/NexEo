@@ -1,13 +1,12 @@
-# Technical Execution Plan: Module 2 - Video Player & Streaming Suite
+# Technical Execution Plan: Module 3 - Manga & Webtoon Reader Suite
 
 ## Goal
-Implement Module 2 upgrades for the Video Player (`apps/frontend-nuxt/pages/video/[id].vue`):
-1. **Video Screenshot & Frame Capture**: 1-click 📸 screenshot button to save current video frame as PNG.
-2. **A/B Loop Repeat & Frame-by-Frame Navigation**: Set Point A and Point B for continuous loop playback, plus `,` / `.` frame-by-frame stepping buttons.
-3. **Web Audio API 5-Band Equalizer Suite**: Integrated 5-band Biquad filter audio chain (60Hz, 250Hz, 1kHz, 4kHz, 12kHz) with Vocal Boost, Bass Boost, Cinema, and Flat presets.
+Implement Module 3 upgrades for the Manga Reader (`apps/frontend-nuxt/pages/manga/[slug]/[chapter].vue`):
+1. **Interactive Zoom Slider & Loupe Magnifier Glass**: Zoom range slider (50% to 250%) and floating loupe magnifier lens for reading tiny speech bubble text.
+2. **Smart Inverted Dark-Mode Scanner Filter**: Night reading inverted contrast CSS filter turning white manga scans into dark background pages.
 
 ## Files to Modify:
-- `apps/frontend-nuxt/pages/video/[id].vue`
+- `apps/frontend-nuxt/pages/manga/[slug]/[chapter].vue`
 
 ## Verification:
 - Monorepo typecheck: `pnpm turbo run typecheck`

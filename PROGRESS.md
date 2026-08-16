@@ -272,3 +272,13 @@
   - **1-Click Frame Screenshot Exporter**: Added 📸 **Screenshot Frame** button capturing current video frame on canvas and saving as PNG image download.
   - **A-B Loop Repeat & Frame Stepping**: Added 🅰️ **Point A** & 🅱️ **Point B** loop markers with auto-seek loop repeat, plus ⏮ `,` / `.` ⏭ frame-by-frame precision stepping (0.04s per frame).
   - **Web Audio API 5-Band Equalizer Suite**: Integrated 5 Biquad Filter audio chain (60Hz, 250Hz, 1kHz, 4kHz, 12kHz) with 🗣️ `Vocal Boost`, 🔊 `Bass Boost`, 🎬 `Cinema`, and `Flat` presets.
+
+---
+
+## Feature 25 (Module 3 Upgrade): Manga & Webtoon Reader Suite Overhaul (Zoom Range Slider, Loupe Magnifier Lens, Smart Inverted Dark-Mode Scanner Filter)
+- **Files Modified**:
+  - `apps/frontend-nuxt/pages/manga/[slug]/[chapter].vue`
+- **Implementation Highlights**:
+  - **Interactive Zoom Level Regulator**: Added 🔎 zoom range slider (`50%` - `250%`) with instant reset controls across Webtoon, Flip, and Double Spread reader modes.
+  - **Floating Loupe Magnifier Lens**: Added 🔍 **Pembesar Teks** lens following mouse cursor over manga images with a circular 300% magnified preview canvas for reading tiny speech bubble text.
+  - **Smart Inverted Dark-Mode Scanner Filter**: Added 🌙 **Filter Malam** button applying CSS `invert(0.92) hue-rotate(180deg) contrast(1.1)` filter so bright white manga scans turn into dark slate pages for night reading without eye strain.

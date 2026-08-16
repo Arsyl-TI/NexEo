@@ -37,6 +37,32 @@
           <option value="full">100% Asli</option>
         </select>
 
+        <!-- Dark Mode Scanner Invert Toggle -->
+        <button 
+          @click="toggleDarkModeInvert" 
+          :class="['px-3 py-1.5 rounded-full text-xs font-semibold border transition-all flex items-center gap-1 shadow-sm active:scale-95', isDarkModeInverted ? 'bg-indigo-600 text-white border-indigo-500 shadow-indigo-500/20' : 'bg-background border-border text-foreground hover:bg-border/60']"
+          title="Mode Inversi Kontras Malam untuk mengurangi silau latar putih"
+        >
+          <span>🌙</span> {{ isDarkModeInverted ? 'Filter Malam ON' : 'Filter Malam' }}
+        </button>
+
+        <!-- Loupe Magnifier Glass Toggle -->
+        <button 
+          @click="isLoupeEnabled = !isLoupeEnabled" 
+          :class="['px-3 py-1.5 rounded-full text-xs font-semibold border transition-all flex items-center gap-1 shadow-sm active:scale-95', isLoupeEnabled ? 'bg-amber-600 text-white border-amber-500 shadow-amber-500/20' : 'bg-background border-border text-foreground hover:bg-border/60']"
+          title="Kaca pembesar melayang saat kursor diarahkan ke teks balon komik"
+        >
+          <span>🔍</span> {{ isLoupeEnabled ? 'Pembesar Teks ON' : 'Pembesar Teks' }}
+        </button>
+
+        <!-- Zoom Level Slider -->
+        <div class="flex items-center gap-2 bg-background border border-border rounded-full px-3 py-1">
+          <span class="text-xs text-muted-foreground">🔎</span>
+          <input type="range" min="50" max="250" step="10" v-model.number="zoomLevel" class="w-16 sm:w-24 h-1.5 bg-card rounded-lg appearance-none cursor-pointer accent-primary" />
+          <span class="text-xs font-mono font-bold text-primary w-10 text-right">{{ zoomLevel }}%</span>
+          <button v-if="zoomLevel !== 100" @click="zoomLevel = 100" class="text-[10px] text-muted-foreground hover:text-foreground font-bold">Reset</button>
+        </div>
+
         <!-- Auto Scroll Button for Webtoon Mode -->
         <button 
           v-if="readerMode === 'webtoon'"
@@ -87,13 +113,27 @@
       </div>
     </div>
 
+    <!-- Floating Loupe Lens Lens Overlay -->
+    <div 
+      v-if="isLoupeEnabled && showLoupe" 
+      class="fixed pointer-events-none z-50 w-44 h-44 rounded-full border-2 border-amber-400 shadow-2xl overflow-hidden ring-4 ring-black/50"
+      :style="{
+        left: `${loupeX}px`,
+        top: `${loupeY}px`,
+        backgroundImage: `url(${loupeSrc})`,
+        backgroundPosition: `${loupeBgX}% ${loupeBgY}%`,
+        backgroundSize: '300%',
+        filter: isDarkModeInverted ? 'invert(0.92) hue-rotate(180deg) contrast(1.1)' : undefined
+      }"
+    ></div>
+
     <!-- MAIN MANGA READER CANVAS -->
     <main :class="readerMode === 'double' ? 'max-w-7xl mx-auto px-2 sm:px-4 pb-12' : 'max-w-5xl mx-auto px-2 sm:px-4 pb-12'">
       <div v-if="loading" class="py-20 flex justify-center"><div class="spinner"></div></div>
       <div v-else-if="pages.length === 0" class="py-20 text-center text-muted-foreground">Tidak ada gambar halaman di chapter ini.</div>
 
       <!-- MODE 1: WEBTOON (VERTICAL SCROLL CONTINUOUS STRIP) -->
-      <div v-else-if="readerMode === 'webtoon'" class="flex flex-col items-center gap-1 sm:gap-2">
+      <div v-else-if="readerMode === 'webtoon'" class="flex flex-col items-center gap-1 sm:gap-2 overflow-hidden">
         <div 
           v-for="(pageUrl, idx) in pages" 
           :key="idx" 
@@ -103,19 +143,25 @@
           <img 
             :src="pageUrl" 
             :alt="`Halaman ${idx + 1}`"
-            class="rounded-lg shadow-2xl object-contain max-w-full"
+            :class="['rounded-lg shadow-2xl object-contain max-w-full transition-transform duration-200', isDarkModeInverted ? 'manga-dark-invert' : '']"
+            :style="{ transform: zoomLevel !== 100 ? `scale(${zoomLevel / 100})` : undefined, transformOrigin: 'center top' }"
+            @mousemove="(e) => handleLoupeMouseMove(e, pageUrl)"
+            @mouseleave="handleLoupeMouseLeave"
             loading="lazy"
           />
         </div>
       </div>
 
       <!-- MODE 2: MANGA FLIP (SINGLE PAGE MODE) -->
-      <div v-else-if="readerMode === 'flip'" class="flex flex-col items-center justify-center min-h-[70vh]">
+      <div v-else-if="readerMode === 'flip'" class="flex flex-col items-center justify-center min-h-[70vh] overflow-hidden">
         <div class="relative max-w-full flex justify-center mb-4 cursor-pointer" @click="handlePageClick">
           <img 
             :src="pages[currentPageIndex]" 
             :alt="`Halaman ${currentPageIndex + 1}`" 
-            :class="['rounded-xl shadow-2xl object-contain max-h-[85vh]', fitClasses]"
+            :class="['rounded-xl shadow-2xl object-contain max-h-[85vh] transition-transform duration-200', fitClasses, isDarkModeInverted ? 'manga-dark-invert' : '']"
+            :style="{ transform: zoomLevel !== 100 ? `scale(${zoomLevel / 100})` : undefined, transformOrigin: 'center top' }"
+            @mousemove="(e) => handleLoupeMouseMove(e, pages[currentPageIndex])"
+            @mouseleave="handleLoupeMouseLeave"
           />
         </div>
 
@@ -144,7 +190,7 @@
       </div>
 
       <!-- MODE 3: DUAL-PAGE SPREAD (BOOK SIMULATION 2 PAGES SIDE BY SIDE) -->
-      <div v-else-if="readerMode === 'double'" class="flex flex-col items-center justify-center min-h-[70vh]">
+      <div v-else-if="readerMode === 'double'" class="flex flex-col items-center justify-center min-h-[70vh] overflow-hidden">
         <!-- Double Spread Canvas -->
         <div class="flex items-center justify-center gap-1 sm:gap-2 max-w-full mb-4 cursor-pointer" @click="handlePageClick">
           <!-- Page Slot 1 (Left on LTR, Right on RTL) -->
@@ -154,7 +200,10 @@
               <img 
                 :src="doublePages.left" 
                 alt="Left Page"
-                class="rounded-r-none rounded-l-xl shadow-2xl object-contain max-h-[85vh] max-w-full border-r border-border/20"
+                :class="['rounded-r-none rounded-l-xl shadow-2xl object-contain max-h-[85vh] max-w-full border-r border-border/20 transition-transform duration-200', isDarkModeInverted ? 'manga-dark-invert' : '']"
+                :style="{ transform: zoomLevel !== 100 ? `scale(${zoomLevel / 100})` : undefined, transformOrigin: 'center top' }"
+                @mousemove="(e) => handleLoupeMouseMove(e, doublePages.left!)"
+                @mouseleave="handleLoupeMouseLeave"
               />
             </div>
             <!-- Right page (current page in RTL) -->
@@ -162,7 +211,10 @@
               <img 
                 :src="doublePages.right" 
                 alt="Right Page"
-                class="rounded-l-none rounded-r-xl shadow-2xl object-contain max-h-[85vh] max-w-full"
+                :class="['rounded-l-none rounded-r-xl shadow-2xl object-contain max-h-[85vh] max-w-full transition-transform duration-200', isDarkModeInverted ? 'manga-dark-invert' : '']"
+                :style="{ transform: zoomLevel !== 100 ? `scale(${zoomLevel / 100})` : undefined, transformOrigin: 'center top' }"
+                @mousemove="(e) => handleLoupeMouseMove(e, doublePages.right!)"
+                @mouseleave="handleLoupeMouseLeave"
               />
             </div>
           </template>
@@ -173,7 +225,10 @@
               <img 
                 :src="doublePages.left" 
                 alt="Left Page"
-                class="rounded-r-none rounded-l-xl shadow-2xl object-contain max-h-[85vh] max-w-full border-r border-border/20"
+                :class="['rounded-r-none rounded-l-xl shadow-2xl object-contain max-h-[85vh] max-w-full border-r border-border/20 transition-transform duration-200', isDarkModeInverted ? 'manga-dark-invert' : '']"
+                :style="{ transform: zoomLevel !== 100 ? `scale(${zoomLevel / 100})` : undefined, transformOrigin: 'center top' }"
+                @mousemove="(e) => handleLoupeMouseMove(e, doublePages.left!)"
+                @mouseleave="handleLoupeMouseLeave"
               />
             </div>
             <!-- Right page (next page in LTR) -->
@@ -181,7 +236,10 @@
               <img 
                 :src="doublePages.right" 
                 alt="Right Page"
-                class="rounded-l-none rounded-r-xl shadow-2xl object-contain max-h-[85vh] max-w-full"
+                :class="['rounded-l-none rounded-r-xl shadow-2xl object-contain max-h-[85vh] max-w-full transition-transform duration-200', isDarkModeInverted ? 'manga-dark-invert' : '']"
+                :style="{ transform: zoomLevel !== 100 ? `scale(${zoomLevel / 100})` : undefined, transformOrigin: 'center top' }"
+                @mousemove="(e) => handleLoupeMouseMove(e, doublePages.right!)"
+                @mouseleave="handleLoupeMouseLeave"
               />
             </div>
           </template>
@@ -285,6 +343,46 @@ const chaptersList = ref<any[]>([])
 const readerMode = ref<'webtoon' | 'flip' | 'double'>('webtoon')
 const fitMode = ref<'width' | 'height' | 'full'>('width')
 const readingDir = ref<'rtl' | 'ltr'>('rtl')
+
+// Module 3 Suite: Inverted Dark Mode & Zoom Loupe State
+const isDarkModeInverted = ref(false)
+const zoomLevel = ref(100) // 50 to 250%
+
+const isLoupeEnabled = ref(false)
+const showLoupe = ref(false)
+const loupeX = ref(0)
+const loupeY = ref(0)
+const loupeBgX = ref(0)
+const loupeBgY = ref(0)
+const loupeSrc = ref('')
+
+function toggleDarkModeInvert() {
+  isDarkModeInverted.value = !isDarkModeInverted.value
+}
+
+function handleLoupeMouseMove(e: MouseEvent, imgSrc: string) {
+  if (!isLoupeEnabled.value || !imgSrc) return
+  const target = e.currentTarget as HTMLElement
+  const rect = target.getBoundingClientRect()
+  
+  const x = e.clientX - rect.left
+  const y = e.clientY - rect.top
+
+  loupeX.value = e.clientX + 15
+  loupeY.value = e.clientY + 15
+  
+  const bgXPct = Math.round((x / rect.width) * 100)
+  const bgYPct = Math.round((y / rect.height) * 100)
+  
+  loupeBgX.value = bgXPct
+  loupeBgY.value = bgYPct
+  loupeSrc.value = imgSrc
+  showLoupe.value = true
+}
+
+function handleLoupeMouseLeave() {
+  showLoupe.value = false
+}
 
 // Auto-Scroll State
 const isAutoScrolling = ref(false)
@@ -540,5 +638,9 @@ watch(() => route.params.chapter, (next) => {
 
 <style scoped>
 .spinner { width: 2.5rem; height: 2.5rem; border: 3px solid #8b5cf6; border-right-color: transparent; border-radius: 50%; animation: spin .8s linear infinite; }
+.manga-dark-invert {
+  filter: invert(0.92) hue-rotate(180deg) contrast(1.1);
+  transition: filter 0.3s ease;
+}
 @keyframes spin { to { transform: rotate(360deg); } }
 </style>
