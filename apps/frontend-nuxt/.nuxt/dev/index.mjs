@@ -3,13 +3,13 @@ import { Server } from 'node:http';
 import path, { resolve, dirname, join } from 'node:path';
 import nodeCrypto from 'node:crypto';
 import { parentPort, threadId } from 'node:worker_threads';
-import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, createError, sendRedirect, proxyRequest, getRequestHeader, setResponseHeaders, setResponseStatus, send, getRequestHeaders, setResponseHeader, appendResponseHeader, getRequestURL, getResponseHeader, removeResponseHeader, getQuery as getQuery$1, getRequestWebStream, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getResponseStatus, getRouterParam, readBody, setHeader, sendStream, readMultipartFormData, getResponseStatusText } from 'file://D:/MyProject/NexEo/node_modules/.pnpm/h3@1.15.11/node_modules/h3/dist/index.mjs';
+import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, createError, sendRedirect, proxyRequest, getRequestHeader, setResponseHeaders, setResponseStatus, send, getRequestHeaders, setResponseHeader, appendResponseHeader, getRequestURL, getResponseHeader, removeResponseHeader, getQuery as getQuery$1, getRequestWebStream, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getResponseStatus, getRouterParam, readBody, setHeader, sendStream, getHeader, readMultipartFormData, getResponseStatusText } from 'file://D:/MyProject/NexEo/node_modules/.pnpm/h3@1.15.11/node_modules/h3/dist/index.mjs';
 import { escapeHtml } from 'file://D:/MyProject/NexEo/node_modules/.pnpm/@vue+shared@3.5.41/node_modules/@vue/shared/dist/shared.cjs.js';
 import viteNodeEntry_mjs from 'file://D:/MyProject/NexEo/node_modules/.pnpm/@nuxt+vite-builder@3.21.11__8a558ac528f01abbe15109c260a6a427/node_modules/@nuxt/vite-builder/dist/vite-node-entry.mjs';
 import { viteNodeFetch } from 'file://D:/MyProject/NexEo/node_modules/.pnpm/@nuxt+vite-builder@3.21.11__8a558ac528f01abbe15109c260a6a427/node_modules/@nuxt/vite-builder/dist/vite-node.mjs';
 import fs, { promises } from 'node:fs';
-import AdmZip from 'file://D:/MyProject/NexEo/node_modules/.pnpm/adm-zip@0.5.18/node_modules/adm-zip/adm-zip.js';
 import axios from 'file://D:/MyProject/NexEo/node_modules/.pnpm/axios@1.19.0/node_modules/axios/index.js';
+import AdmZip from 'file://D:/MyProject/NexEo/node_modules/.pnpm/adm-zip@0.5.18/node_modules/adm-zip/adm-zip.js';
 import * as cheerio from 'file://D:/MyProject/NexEo/node_modules/.pnpm/cheerio@1.2.0/node_modules/cheerio/dist/esm/index.js';
 import xml2js from 'file://D:/MyProject/NexEo/node_modules/.pnpm/xml2js@0.6.2/node_modules/xml2js/lib/xml2js.js';
 import jschardet from 'file://D:/MyProject/NexEo/node_modules/.pnpm/jschardet@3.1.4/node_modules/jschardet/index.js';
@@ -2808,8 +2808,15 @@ const _lazy_EBEltq = () => Promise.resolve().then(function () { return categorie
 const _lazy_P8qeBp = () => Promise.resolve().then(function () { return _filename__get$7; });
 const _lazy_E62Vr_ = () => Promise.resolve().then(function () { return tasks_get$1; });
 const _lazy_PeXua1 = () => Promise.resolve().then(function () { return tasks_post$1; });
-const _lazy_vyH4_j = () => Promise.resolve().then(function () { return _id__delete$1; });
+const _lazy_vyH4_j = () => Promise.resolve().then(function () { return _id__delete$5; });
 const _lazy_EY18Ms = () => Promise.resolve().then(function () { return cancel_post$1; });
+const _lazy_aplgqS = () => Promise.resolve().then(function () { return accounts_get$1; });
+const _lazy_V3wS1c = () => Promise.resolve().then(function () { return accounts_post$1; });
+const _lazy_1e6DBx = () => Promise.resolve().then(function () { return _id__delete$3; });
+const _lazy_JuYO4W = () => Promise.resolve().then(function () { return files_get$1; });
+const _lazy_aOqmex = () => Promise.resolve().then(function () { return _id__delete$1; });
+const _lazy_PJ5DmP = () => Promise.resolve().then(function () { return _id__get$7; });
+const _lazy_oidQZE = () => Promise.resolve().then(function () { return upload_post$5; });
 const _lazy_W5Oup1 = () => Promise.resolve().then(function () { return info_get$1; });
 const _lazy_HB3OpB = () => Promise.resolve().then(function () { return _slug__get$7; });
 const _lazy_Mumbhl = () => Promise.resolve().then(function () { return _chapter__get$1; });
@@ -2870,6 +2877,13 @@ const handlers = [
   { route: '/api/downloader/tasks', handler: _lazy_PeXua1, lazy: true, middleware: false, method: "post" },
   { route: '/api/downloader/tasks/:id', handler: _lazy_vyH4_j, lazy: true, middleware: false, method: "delete" },
   { route: '/api/downloader/tasks/:id/cancel', handler: _lazy_EY18Ms, lazy: true, middleware: false, method: "post" },
+  { route: '/api/gdrive/pool/accounts', handler: _lazy_aplgqS, lazy: true, middleware: false, method: "get" },
+  { route: '/api/gdrive/pool/accounts', handler: _lazy_V3wS1c, lazy: true, middleware: false, method: "post" },
+  { route: '/api/gdrive/pool/accounts/:id', handler: _lazy_1e6DBx, lazy: true, middleware: false, method: "delete" },
+  { route: '/api/gdrive/pool/files', handler: _lazy_JuYO4W, lazy: true, middleware: false, method: "get" },
+  { route: '/api/gdrive/pool/files/:id', handler: _lazy_aOqmex, lazy: true, middleware: false, method: "delete" },
+  { route: '/api/gdrive/pool/stream/:id', handler: _lazy_PJ5DmP, lazy: true, middleware: false, method: "get" },
+  { route: '/api/gdrive/pool/upload', handler: _lazy_oidQZE, lazy: true, middleware: false, method: "post" },
   { route: '/api/info', handler: _lazy_W5Oup1, lazy: true, middleware: false, method: "get" },
   { route: '/api/manga/:slug', handler: _lazy_HB3OpB, lazy: true, middleware: false, method: "get" },
   { route: '/api/manga/:slug/chapter/:chapter', handler: _lazy_Mumbhl, lazy: true, middleware: false, method: "get" },
@@ -3607,7 +3621,7 @@ function saveTasksToFile() {
     console.error("Failed to save downloader queue to file:", err);
   }
 }
-function formatBytes(bytes) {
+function formatBytes$1(bytes) {
   if (bytes === 0) return "0 B";
   const k = 1024;
   const sizes = ["B", "KB", "MB", "GB"];
@@ -3729,7 +3743,7 @@ async function runSingleDownload(task) {
       if (timeDiff >= 0.5) {
         const bytesDiff = downloadedBytes - lastBytes;
         const bytesPerSec = bytesDiff / timeDiff;
-        task.speedFormatted = `${formatBytes(bytesPerSec)}`;
+        task.speedFormatted = `${formatBytes$1(bytesPerSec)}`;
         lastTime = now;
         lastBytes = downloadedBytes;
         saveTasksToFile();
@@ -3792,7 +3806,7 @@ const tasks_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProper
   default: tasks_post
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const _id__delete = defineEventHandler((event) => {
+const _id__delete$4 = defineEventHandler((event) => {
   const id = getRouterParam(event, "id");
   if (!id) {
     throw createError({ statusCode: 400, statusMessage: "Task ID is required" });
@@ -3805,9 +3819,9 @@ const _id__delete = defineEventHandler((event) => {
   }
 });
 
-const _id__delete$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const _id__delete$5 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: _id__delete
+  default: _id__delete$4
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const cancel_post = defineEventHandler((event) => {
@@ -3826,6 +3840,387 @@ const cancel_post = defineEventHandler((event) => {
 const cancel_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
   default: cancel_post
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const DATA_DIR = path.join(process.cwd(), "server", "data");
+const ACCOUNTS_FILE = path.join(DATA_DIR, "gdrive_accounts.json");
+const FILES_FILE = path.join(DATA_DIR, "gdrive_pooled_files.json");
+function ensureDataDir() {
+  if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+  }
+}
+function loadAccounts() {
+  ensureDataDir();
+  if (!fs.existsSync(ACCOUNTS_FILE)) return [];
+  try {
+    const raw = fs.readFileSync(ACCOUNTS_FILE, "utf-8");
+    return JSON.parse(raw);
+  } catch {
+    return [];
+  }
+}
+function saveAccounts(accounts) {
+  ensureDataDir();
+  fs.writeFileSync(ACCOUNTS_FILE, JSON.stringify(accounts, null, 2), "utf-8");
+}
+function loadPooledFiles() {
+  ensureDataDir();
+  if (!fs.existsSync(FILES_FILE)) return [];
+  try {
+    const raw = fs.readFileSync(FILES_FILE, "utf-8");
+    return JSON.parse(raw);
+  } catch {
+    return [];
+  }
+}
+function savePooledFiles(files) {
+  ensureDataDir();
+  fs.writeFileSync(FILES_FILE, JSON.stringify(files, null, 2), "utf-8");
+}
+function formatBytes(bytes, decimals = 2) {
+  if (bytes === 0) return "0 Bytes";
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
+}
+async function getAccessToken(account) {
+  var _a, _b;
+  try {
+    const res = await axios.post("https://oauth2.googleapis.com/token", {
+      client_id: account.clientId,
+      client_secret: account.clientSecret,
+      refresh_token: account.refreshToken,
+      grant_type: "refresh_token"
+    });
+    if (res.data && res.data.access_token) {
+      return res.data.access_token;
+    }
+    throw new Error("No access_token returned in Google OAuth response");
+  } catch (err) {
+    const msg = ((_b = (_a = err.response) == null ? void 0 : _a.data) == null ? void 0 : _b.error_description) || err.message;
+    throw new Error(`Gagal mendapatkan token akses Google Drive (${account.email}): ${msg}`);
+  }
+}
+async function fetchAccountQuota(account) {
+  var _a, _b, _c;
+  const token = await getAccessToken(account);
+  const res = await axios.get("https://www.googleapis.com/drive/v3/about?fields=user,storageQuota", {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  const userEmail = ((_b = (_a = res.data) == null ? void 0 : _a.user) == null ? void 0 : _b.emailAddress) || account.email;
+  const quota = ((_c = res.data) == null ? void 0 : _c.storageQuota) || {};
+  const total = parseInt(quota.limit || String(15 * 1024 * 1024 * 1024), 10);
+  const used = parseInt(quota.usage || "0", 10);
+  return { total, used, email: userEmail };
+}
+async function syncAllAccountsQuota() {
+  const accounts = loadAccounts();
+  for (const acc of accounts) {
+    try {
+      const q = await fetchAccountQuota(acc);
+      acc.quotaBytesTotal = q.total;
+      acc.quotaBytesUsed = q.used;
+      if (q.email) acc.email = q.email;
+      acc.status = q.used >= q.total - 100 * 1024 * 1024 ? "full" : "active";
+    } catch (e) {
+      console.error(`[GDrive Quota Error] Account ${acc.name}:`, e.message);
+      acc.status = "error";
+    }
+  }
+  saveAccounts(accounts);
+  return accounts;
+}
+async function selectAccountForUpload(fileSizeBytes) {
+  const accounts = await syncAllAccountsQuota();
+  const activeAccounts = accounts.filter((a) => a.status === "active");
+  if (activeAccounts.length === 0) {
+    throw new Error("Tidak ada akun Google Drive aktif yang tersedia di storage pool. Harap tambahkan akun baru!");
+  }
+  for (const acc of activeAccounts) {
+    const remaining = acc.quotaBytesTotal - acc.quotaBytesUsed;
+    if (remaining > fileSizeBytes + 10 * 1024 * 1024) {
+      const token = await getAccessToken(acc);
+      return { account: acc, accessToken: token };
+    } else {
+      acc.status = "full";
+    }
+  }
+  saveAccounts(accounts);
+  throw new Error(`Seluruh akun Google Drive di storage pool sudah penuh untuk mengunggah berkas sebesar ${formatBytes(fileSizeBytes)}. Harap tambahkan akun Google Drive baru!`);
+}
+async function uploadFileToGDrive(account, token, fileName, mimeType, buffer) {
+  const metadata = {
+    name: fileName,
+    mimeType: mimeType
+  };
+  const boundary = "-------314159265358979323846";
+  const delimiter = `\r
+--${boundary}\r
+`;
+  const closeDelimiter = `\r
+--${boundary}--`;
+  let multipartRequestBody = delimiter + "Content-Type: application/json; charset=UTF-8\r\n\r\n" + JSON.stringify(metadata) + delimiter + `Content-Type: ${mimeType}\r
+\r
+`;
+  const payload = Buffer.concat([
+    Buffer.from(multipartRequestBody, "utf-8"),
+    buffer,
+    Buffer.from(closeDelimiter, "utf-8")
+  ]);
+  const res = await axios.post("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink", payload, {
+    headers: {
+      "Authorization": `Bearer ${token}`,
+      "Content-Type": `multipart/related; boundary=${boundary}`,
+      "Content-Length": payload.length
+    },
+    maxBodyLength: Infinity,
+    maxContentLength: Infinity
+  });
+  if (res.data && res.data.id) {
+    return { fileId: res.data.id, webViewLink: res.data.webViewLink };
+  }
+  throw new Error("Google Drive API tidak mengembalikan ID berkas setelah upload.");
+}
+async function deleteFileFromGDrive(account, gdriveFileId) {
+  try {
+    const token = await getAccessToken(account);
+    await axios.delete(`https://www.googleapis.com/drive/v3/files/${gdriveFileId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return true;
+  } catch (err) {
+    console.error(`[GDrive Delete Error] File ${gdriveFileId}:`, err.message);
+    return false;
+  }
+}
+
+const accounts_get = defineEventHandler(async () => {
+  try {
+    const accounts = await syncAllAccountsQuota();
+    const totalBytes = accounts.reduce((acc, a) => acc + a.quotaBytesTotal, 0);
+    const usedBytes = accounts.reduce((acc, a) => acc + a.quotaBytesUsed, 0);
+    const freeBytes = Math.max(0, totalBytes - usedBytes);
+    return {
+      success: true,
+      data: {
+        accounts,
+        totalBytes,
+        usedBytes,
+        freeBytes,
+        totalBytesFormatted: formatBytes(totalBytes),
+        usedBytesFormatted: formatBytes(usedBytes),
+        freeBytesFormatted: formatBytes(freeBytes)
+      }
+    };
+  } catch (err) {
+    throw createError({ statusCode: 500, statusMessage: err.message });
+  }
+});
+
+const accounts_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: accounts_get
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const accounts_post = defineEventHandler(async (event) => {
+  const body = await readBody(event) || {};
+  const { name, clientId, clientSecret, refreshToken } = body;
+  if (!clientId || !clientSecret || !refreshToken) {
+    throw createError({ statusCode: 400, statusMessage: "Harap isi Client ID, Client Secret, dan Refresh Token Google Drive." });
+  }
+  const accounts = loadAccounts();
+  const accountId = `gdrive_acc_${Date.now()}`;
+  const newAccount = {
+    id: accountId,
+    name: name || `Google Drive Account ${accounts.length + 1}`,
+    email: name || "Google Account",
+    clientId,
+    clientSecret,
+    refreshToken,
+    quotaBytesTotal: 15 * 1024 * 1024 * 1024,
+    quotaBytesUsed: 0,
+    status: "active",
+    createdAt: (/* @__PURE__ */ new Date()).toISOString()
+  };
+  try {
+    const q = await fetchAccountQuota(newAccount);
+    newAccount.quotaBytesTotal = q.total;
+    newAccount.quotaBytesUsed = q.used;
+    if (q.email) newAccount.email = q.email;
+    newAccount.status = q.used >= q.total - 100 * 1024 * 1024 ? "full" : "active";
+    accounts.push(newAccount);
+    saveAccounts(accounts);
+    return {
+      success: true,
+      message: `Akun Google Drive (${newAccount.email}) berhasil ditambahkan ke storage pool!`,
+      data: newAccount
+    };
+  } catch (err) {
+    throw createError({ statusCode: 400, statusMessage: `Kredensial Google Drive tidak valid: ${err.message}` });
+  }
+});
+
+const accounts_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: accounts_post
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const _id__delete$2 = defineEventHandler(async (event) => {
+  const accountId = getRouterParam(event, "id") || "";
+  const accounts = loadAccounts();
+  const filtered = accounts.filter((a) => a.id !== accountId);
+  if (filtered.length === accounts.length) {
+    throw createError({ statusCode: 404, statusMessage: "Akun Google Drive tidak ditemukan di storage pool." });
+  }
+  saveAccounts(filtered);
+  return {
+    success: true,
+    message: "Akun Google Drive telah dihapus dari storage pool."
+  };
+});
+
+const _id__delete$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: _id__delete$2
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const files_get = defineEventHandler(async () => {
+  const files = loadPooledFiles();
+  return {
+    success: true,
+    data: files
+  };
+});
+
+const files_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: files_get
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const _id__delete = defineEventHandler(async (event) => {
+  const fileId = getRouterParam(event, "id") || "";
+  const files = loadPooledFiles();
+  const fileItem = files.find((f) => f.id === fileId);
+  if (!fileItem) {
+    throw createError({ statusCode: 404, statusMessage: "Berkas tidak ditemukan di Storage Pool." });
+  }
+  const accounts = loadAccounts();
+  const account = accounts.find((a) => a.id === fileItem.gdriveAccountId);
+  if (account) {
+    await deleteFileFromGDrive(account, fileItem.gdriveFileId);
+  }
+  const updatedFiles = files.filter((f) => f.id !== fileId);
+  savePooledFiles(updatedFiles);
+  await syncAllAccountsQuota();
+  return {
+    success: true,
+    message: `Berkas "${fileItem.name}" berhasil dihapus dari Google Drive & Storage Pool.`
+  };
+});
+
+const _id__delete$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: _id__delete
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const _id__get$6 = defineEventHandler(async (event) => {
+  const fileId = getRouterParam(event, "id") || "";
+  const files = loadPooledFiles();
+  const fileItem = files.find((f) => f.id === fileId);
+  if (!fileItem) {
+    throw createError({ statusCode: 404, statusMessage: "Berkas tidak ditemukan di Storage Pool." });
+  }
+  const accounts = loadAccounts();
+  const account = accounts.find((a) => a.id === fileItem.gdriveAccountId);
+  if (!account) {
+    throw createError({ statusCode: 404, statusMessage: "Akun Google Drive penyimpan berkas ini tidak ditemukan." });
+  }
+  try {
+    const token = await getAccessToken(account);
+    const rangeHeader = getHeader(event, "range");
+    const headers = {
+      Authorization: `Bearer ${token}`
+    };
+    if (rangeHeader) {
+      headers.Range = rangeHeader;
+    }
+    const gdriveRes = await axios.get(`https://www.googleapis.com/drive/v3/files/${fileItem.gdriveFileId}?alt=media`, {
+      headers,
+      responseType: "stream",
+      validateStatus: () => true
+    });
+    setResponseStatus(event, gdriveRes.status);
+    const contentType = String(gdriveRes.headers["content-type"] || fileItem.mimeType || "application/octet-stream");
+    setResponseHeader(event, "Content-Type", contentType);
+    if (gdriveRes.headers["content-length"]) {
+      setResponseHeader(event, "Content-Length", Number(gdriveRes.headers["content-length"]));
+    }
+    if (gdriveRes.headers["content-range"]) {
+      setResponseHeader(event, "Content-Range", String(gdriveRes.headers["content-range"]));
+    }
+    setResponseHeader(event, "Accept-Ranges", "bytes");
+    setResponseHeader(event, "Content-Disposition", `inline; filename="${encodeURIComponent(fileItem.name)}"`);
+    return sendStream(event, gdriveRes.data);
+  } catch (err) {
+    throw createError({ statusCode: 500, statusMessage: `Gagal melakukan streaming dari Google Drive: ${err.message}` });
+  }
+});
+
+const _id__get$7 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: _id__get$6
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const upload_post$4 = defineEventHandler(async (event) => {
+  try {
+    const parts = await readMultipartFormData(event);
+    if (!parts || parts.length === 0) {
+      throw createError({ statusCode: 400, statusMessage: "Tidak ada berkas yang dikirim untuk diunggah." });
+    }
+    const uploadedItems = [];
+    const pooledFiles = loadPooledFiles();
+    for (const part of parts) {
+      if (part.name === "file" && part.filename && part.data) {
+        const fileName = part.filename;
+        const mimeType = part.type || "application/octet-stream";
+        const buffer = part.data;
+        const size = buffer.length;
+        const { account, accessToken } = await selectAccountForUpload(size);
+        const gdriveRes = await uploadFileToGDrive(account, accessToken, fileName, mimeType, buffer);
+        const fileItem = {
+          id: `pool_file_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+          name: fileName,
+          size,
+          sizeFormatted: formatBytes(size),
+          mimeType,
+          gdriveAccountId: account.id,
+          gdriveAccountEmail: account.email,
+          gdriveFileId: gdriveRes.fileId,
+          uploadedAt: (/* @__PURE__ */ new Date()).toISOString()
+        };
+        pooledFiles.unshift(fileItem);
+        uploadedItems.push(fileItem);
+        account.quotaBytesUsed += size;
+      }
+    }
+    savePooledFiles(pooledFiles);
+    await syncAllAccountsQuota();
+    return {
+      success: true,
+      message: `Berhasil mengunggah ${uploadedItems.length} berkas ke Storage Pool Google Drive!`,
+      data: uploadedItems
+    };
+  } catch (err) {
+    throw createError({ statusCode: 500, statusMessage: err.message });
+  }
+});
+
+const upload_post$5 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: upload_post$4
 }, Symbol.toStringTag, { value: 'Module' }));
 
 function getLocalIP() {
@@ -5956,6 +6351,12 @@ async function translateBatch(texts, config = {}) {
 }
 
 const NOVEL_SOURCES = [
+  { id: "sakuranovel", name: "SakuraNovel.id (Indo)", url: "https://sakuranovel.id" },
+  { id: "indowebnovel", name: "Indowebnovel.id (Indo)", url: "https://indowebnovel.id" },
+  { id: "meionovel", name: "Meionovel.id (Indo)", url: "https://meionovel.id" },
+  { id: "vanovel", name: "Vanovel.com (Indo)", url: "https://vanovel.com" },
+  { id: "bacalightnovel", name: "BacaLightNovel (Indo)", url: "https://bacalightnovel.co" },
+  { id: "novelbookid", name: "NovelBookId (Indo)", url: "https://novelbook.id" },
   { id: "dreamy-translations", name: "Dreamy Translations", url: "https://dreamy-translations.com" },
   { id: "noveldex", name: "Noveldex", url: "https://noveldex.io" }
 ];
@@ -6289,8 +6690,344 @@ async function scrapeNoveldexNovelDetail(slug) {
     chapters
   };
 }
+async function scrapeSakuraCatalog() {
+  const baseUrl = "https://sakuranovel.id";
+  const headers = { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" };
+  const novels = [];
+  try {
+    for (let page = 1; page <= 3; page++) {
+      const res = await axios.get(`${baseUrl}/wp-json/wp/v2/categories?per_page=100&page=${page}&orderby=count&order=desc`, { headers, timeout: 15e3 });
+      const categories = res.data;
+      if (!Array.isArray(categories) || categories.length === 0) break;
+      for (const cat of categories) {
+        if (cat.count > 0 && cat.slug !== "uncategorized") {
+          novels.push({
+            id: cat.slug,
+            slug: cat.slug,
+            title: cat.name,
+            sourceUrl: `${baseUrl}/category/${cat.slug}/`,
+            description: `Novel terjemahan Bahasa Indonesia: ${cat.name} (${cat.count} chapter).`
+          });
+        }
+      }
+    }
+  } catch (err) {
+    console.error("[SakuraCatalog Error]", err.message);
+  }
+  return novels;
+}
+async function scrapeSakuraNovelDetail(slug) {
+  var _a, _b;
+  const baseUrl = "https://sakuranovel.id";
+  const headers = { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" };
+  const catRes = await axios.get(`${baseUrl}/wp-json/wp/v2/categories?slug=${encodeURIComponent(slug)}`, { headers, timeout: 15e3 });
+  const categories = catRes.data;
+  if (!Array.isArray(categories) || categories.length === 0) {
+    throw new Error(`Category not found for slug: ${slug}`);
+  }
+  const cat = categories[0];
+  const catId = cat.id;
+  const title = cat.name;
+  const chapters = [];
+  let page = 1;
+  let totalPages = 1;
+  do {
+    const postsRes = await axios.get(`${baseUrl}/wp-json/wp/v2/posts?categories=${catId}&per_page=100&page=${page}&order=asc`, { headers, timeout: 2e4 });
+    const posts = postsRes.data;
+    totalPages = parseInt(postsRes.headers["x-wp-totalpages"] || "1", 10);
+    if (Array.isArray(posts)) {
+      for (const p of posts) {
+        const chTitle = ((_a = p.title) == null ? void 0 : _a.rendered) ? cheerio.load(p.title.rendered).text().trim() : `Chapter ${chapters.length + 1}`;
+        const chUrl = p.link || `${baseUrl}/${p.slug}`;
+        chapters.push({
+          title: chTitle,
+          url: chUrl,
+          file: `chapter-${chapters.length + 1}.json`,
+          contentHtml: (_b = p.content) == null ? void 0 : _b.rendered
+        });
+      }
+    }
+    page++;
+  } while (page <= totalPages && page <= 10);
+  return {
+    id: slug,
+    slug,
+    title,
+    author: "SakuraNovel",
+    description: `Novel terjemahan Bahasa Indonesia dari SakuraNovel: ${title} (${chapters.length} chapter).`,
+    tags: ["SakuraNovel", "Bahasa Indonesia"],
+    sourceUrl: `${baseUrl}/category/${slug}/`,
+    chapters
+  };
+}
+async function scrapeIndowebnovelCatalog() {
+  const baseUrl = "https://indowebnovel.id";
+  const headers = { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" };
+  const novels = [];
+  try {
+    for (let page = 1; page <= 3; page++) {
+      const res = await axios.get(`${baseUrl}/wp-json/wp/v2/seri?per_page=100&page=${page}&orderby=count&order=desc`, { headers, timeout: 15e3 });
+      const series = res.data;
+      if (!Array.isArray(series) || series.length === 0) break;
+      for (const item of series) {
+        if (item.count > 0) {
+          novels.push({
+            id: item.slug,
+            slug: item.slug,
+            title: item.name,
+            sourceUrl: `${baseUrl}/seri/${item.slug}/`,
+            description: `Novel terjemahan Bahasa Indonesia dari Indowebnovel: ${item.name} (${item.count} chapter).`
+          });
+        }
+      }
+    }
+  } catch (err) {
+    console.error("[Indowebnovel Catalog Error]", err.message);
+  }
+  return novels;
+}
+async function scrapeIndowebnovelDetail(slug) {
+  var _a, _b;
+  const baseUrl = "https://indowebnovel.id";
+  const headers = { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" };
+  const seriRes = await axios.get(`${baseUrl}/wp-json/wp/v2/seri?slug=${encodeURIComponent(slug)}`, { headers, timeout: 15e3 });
+  const seriesList = seriRes.data;
+  let catId = null;
+  let title = slug;
+  if (Array.isArray(seriesList) && seriesList.length > 0) {
+    catId = seriesList[0].id;
+    title = seriesList[0].name;
+  } else {
+    const catRes = await axios.get(`${baseUrl}/wp-json/wp/v2/categories?slug=${encodeURIComponent(slug)}`, { headers, timeout: 15e3 });
+    if (Array.isArray(catRes.data) && catRes.data.length > 0) {
+      catId = catRes.data[0].id;
+      title = catRes.data[0].name;
+    }
+  }
+  if (!catId) {
+    throw new Error(`Novel series not found on Indowebnovel for slug: ${slug}`);
+  }
+  const chapters = [];
+  let page = 1;
+  let totalPages = 1;
+  do {
+    const postsRes = await axios.get(`${baseUrl}/wp-json/wp/v2/posts?seri=${catId}&per_page=100&page=${page}&order=asc`, { headers, timeout: 2e4 });
+    const posts = postsRes.data;
+    totalPages = parseInt(postsRes.headers["x-wp-totalpages"] || "1", 10);
+    if (Array.isArray(posts)) {
+      for (const p of posts) {
+        const chTitle = ((_a = p.title) == null ? void 0 : _a.rendered) ? cheerio.load(p.title.rendered).text().trim() : `Chapter ${chapters.length + 1}`;
+        chapters.push({
+          title: chTitle,
+          url: p.link || `${baseUrl}/${p.slug}`,
+          file: `chapter-${chapters.length + 1}.json`,
+          contentHtml: (_b = p.content) == null ? void 0 : _b.rendered
+        });
+      }
+    }
+    page++;
+  } while (page <= totalPages && page <= 10);
+  return {
+    id: slug,
+    slug,
+    title,
+    author: "Indowebnovel",
+    description: `Novel terjemahan Bahasa Indonesia dari Indowebnovel: ${title} (${chapters.length} chapter).`,
+    tags: ["Indowebnovel", "Bahasa Indonesia"],
+    sourceUrl: `${baseUrl}/seri/${slug}/`,
+    chapters
+  };
+}
+async function scrapeMeionovelCatalog() {
+  const baseUrl = "https://meionovels.com";
+  const headers = { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" };
+  const novelsMap = /* @__PURE__ */ new Map();
+  try {
+    const res = await axios.get(`${baseUrl}/novel/`, { headers, timeout: 15e3 });
+    const $ = cheerio.load(res.data);
+    $('a[href*="/novel/"]').each((_, el) => {
+      const href = $(el).attr("href") || "";
+      const title = $(el).text().trim() || $(el).find("img").attr("alt") || "";
+      if (href && !href.endsWith("/novel/") && !href.includes("/pengumuman/")) {
+        const parts = href.replace(/\/$/, "").split("/");
+        const slug = parts.pop() || "";
+        if (slug && title && title !== "HTL" && !title.startsWith("Chapter") && !novelsMap.has(slug)) {
+          novelsMap.set(slug, {
+            id: slug,
+            slug,
+            title,
+            sourceUrl: href,
+            description: `Novel terjemahan Bahasa Indonesia dari Meionovel: ${title}.`
+          });
+        }
+      }
+    });
+  } catch (err) {
+    console.error("[Meionovel Catalog Error]", err.message);
+  }
+  return Array.from(novelsMap.values());
+}
+async function scrapeMeionovelDetail(slug) {
+  const baseUrl = "https://meionovels.com";
+  const headers = { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" };
+  const sourceUrl = `${baseUrl}/novel/${slug}/`;
+  const res = await axios.get(sourceUrl, { headers, timeout: 2e4 });
+  const $ = cheerio.load(res.data);
+  const title = $("h1").first().text().trim() || slug;
+  const desc = $(".entry-content p, .sinopsis p, .desc p").first().text().trim() || `Novel Meionovel: ${title}`;
+  const cover = $(".thumb img, .summary_image img").attr("src") || void 0;
+  const chapters = [];
+  $('a[href*="/chapter-"], .wp-manga-chapter a').each((i, el) => {
+    const chUrl = $(el).attr("href") || "";
+    const chTitle = $(el).text().trim() || `Chapter ${i + 1}`;
+    if (chUrl && !chapters.some((c) => c.url === chUrl)) {
+      chapters.push({
+        title: chTitle,
+        url: chUrl,
+        file: `chapter-${chapters.length + 1}.json`
+      });
+    }
+  });
+  return {
+    id: slug,
+    slug,
+    title,
+    author: "Meionovel",
+    description: desc,
+    cover,
+    tags: ["Meionovel", "Bahasa Indonesia"],
+    sourceUrl,
+    chapters
+  };
+}
+async function scrapeVanovelCatalog() {
+  const baseUrl = "https://vanovel.com";
+  const headers = { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" };
+  const novelsMap = /* @__PURE__ */ new Map();
+  try {
+    const res = await axios.get(`${baseUrl}/`, { headers, timeout: 15e3 });
+    const $ = cheerio.load(res.data);
+    $('a[href*="/manga/"]').each((_, el) => {
+      const href = $(el).attr("href") || "";
+      const title = $(el).text().trim() || $(el).find("img").attr("alt") || "";
+      if (href && !href.includes("/manga-genre/") && !href.includes("/chapter-")) {
+        const parts = href.replace(/\/$/, "").split("/");
+        const slug = parts.pop() || "";
+        if (slug && title && !novelsMap.has(slug)) {
+          novelsMap.set(slug, {
+            id: slug,
+            slug,
+            title,
+            sourceUrl: href,
+            description: `Novel terjemahan Bahasa Indonesia dari Vanovel: ${title}.`
+          });
+        }
+      }
+    });
+  } catch (err) {
+    console.error("[Vanovel Catalog Error]", err.message);
+  }
+  return Array.from(novelsMap.values());
+}
+async function scrapeVanovelDetail(slug) {
+  const baseUrl = "https://vanovel.com";
+  const headers = { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" };
+  const sourceUrl = `${baseUrl}/manga/${slug}/`;
+  const res = await axios.get(sourceUrl, { headers, timeout: 2e4 });
+  const $ = cheerio.load(res.data);
+  const title = $("h1.entry-title, h1").first().text().trim() || slug;
+  const desc = $(".entry-content p, .sinopsis p").first().text().trim() || `Novel Vanovel: ${title}`;
+  const cover = $(".thumb img").attr("src") || void 0;
+  const chapters = [];
+  $(".clx li a, #chapterlist li a, .eplister li a").each((i, el) => {
+    const chUrl = $(el).attr("href") || "";
+    const chTitle = $(el).find(".chapternum").text().trim() || $(el).text().trim() || `Chapter ${i + 1}`;
+    if (chUrl && !chapters.some((c) => c.url === chUrl)) {
+      chapters.push({
+        title: chTitle,
+        url: chUrl,
+        file: `chapter-${chapters.length + 1}.json`
+      });
+    }
+  });
+  return {
+    id: slug,
+    slug,
+    title,
+    author: "Vanovel",
+    description: desc,
+    cover,
+    tags: ["Vanovel", "Bahasa Indonesia"],
+    sourceUrl,
+    chapters
+  };
+}
+async function scrapeBacalightnovelCatalog() {
+  const baseUrl = "https://bacalightnovel.co";
+  const headers = { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" };
+  const novels = [];
+  try {
+    const res = await axios.get(`${baseUrl}/wp-json/wp/v2/categories?per_page=100`, { headers, timeout: 15e3 });
+    if (Array.isArray(res.data)) {
+      for (const cat of res.data) {
+        if (cat.count > 0 && cat.slug !== "uncategorized") {
+          novels.push({
+            id: cat.slug,
+            slug: cat.slug,
+            title: cat.name,
+            sourceUrl: `${baseUrl}/category/${cat.slug}/`,
+            description: `Novel BacaLightNovel: ${cat.name} (${cat.count} chapter).`
+          });
+        }
+      }
+    }
+  } catch {
+  }
+  return novels;
+}
+async function scrapeBacalightnovelDetail(slug) {
+  return await scrapeSakuraNovelDetail(slug);
+}
+async function scrapeNovelbookidCatalog() {
+  const baseUrl = "https://novelbook.id";
+  const headers = { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" };
+  const novels = [];
+  try {
+    const res = await axios.get(`${baseUrl}/wp-json/wp/v2/categories?per_page=100`, { headers, timeout: 15e3 });
+    if (Array.isArray(res.data)) {
+      for (const cat of res.data) {
+        if (cat.count > 0 && cat.slug !== "uncategorized") {
+          novels.push({
+            id: cat.slug,
+            slug: cat.slug,
+            title: cat.name,
+            sourceUrl: `${baseUrl}/category/${cat.slug}/`,
+            description: `Novel NovelBookId: ${cat.name} (${cat.count} chapter).`
+          });
+        }
+      }
+    }
+  } catch {
+  }
+  return novels;
+}
+async function scrapeNovelbookidDetail(slug) {
+  return await scrapeSakuraNovelDetail(slug);
+}
 async function getSourceCatalog(sourceId) {
-  if (sourceId === "dreamy-translations") {
+  if (sourceId === "sakuranovel") {
+    return await scrapeSakuraCatalog();
+  } else if (sourceId === "indowebnovel") {
+    return await scrapeIndowebnovelCatalog();
+  } else if (sourceId === "meionovel") {
+    return await scrapeMeionovelCatalog();
+  } else if (sourceId === "vanovel") {
+    return await scrapeVanovelCatalog();
+  } else if (sourceId === "bacalightnovel") {
+    return await scrapeBacalightnovelCatalog();
+  } else if (sourceId === "novelbookid") {
+    return await scrapeNovelbookidCatalog();
+  } else if (sourceId === "dreamy-translations") {
     return await scrapeDreamyCatalog();
   } else if (sourceId === "noveldex") {
     return await scrapeNoveldexCatalog();
@@ -6497,7 +7234,19 @@ const sources_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.definePrope
 const _slug__get = defineEventHandler(async (event) => {
   const sourceId = getRouterParam(event, "source") || "";
   const slug = getRouterParam(event, "slug") || "";
-  if (sourceId === "dreamy-translations") {
+  if (sourceId === "sakuranovel") {
+    return await scrapeSakuraNovelDetail(slug);
+  } else if (sourceId === "indowebnovel") {
+    return await scrapeIndowebnovelDetail(slug);
+  } else if (sourceId === "meionovel") {
+    return await scrapeMeionovelDetail(slug);
+  } else if (sourceId === "vanovel") {
+    return await scrapeVanovelDetail(slug);
+  } else if (sourceId === "bacalightnovel") {
+    return await scrapeBacalightnovelDetail(slug);
+  } else if (sourceId === "novelbookid") {
+    return await scrapeNovelbookidDetail(slug);
+  } else if (sourceId === "dreamy-translations") {
     return await scrapeDreamyNovelDetail(slug);
   } else if (sourceId === "noveldex") {
     return await scrapeNoveldexNovelDetail(slug);

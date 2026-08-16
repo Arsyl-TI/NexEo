@@ -312,3 +312,18 @@
   - **Smart Auto-Failover / Overflow Router**: Automatically inspects account quotas before upload (`selectAccountForUpload(fileSizeBytes)`). When Account #1 reaches its storage limit, subsequent uploads automatically failover and switch to Account #2, Account #3, etc.
   - **Unified Stream Proxy**: Serves files through `/api/gdrive/pool/stream/[id]` with HTTP Range headers for direct video/audio playback and 1-click downloads regardless of which underlying Google account holds the physical file.
   - **Interactive Management UI**: Dashboard featuring total capacity progress banner, linked account cards with individual quota gauges, account connector modal, drag & drop uploader with auto-overflow indicator, and virtual file browser.
+
+---
+
+## Feature 28: Game Deals & Discounts Scraper Hub ("NexEo GameDeals Hub")
+- **Files Modified**:
+  - `apps/frontend-nuxt/server/utils/games/dealsScraper.ts`
+  - `apps/frontend-nuxt/server/api/games/deals.get.ts`
+  - `apps/frontend-nuxt/server/api/games/freebies.get.ts`
+  - `apps/frontend-nuxt/server/api/games/stores.get.ts`
+  - `apps/frontend-nuxt/pages/game-deals.vue`
+  - `apps/frontend-nuxt/components/Layout/Navbar.vue`
+- **Implementation Highlights**:
+  - **Multi-Store Aggregator Scraper**: Scrapes and aggregates live game price drops, savings percentages, Metacritic scores (`🎯 88`), and Steam review ratings (`👍 92%`) across Steam, Epic Games Store, Ubisoft Store, GOG.com, Microsoft/Xbox Store, and Fanatical using CheapShark API and Epic Games Store Freebies API.
+  - **🎁 Weekly Free Games Spotlight (100% OFF)**: Top hero banner spotlighting active 100% free-to-keep game giveaways with instant store claim links.
+  - **Interactive Deals Dashboard**: Store pills, discount percentage filters (50%+ OFF, 75%+ OFF), live title search, and personal 📌 **Wishlist / Bookmark** manager.

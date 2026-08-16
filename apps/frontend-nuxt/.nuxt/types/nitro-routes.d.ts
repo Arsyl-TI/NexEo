@@ -19,6 +19,15 @@ declare module "nitropack/types" {
     '/api/downloader/tasks/:id/cancel': {
       'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/downloader/tasks/[id]/cancel.post').default>>>>
     }
+    '/api/games/deals': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/games/deals.get').default>>>>
+    }
+    '/api/games/freebies': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/games/freebies.get').default>>>>
+    }
+    '/api/games/stores': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/games/stores.get').default>>>>
+    }
     '/api/gdrive/pool/accounts': {
       'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/gdrive/pool/accounts.get').default>>>>
       'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/gdrive/pool/accounts.post').default>>>>
