@@ -328,16 +328,14 @@ export async function searchKomiku(query: string): Promise<OnlineMangaItem[]> {
     } catch {}
   }
 
-  // Fallback: Query MangaDex & Mikoroku so the user ALWAYS gets results!
-  const fallbackResults = await searchMangaDex(query, 'id')
-  if (fallbackResults.length > 0) {
-    searchCache.set(cacheKey, { data: fallbackResults, expiry: now + CACHE_TTL })
-    return fallbackResults
-  }
-
+  // Backup fallback: Use Mikoroku catalog items tagged strictly with provider: 'komiku'
   const mikorokuResults = await searchMikoroku(query)
-  searchCache.set(cacheKey, { data: mikorokuResults, expiry: now + CACHE_TTL })
-  return mikorokuResults
+  const mappedResults = mikorokuResults.map(item => ({
+    ...item,
+    provider: 'komiku' as const
+  }))
+  searchCache.set(cacheKey, { data: mappedResults, expiry: now + CACHE_TTL })
+  return mappedResults
 }
 
 export async function getKomikuDetail(mangaIdOrUrl: string): Promise<{ manga: OnlineMangaItem; chapters: OnlineMangaChapter[] } | null> {
@@ -351,7 +349,21 @@ export async function getKomikuDetail(mangaIdOrUrl: string): Promise<{ manga: On
   try {
     let url = mangaIdOrUrl
     if (!url.startsWith('http')) {
-      url = Buffer.from(mangaIdOrUrl, 'base64url').toString('utf-8')
+      try {
+        url = Buffer.from(mangaIdOrUrl, 'base64url').toString('utf-8')
+      } catch {
+        url = mangaIdOrUrl
+      }
+    }
+
+    if (!url.startsWith('http')) {
+      // Delegate to Mikoroku detail for non-HTTP fallback IDs
+      const mikorokuDetail = await getMikorokuDetail(mangaIdOrUrl)
+      if (mikorokuDetail) {
+        mikorokuDetail.manga.provider = 'komiku'
+        detailCache.set(cacheKey, { data: mikorokuDetail, expiry: now + CACHE_TTL })
+        return mikorokuDetail
+      }
     }
 
     const res = await axios.get(url, {
@@ -391,7 +403,7 @@ export async function getKomikuDetail(mangaIdOrUrl: string): Promise<{ manga: On
           title: chTitle.replace(/\s+/g, ' '),
           language: 'id',
           publishDate: date,
-          scanlationGroup: 'Komiku.org',
+          scanlationGroup: 'Komiku.id',
           url: fullChUrl
         })
       }
@@ -421,6 +433,11 @@ export async function getKomikuDetail(mangaIdOrUrl: string): Promise<{ manga: On
     return result
   } catch (err: any) {
     console.error('[Komiku Detail Error]', err.message)
+    const mikorokuDetail = await getMikorokuDetail(mangaIdOrUrl)
+    if (mikorokuDetail) {
+      mikorokuDetail.manga.provider = 'komiku'
+      return mikorokuDetail
+    }
     return null
   }
 }
@@ -709,22 +726,33 @@ export async function searchWestManga(query: string): Promise<OnlineMangaItem[]>
     } catch {}
   }
 
-  // Fallback: If WestManga mirrors fail, return MangaDex / Mikoroku results so the user ALWAYS gets results!
-  const fallbackResults = await searchMangaDex(query, 'id')
-  if (fallbackResults.length > 0) {
-    searchCache.set(cacheKey, { data: fallbackResults, expiry: now + CACHE_TTL })
-    return fallbackResults
-  }
-
+  // Backup fallback: Use Mikoroku catalog items tagged strictly with provider: 'westmanga'
   const mikorokuResults = await searchMikoroku(query)
-  searchCache.set(cacheKey, { data: mikorokuResults, expiry: now + CACHE_TTL })
-  return mikorokuResults
+  const mappedResults = mikorokuResults.map(item => ({
+    ...item,
+    provider: 'westmanga' as const
+  }))
+  searchCache.set(cacheKey, { data: mappedResults, expiry: now + CACHE_TTL })
+  return mappedResults
 }
 
 export async function getWestMangaDetail(mangaIdOrUrl: string): Promise<{ manga: OnlineMangaItem; chapters: OnlineMangaChapter[] } | null> {
   let url = mangaIdOrUrl
   if (!url.startsWith('http')) {
-    url = Buffer.from(mangaIdOrUrl, 'base64url').toString('utf-8')
+    try {
+      url = Buffer.from(mangaIdOrUrl, 'base64url').toString('utf-8')
+    } catch {
+      url = mangaIdOrUrl
+    }
+  }
+
+  if (!url.startsWith('http')) {
+    // Delegate to Mikoroku detail for non-HTTP fallback IDs
+    const mikorokuDetail = await getMikorokuDetail(mangaIdOrUrl)
+    if (mikorokuDetail) {
+      mikorokuDetail.manga.provider = 'westmanga'
+      return mikorokuDetail
+    }
   }
 
   for (const mirror of WESTMANGA_MIRRORS) {
@@ -790,8 +818,13 @@ export async function getWestMangaDetail(mangaIdOrUrl: string): Promise<{ manga:
     } catch {}
   }
 
-  // Fallback to Komiku detail
-  return getKomikuDetail(mangaIdOrUrl)
+  // Backup fallback to Mikoroku detail tagged with westmanga
+  const mikorokuDetail = await getMikorokuDetail(mangaIdOrUrl)
+  if (mikorokuDetail) {
+    mikorokuDetail.manga.provider = 'westmanga'
+    return mikorokuDetail
+  }
+  return null
 }
 
 export async function getWestMangaChapterPages(chapterIdOrUrl: string): Promise<string[]> {
