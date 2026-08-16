@@ -20,6 +20,11 @@ export interface CatalogNovel {
 
 export const NOVEL_SOURCES: NovelSource[] = [
   { id: 'sakuranovel', name: 'SakuraNovel.id (Indo)', url: 'https://sakuranovel.id' },
+  { id: 'indowebnovel', name: 'Indowebnovel.id (Indo)', url: 'https://indowebnovel.id' },
+  { id: 'meionovel', name: 'Meionovel.id (Indo)', url: 'https://meionovel.id' },
+  { id: 'vanovel', name: 'Vanovel.com (Indo)', url: 'https://vanovel.com' },
+  { id: 'bacalightnovel', name: 'BacaLightNovel (Indo)', url: 'https://bacalightnovel.co' },
+  { id: 'novelbookid', name: 'NovelBookId (Indo)', url: 'https://novelbook.id' },
   { id: 'dreamy-translations', name: 'Dreamy Translations', url: 'https://dreamy-translations.com' },
   { id: 'noveldex', name: 'Noveldex', url: 'https://noveldex.io' }
 ]
@@ -493,9 +498,330 @@ export async function scrapeSakuraNovelDetail(slug: string): Promise<CatalogNove
   }
 }
 
+// ----------------------------------------------------
+// 4. INDOWEBNOVEL.ID SCRAPER (WP REST API & TAXONOMY 'SERI')
+// ----------------------------------------------------
+
+export async function scrapeIndowebnovelCatalog(): Promise<CatalogNovel[]> {
+  const baseUrl = 'https://indowebnovel.id'
+  const headers = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
+  const novels: CatalogNovel[] = []
+
+  try {
+    for (let page = 1; page <= 3; page++) {
+      const res = await axios.get(`${baseUrl}/wp-json/wp/v2/seri?per_page=100&page=${page}&orderby=count&order=desc`, { headers, timeout: 15000 })
+      const series = res.data
+      if (!Array.isArray(series) || series.length === 0) break
+
+      for (const item of series) {
+        if (item.count > 0) {
+          novels.push({
+            id: item.slug,
+            slug: item.slug,
+            title: item.name,
+            sourceUrl: `${baseUrl}/seri/${item.slug}/`,
+            description: `Novel terjemahan Bahasa Indonesia dari Indowebnovel: ${item.name} (${item.count} chapter).`
+          })
+        }
+      }
+    }
+  } catch (err: any) {
+    console.error('[Indowebnovel Catalog Error]', err.message)
+  }
+  return novels
+}
+
+export async function scrapeIndowebnovelDetail(slug: string): Promise<CatalogNovel & { chapters: Array<{ title: string; url: string; file: string; contentHtml?: string }> }> {
+  const baseUrl = 'https://indowebnovel.id'
+  const headers = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
+
+  // 1. Fetch series taxonomy term by slug
+  const seriRes = await axios.get(`${baseUrl}/wp-json/wp/v2/seri?slug=${encodeURIComponent(slug)}`, { headers, timeout: 15000 })
+  const seriesList = seriRes.data
+  let catId: number | null = null
+  let title = slug
+
+  if (Array.isArray(seriesList) && seriesList.length > 0) {
+    catId = seriesList[0].id
+    title = seriesList[0].name
+  } else {
+    // Fallback: try category
+    const catRes = await axios.get(`${baseUrl}/wp-json/wp/v2/categories?slug=${encodeURIComponent(slug)}`, { headers, timeout: 15000 })
+    if (Array.isArray(catRes.data) && catRes.data.length > 0) {
+      catId = catRes.data[0].id
+      title = catRes.data[0].name
+    }
+  }
+
+  if (!catId) {
+    throw new Error(`Novel series not found on Indowebnovel for slug: ${slug}`)
+  }
+
+  // 2. Fetch posts
+  const chapters: Array<{ title: string; url: string; file: string; contentHtml?: string }> = []
+  let page = 1
+  let totalPages = 1
+
+  do {
+    const postsRes = await axios.get(`${baseUrl}/wp-json/wp/v2/posts?seri=${catId}&per_page=100&page=${page}&order=asc`, { headers, timeout: 20000 })
+    const posts = postsRes.data
+    totalPages = parseInt(postsRes.headers['x-wp-totalpages'] || '1', 10)
+
+    if (Array.isArray(posts)) {
+      for (const p of posts) {
+        const chTitle = p.title?.rendered ? cheerio.load(p.title.rendered).text().trim() : `Chapter ${chapters.length + 1}`
+        chapters.push({
+          title: chTitle,
+          url: p.link || `${baseUrl}/${p.slug}`,
+          file: `chapter-${chapters.length + 1}.json`,
+          contentHtml: p.content?.rendered
+        })
+      }
+    }
+    page++
+  } while (page <= totalPages && page <= 10)
+
+  return {
+    id: slug,
+    slug,
+    title,
+    author: 'Indowebnovel',
+    description: `Novel terjemahan Bahasa Indonesia dari Indowebnovel: ${title} (${chapters.length} chapter).`,
+    tags: ['Indowebnovel', 'Bahasa Indonesia'],
+    sourceUrl: `${baseUrl}/seri/${slug}/`,
+    chapters
+  }
+}
+
+// ----------------------------------------------------
+// 5. MEIONOVEL.ID SCRAPER
+// ----------------------------------------------------
+
+export async function scrapeMeionovelCatalog(): Promise<CatalogNovel[]> {
+  const baseUrl = 'https://meionovels.com'
+  const headers = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
+  const novelsMap = new Map<string, CatalogNovel>()
+
+  try {
+    const res = await axios.get(`${baseUrl}/novel/`, { headers, timeout: 15000 })
+    const $ = cheerio.load(res.data)
+
+    $('a[href*="/novel/"]').each((_, el) => {
+      const href = $(el).attr('href') || ''
+      const title = $(el).text().trim() || $(el).find('img').attr('alt') || ''
+      if (href && !href.endsWith('/novel/') && !href.includes('/pengumuman/')) {
+        const parts = href.replace(/\/$/, '').split('/')
+        const slug = parts.pop() || ''
+        if (slug && title && title !== 'HTL' && !title.startsWith('Chapter') && !novelsMap.has(slug)) {
+          novelsMap.set(slug, {
+            id: slug,
+            slug,
+            title,
+            sourceUrl: href,
+            description: `Novel terjemahan Bahasa Indonesia dari Meionovel: ${title}.`
+          })
+        }
+      }
+    })
+  } catch (err: any) {
+    console.error('[Meionovel Catalog Error]', err.message)
+  }
+
+  return Array.from(novelsMap.values())
+}
+
+export async function scrapeMeionovelDetail(slug: string): Promise<CatalogNovel & { chapters: Array<{ title: string; url: string; file: string; contentHtml?: string }> }> {
+  const baseUrl = 'https://meionovels.com'
+  const headers = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
+  const sourceUrl = `${baseUrl}/novel/${slug}/`
+
+  const res = await axios.get(sourceUrl, { headers, timeout: 20000 })
+  const $ = cheerio.load(res.data)
+
+  const title = $('h1').first().text().trim() || slug
+  const desc = $('.entry-content p, .sinopsis p, .desc p').first().text().trim() || `Novel Meionovel: ${title}`
+  const cover = $('.thumb img, .summary_image img').attr('src') || undefined
+
+  const chapters: Array<{ title: string; url: string; file: string; contentHtml?: string }> = []
+  $('a[href*="/chapter-"], .wp-manga-chapter a').each((i, el) => {
+    const chUrl = $(el).attr('href') || ''
+    const chTitle = $(el).text().trim() || `Chapter ${i + 1}`
+    if (chUrl && !chapters.some(c => c.url === chUrl)) {
+      chapters.push({
+        title: chTitle,
+        url: chUrl,
+        file: `chapter-${chapters.length + 1}.json`
+      })
+    }
+  })
+
+  return {
+    id: slug,
+    slug,
+    title,
+    author: 'Meionovel',
+    description: desc,
+    cover,
+    tags: ['Meionovel', 'Bahasa Indonesia'],
+    sourceUrl,
+    chapters
+  }
+}
+
+// ----------------------------------------------------
+// 6. VANOVEL.COM SCRAPER
+// ----------------------------------------------------
+
+export async function scrapeVanovelCatalog(): Promise<CatalogNovel[]> {
+  const baseUrl = 'https://vanovel.com'
+  const headers = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
+  const novelsMap = new Map<string, CatalogNovel>()
+
+  try {
+    const res = await axios.get(`${baseUrl}/`, { headers, timeout: 15000 })
+    const $ = cheerio.load(res.data)
+
+    $('a[href*="/manga/"]').each((_, el) => {
+      const href = $(el).attr('href') || ''
+      const title = $(el).text().trim() || $(el).find('img').attr('alt') || ''
+      if (href && !href.includes('/manga-genre/') && !href.includes('/chapter-')) {
+        const parts = href.replace(/\/$/, '').split('/')
+        const slug = parts.pop() || ''
+        if (slug && title && !novelsMap.has(slug)) {
+          novelsMap.set(slug, {
+            id: slug,
+            slug,
+            title,
+            sourceUrl: href,
+            description: `Novel terjemahan Bahasa Indonesia dari Vanovel: ${title}.`
+          })
+        }
+      }
+    })
+  } catch (err: any) {
+    console.error('[Vanovel Catalog Error]', err.message)
+  }
+
+  return Array.from(novelsMap.values())
+}
+
+export async function scrapeVanovelDetail(slug: string): Promise<CatalogNovel & { chapters: Array<{ title: string; url: string; file: string; contentHtml?: string }> }> {
+  const baseUrl = 'https://vanovel.com'
+  const headers = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
+  const sourceUrl = `${baseUrl}/manga/${slug}/`
+
+  const res = await axios.get(sourceUrl, { headers, timeout: 20000 })
+  const $ = cheerio.load(res.data)
+
+  const title = $('h1.entry-title, h1').first().text().trim() || slug
+  const desc = $('.entry-content p, .sinopsis p').first().text().trim() || `Novel Vanovel: ${title}`
+  const cover = $('.thumb img').attr('src') || undefined
+
+  const chapters: Array<{ title: string; url: string; file: string; contentHtml?: string }> = []
+  $('.clx li a, #chapterlist li a, .eplister li a').each((i, el) => {
+    const chUrl = $(el).attr('href') || ''
+    const chTitle = $(el).find('.chapternum').text().trim() || $(el).text().trim() || `Chapter ${i + 1}`
+    if (chUrl && !chapters.some(c => c.url === chUrl)) {
+      chapters.push({
+        title: chTitle,
+        url: chUrl,
+        file: `chapter-${chapters.length + 1}.json`
+      })
+    }
+  })
+
+  return {
+    id: slug,
+    slug,
+    title,
+    author: 'Vanovel',
+    description: desc,
+    cover,
+    tags: ['Vanovel', 'Bahasa Indonesia'],
+    sourceUrl,
+    chapters
+  }
+}
+
+// ----------------------------------------------------
+// 7. BACALIGHTNOVEL.CO SCRAPER
+// ----------------------------------------------------
+
+export async function scrapeBacalightnovelCatalog(): Promise<CatalogNovel[]> {
+  const baseUrl = 'https://bacalightnovel.co'
+  const headers = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
+  const novels: CatalogNovel[] = []
+
+  try {
+    const res = await axios.get(`${baseUrl}/wp-json/wp/v2/categories?per_page=100`, { headers, timeout: 15000 })
+    if (Array.isArray(res.data)) {
+      for (const cat of res.data) {
+        if (cat.count > 0 && cat.slug !== 'uncategorized') {
+          novels.push({
+            id: cat.slug,
+            slug: cat.slug,
+            title: cat.name,
+            sourceUrl: `${baseUrl}/category/${cat.slug}/`,
+            description: `Novel BacaLightNovel: ${cat.name} (${cat.count} chapter).`
+          })
+        }
+      }
+    }
+  } catch {}
+
+  return novels
+}
+
+export async function scrapeBacalightnovelDetail(slug: string): Promise<CatalogNovel & { chapters: Array<{ title: string; url: string; file: string; contentHtml?: string }> }> {
+  return await scrapeSakuraNovelDetail(slug)
+}
+
+// ----------------------------------------------------
+// 8. NOVELBOOKID SCRAPER
+// ----------------------------------------------------
+
+export async function scrapeNovelbookidCatalog(): Promise<CatalogNovel[]> {
+  const baseUrl = 'https://novelbook.id'
+  const headers = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
+  const novels: CatalogNovel[] = []
+
+  try {
+    const res = await axios.get(`${baseUrl}/wp-json/wp/v2/categories?per_page=100`, { headers, timeout: 15000 })
+    if (Array.isArray(res.data)) {
+      for (const cat of res.data) {
+        if (cat.count > 0 && cat.slug !== 'uncategorized') {
+          novels.push({
+            id: cat.slug,
+            slug: cat.slug,
+            title: cat.name,
+            sourceUrl: `${baseUrl}/category/${cat.slug}/`,
+            description: `Novel NovelBookId: ${cat.name} (${cat.count} chapter).`
+          })
+        }
+      }
+    }
+  } catch {}
+
+  return novels
+}
+
+export async function scrapeNovelbookidDetail(slug: string): Promise<CatalogNovel & { chapters: Array<{ title: string; url: string; file: string; contentHtml?: string }> }> {
+  return await scrapeSakuraNovelDetail(slug)
+}
+
 export async function getSourceCatalog(sourceId: string): Promise<CatalogNovel[]> {
   if (sourceId === 'sakuranovel') {
     return await scrapeSakuraCatalog()
+  } else if (sourceId === 'indowebnovel') {
+    return await scrapeIndowebnovelCatalog()
+  } else if (sourceId === 'meionovel') {
+    return await scrapeMeionovelCatalog()
+  } else if (sourceId === 'vanovel') {
+    return await scrapeVanovelCatalog()
+  } else if (sourceId === 'bacalightnovel') {
+    return await scrapeBacalightnovelCatalog()
+  } else if (sourceId === 'novelbookid') {
+    return await scrapeNovelbookidCatalog()
   } else if (sourceId === 'dreamy-translations') {
     return await scrapeDreamyCatalog()
   } else if (sourceId === 'noveldex') {

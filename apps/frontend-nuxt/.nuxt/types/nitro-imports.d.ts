@@ -140,12 +140,22 @@ declare global {
   const sanitizeStatusMessage: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').sanitizeStatusMessage
   const saveTasksToFile: typeof import('../../server/utils/downloader').saveTasksToFile
   const scanVideos: typeof import('../../server/utils/video').scanVideos
+  const scrapeBacalightnovelCatalog: typeof import('../../server/utils/novel/catalogScraper').scrapeBacalightnovelCatalog
+  const scrapeBacalightnovelDetail: typeof import('../../server/utils/novel/catalogScraper').scrapeBacalightnovelDetail
   const scrapeDreamyCatalog: typeof import('../../server/utils/novel/catalogScraper').scrapeDreamyCatalog
   const scrapeDreamyNovelDetail: typeof import('../../server/utils/novel/catalogScraper').scrapeDreamyNovelDetail
+  const scrapeIndowebnovelCatalog: typeof import('../../server/utils/novel/catalogScraper').scrapeIndowebnovelCatalog
+  const scrapeIndowebnovelDetail: typeof import('../../server/utils/novel/catalogScraper').scrapeIndowebnovelDetail
+  const scrapeMeionovelCatalog: typeof import('../../server/utils/novel/catalogScraper').scrapeMeionovelCatalog
+  const scrapeMeionovelDetail: typeof import('../../server/utils/novel/catalogScraper').scrapeMeionovelDetail
+  const scrapeNovelbookidCatalog: typeof import('../../server/utils/novel/catalogScraper').scrapeNovelbookidCatalog
+  const scrapeNovelbookidDetail: typeof import('../../server/utils/novel/catalogScraper').scrapeNovelbookidDetail
   const scrapeNoveldexCatalog: typeof import('../../server/utils/novel/catalogScraper').scrapeNoveldexCatalog
   const scrapeNoveldexNovelDetail: typeof import('../../server/utils/novel/catalogScraper').scrapeNoveldexNovelDetail
   const scrapeSakuraCatalog: typeof import('../../server/utils/novel/catalogScraper').scrapeSakuraCatalog
   const scrapeSakuraNovelDetail: typeof import('../../server/utils/novel/catalogScraper').scrapeSakuraNovelDetail
+  const scrapeVanovelCatalog: typeof import('../../server/utils/novel/catalogScraper').scrapeVanovelCatalog
+  const scrapeVanovelDetail: typeof import('../../server/utils/novel/catalogScraper').scrapeVanovelDetail
   const sealSession: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').sealSession
   const searchKomiku: typeof import('../../server/utils/manga/online').searchKomiku
   const searchMangaDex: typeof import('../../server/utils/manga/online').searchMangaDex
@@ -245,7 +255,7 @@ export { getMangaDir, listLocalManga, getLocalMangaDetail, getLocalMangaChapters
 export { searchMangaDex, getMangaDexDetail, getMangaDexChapterPages, searchKomiku, getKomikuDetail, getKomikuChapterPages, searchMikoroku, getMikorokuDetail, getMikorokuChapterPages, searchWestManga, getWestMangaDetail, getWestMangaChapterPages, searchUniversalManga, getUniversalMangaDetail, getUniversalChapterPages, downloadChapterToLocal } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/manga/online';
 export { getLocalIP } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/network';
 export { NovelServerRepository, novelServerRepo, listLocalNovels, getLocalNovel, getLocalChapters, getLocalChapterContent } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/novel';
-export { NOVEL_SOURCES, scrapeDreamyCatalog, scrapeDreamyNovelDetail, scrapeNoveldexCatalog, scrapeNoveldexNovelDetail, scrapeSakuraCatalog, scrapeSakuraNovelDetail, getSourceCatalog } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/novel/catalogScraper';
+export { NOVEL_SOURCES, scrapeDreamyCatalog, scrapeDreamyNovelDetail, scrapeNoveldexCatalog, scrapeNoveldexNovelDetail, scrapeSakuraCatalog, scrapeSakuraNovelDetail, scrapeIndowebnovelCatalog, scrapeIndowebnovelDetail, scrapeMeionovelCatalog, scrapeMeionovelDetail, scrapeVanovelCatalog, scrapeVanovelDetail, scrapeBacalightnovelCatalog, scrapeBacalightnovelDetail, scrapeNovelbookidCatalog, scrapeNovelbookidDetail, getSourceCatalog } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/novel/catalogScraper';
 export { importEpubFile } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/novel/epubImporter';
 export { importNovelFromSource } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/novel/massScraper';
 export { detectSourceLanguage, translateWithGemini, translateBatchDeepL, translateBatchLibre, translateBatchGoogle, translateBatch } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/novel/translator';

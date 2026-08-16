@@ -237,3 +237,18 @@
   - **WP REST API Bypass Scraper**: Intercepts `https://sakuranovel.id/wp-json/wp/v2/categories` and `https://sakuranovel.id/wp-json/wp/v2/posts` to bypass Cloudflare turnstile protection cleanly.
   - **Full Novel Catalog & Chapter Extractor**: Scrapes novel titles, chapter listings, and full Indonesian translated text content for 1-click import into local NexEo novel library.
   - **Source Provider Integration**: Added `SakuraNovel.id (Indo)` to `NOVEL_SOURCES` dropdown in Online Novel importer.
+
+---
+
+## Feature 22: Suite of 5 Additional Indonesian Novel Providers
+- **Files Modified**:
+  - `apps/frontend-nuxt/server/utils/novel/catalogScraper.ts`
+  - `apps/frontend-nuxt/server/api/novels/sources/[source]/novel/[slug].get.ts`
+- **Implementation Highlights**:
+  - **5 New Integrated Novel Sources**:
+    1. 📖 **Indowebnovel.id**: High-volume novel taxonomy engine (`/wp-json/wp/v2/seri`).
+    2. 🌸 **Meionovel.id** (`meionovels.com`): HTML & catalog scraper.
+    3. ⚔️ **Vanovel.com**: Light novel & Web novel scraper.
+    4. 📜 **BacaLightNovel.co**: Category & chapter scraper.
+    5. 📚 **NovelBookId.id**: Catalog & chapter scraper.
+  - **Universal Importer Dropdown**: All 5 new sources are added to `NOVEL_SOURCES` in the Online Novel Importer.

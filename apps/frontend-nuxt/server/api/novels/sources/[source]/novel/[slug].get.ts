@@ -4,6 +4,16 @@ export default defineEventHandler(async (event) => {
 
   if (sourceId === 'sakuranovel') {
     return await scrapeSakuraNovelDetail(slug)
+  } else if (sourceId === 'indowebnovel') {
+    return await scrapeIndowebnovelDetail(slug)
+  } else if (sourceId === 'meionovel') {
+    return await scrapeMeionovelDetail(slug)
+  } else if (sourceId === 'vanovel') {
+    return await scrapeVanovelDetail(slug)
+  } else if (sourceId === 'bacalightnovel') {
+    return await scrapeBacalightnovelDetail(slug)
+  } else if (sourceId === 'novelbookid') {
+    return await scrapeNovelbookidDetail(slug)
   } else if (sourceId === 'dreamy-translations') {
     return await scrapeDreamyNovelDetail(slug)
   } else if (sourceId === 'noveldex') {
