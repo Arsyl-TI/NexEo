@@ -362,9 +362,13 @@
 
 ---
 
-## Feature 32: Novel Scraping & Chapter Download Success Popup Modals
+## Feature 32: Novel Scraping & Chapter Download Success Popup Modals (Teleported Overlay & EPUB Support)
 - **Files Modified**:
   - `apps/frontend-nuxt/pages/novel-browser.vue`
+  - `apps/frontend-nuxt/pages/novels/index.vue`
 - **Implementation Highlights**:
-  - **🎉 Popup Berhasil Tambah Novel ke Perpustakaan**: Glassmorphic modal displaying novel artwork preview, title, author, and 2 action buttons (📖 **"Baca Sekarang"** and 📚 **"Perpustakaan"**).
-  - **📥 Popup Status & Hasil Download Chapter**: Interactive download progress modal showing live status message and completion summary with 1-click **"Mulai Membaca Bab Terunduh"** button.
+  - **Teleported `<Teleport to="body">` Overlay**: Both `showAddedModal` and `showDownloadModal` are teleported directly to document `body` with high `z-[100]`, preventing clipping by parent overflow/stacking contexts.
+  - **🎉 Popup Berhasil Tambah Novel ke Perpustakaan**: Glassmorphic modal displaying novel artwork preview, title, author, status badge `✓ Tersimpan di Library`, and 2 action buttons (📖 **"Baca Sekarang"** and 📚 **"Perpustakaan"**).
+  - **📥 Popup Status & Hasil Download Chapter**: Interactive download progress modal showing live loading spinner during download (`Mengunduh semua bab...`) and completion summary with 1-click **"Mulai Membaca Bab Terunduh"** button.
+  - **1-Click Card Add Button**: Added 1-click `➕ Tambah ke Library` button on hover of every novel grid card in `novel-browser.vue` for instant import.
+  - **📚 EPUB Import Success Popup Modal**: Added teleported EPUB success modal in `pages/novels/index.vue` when uploading `.epub` files.

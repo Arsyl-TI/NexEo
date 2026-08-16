@@ -65,6 +65,53 @@
         </div>
       </div>
     </div>
+
+    <!-- POPUP MODAL: EPUB BERHASIL DIIMPOR -->
+    <Teleport to="body">
+      <div 
+        v-if="showEpubAddedModal && epubAddedData" 
+        class="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200"
+        @click.self="showEpubAddedModal = false"
+      >
+        <div class="bg-card border border-emerald-500/40 rounded-3xl p-6 max-w-sm w-full shadow-2xl relative space-y-4 text-center">
+          <button @click="showEpubAddedModal = false" class="absolute top-4 right-4 text-muted-foreground hover:text-foreground text-sm p-1 rounded-lg">✕</button>
+
+          <div class="w-16 h-16 bg-emerald-500/20 border border-emerald-500/40 rounded-full flex items-center justify-center text-3xl mx-auto animate-bounce">
+            📚
+          </div>
+
+          <div>
+            <h3 class="text-base font-bold text-foreground">File EPUB Berhasil Diimpor!</h3>
+            <p class="text-xs text-muted-foreground mt-1">Novel EPUB telah diekstrak dan disimpan ke perpustakaan lokal.</p>
+          </div>
+
+          <div class="bg-background/90 border border-border rounded-2xl p-3 text-left space-y-1">
+            <h4 class="font-bold text-xs text-foreground truncate">{{ epubAddedData.title }}</h4>
+            <p v-if="epubAddedData.chapterCount" class="text-[11px] text-muted-foreground font-mono">
+              Total: <span class="text-emerald-400 font-bold">{{ epubAddedData.chapterCount }} Chapter</span>
+            </p>
+          </div>
+
+          <div class="pt-2">
+            <NuxtLink 
+              v-if="epubAddedData.slug"
+              :to="`/novels/${epubAddedData.slug}`" 
+              class="w-full py-2.5 bg-primary hover:bg-primary/90 text-white font-bold rounded-xl text-xs shadow-md transition-all flex items-center justify-center gap-1"
+              @click="showEpubAddedModal = false"
+            >
+              <span>📖</span> Baca Novel Sekarang
+            </NuxtLink>
+            <button 
+              v-else 
+              @click="showEpubAddedModal = false" 
+              class="w-full py-2.5 bg-card border border-border hover:bg-border text-foreground font-bold rounded-xl text-xs transition-all"
+            >
+              Tutup
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -150,12 +197,22 @@ async function uploadEpub(event: Event) {
   const result = await novelStore.uploadEpub(file)
   if (result.success) {
     const importedTitle = ('title' in result && typeof result.title === 'string') ? result.title : file.name
+    const importedSlug = ('slug' in result && typeof result.slug === 'string') ? result.slug : ''
+    epubAddedData.value = {
+      title: importedTitle,
+      slug: importedSlug,
+      chapterCount: ('chapterCount' in result && typeof result.chapterCount === 'number') ? result.chapterCount : 0
+    }
+    showEpubAddedModal.value = true
     success(`Novel "${importedTitle}" berhasil diimpor!`)
   } else {
     showError(`Gagal mengimpor EPUB: ${result.error}`)
   }
   input.value = ''
 }
+
+const showEpubAddedModal = ref(false)
+const epubAddedData = ref<any>(null)
 
 onMounted(async () => {
   await novelStore.fetchLibrary()

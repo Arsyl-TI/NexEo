@@ -47,8 +47,13 @@
 
                 <!-- Action Buttons -->
                 <div class="mt-6 flex flex-col md:flex-row gap-3">
-                  <button @click="addToLibrary(selectedNovelDetail)" class="flex-1 px-4 py-2 bg-primary text-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium">
-                    Tambah ke Perpustakaan
+                  <button 
+                    @click="addToLibrary(selectedNovelDetail)" 
+                    :disabled="isAddingLibrary"
+                    class="flex-1 px-4 py-2 bg-primary text-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    <span v-if="isAddingLibrary" class="spinner border-2 w-3.5 h-3.5 border-r-transparent rounded-full animate-spin"></span>
+                    <span>{{ isAddingLibrary ? 'Mengimpor Novel...' : 'Tambah ke Perpustakaan' }}</span>
                   </button>
                   <a v-if="selectedNovelDetail.sourceUrl" :href="selectedNovelDetail.sourceUrl" target="_blank" class="flex-1 px-4 py-2 bg-card text-card-foreground rounded-lg hover:bg-border transition-colors text-sm font-medium flex items-center justify-center">
                     Buka Sumber â†—
@@ -167,24 +172,37 @@
             />
             <div v-else class="flex items-center justify-center w-full h-full text-muted-foreground text-sm">No Cover</div>
 
-            <!-- Hover Overlay -->
-            <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-4">
-              <span class="text-foreground text-sm font-semibold bg-primary px-4 py-2 rounded-full transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 shadow-lg shadow-brand/30">LIHAT DETAIL</span>
-            </div>
-          </div>
-          <h3 class="font-semibold text-sm text-card-foreground line-clamp-2 group-hover:text-primary transition-colors">{{ novel.title }}</h3>
-          <p class="text-xs text-muted-foreground mt-1">{{ novel.author || 'Unknown' }}</p>
+        <!-- Hover Overlay & Quick Actions -->
+        <div class="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center p-3 gap-2">
+          <button 
+            @click.stop="openNovelDetail(novel)" 
+            class="w-full text-foreground text-xs font-semibold bg-primary hover:bg-primary/90 py-2 rounded-full transform translate-y-2 group-hover:translate-y-0 transition-all shadow-lg text-center"
+          >
+            LIHAT DETAIL
+          </button>
+
+          <button 
+            @click.stop="addToLibrary(novel)" 
+            :disabled="isAddingLibrary"
+            class="w-full text-card-foreground text-xs font-semibold bg-card/90 border border-border hover:bg-border py-1.5 rounded-full transform translate-y-2 group-hover:translate-y-0 transition-all shadow-lg text-center flex items-center justify-center gap-1"
+          >
+            <span>➕</span> Tambah ke Library
+          </button>
         </div>
       </div>
+      <h3 class="font-semibold text-sm text-card-foreground line-clamp-2 group-hover:text-primary transition-colors">{{ novel.title }}</h3>
+      <p class="text-xs text-muted-foreground mt-1">{{ novel.author || 'Unknown' }}</p>
     </div>
+  </div>
 
-    <!-- POPUP MODAL 1: NOVEL BERHASIL DITAMBAH KE PERPUSTAKAAN -->
+  <!-- POPUP MODAL 1: NOVEL BERHASIL DITAMBAH KE PERPUSTAKAAN -->
+  <Teleport to="body">
     <div 
       v-if="showAddedModal && addedNovelData" 
-      class="fixed inset-0 z-50 bg-background/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200"
+      class="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200"
       @click.self="showAddedModal = false"
     >
-      <div class="bg-card border border-primary/40 rounded-3xl p-6 max-w-sm w-full shadow-2xl relative space-y-4 text-center">
+      <div class="bg-card border border-emerald-500/40 rounded-3xl p-6 max-w-sm w-full shadow-2xl relative space-y-4 text-center">
         <button @click="showAddedModal = false" class="absolute top-4 right-4 text-muted-foreground hover:text-foreground text-sm p-1 rounded-lg">✕</button>
 
         <div class="w-16 h-16 bg-emerald-500/20 border border-emerald-500/40 rounded-full flex items-center justify-center text-3xl mx-auto animate-bounce">
@@ -196,14 +214,14 @@
           <p class="text-xs text-muted-foreground mt-1">Novel telah tersimpan di perpustakaan lokal NexEo Anda.</p>
         </div>
 
-        <div class="bg-background/80 border border-border rounded-2xl p-3 flex items-center gap-3 text-left">
+        <div class="bg-background/90 border border-border rounded-2xl p-3 flex items-center gap-3 text-left shadow-inner">
           <div class="w-12 h-16 rounded-lg overflow-hidden border border-border shrink-0 bg-card">
             <img v-if="addedNovelData.cover" :src="addedNovelData.cover" class="w-full h-full object-cover">
             <div v-else class="w-full h-full flex items-center justify-center text-xs">📖</div>
           </div>
           <div class="min-w-0 flex-1">
             <h4 class="font-bold text-xs text-foreground truncate">{{ addedNovelData.title }}</h4>
-            <p class="text-[11px] text-muted-foreground">{{ addedNovelData.author || 'Penulis Unknown' }}</p>
+            <p class="text-[11px] text-muted-foreground truncate">{{ addedNovelData.author || 'Penulis Unknown' }}</p>
             <span class="inline-block mt-1 text-[10px] font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-500/30 px-2 py-0.5 rounded">
               ✓ Tersimpan di Library
             </span>
@@ -214,23 +232,27 @@
           <NuxtLink 
             :to="`/novels/${addedNovelData.slug}`" 
             class="py-2.5 bg-primary hover:bg-primary/90 text-white font-bold rounded-xl text-xs shadow-md transition-all flex items-center justify-center gap-1"
+            @click="showAddedModal = false"
           >
             <span>📖</span> Baca Sekarang
           </NuxtLink>
           <NuxtLink 
             to="/library" 
             class="py-2.5 bg-card border border-border hover:bg-border text-foreground font-semibold rounded-xl text-xs transition-all flex items-center justify-center gap-1"
+            @click="showAddedModal = false"
           >
             <span>📚</span> Perpustakaan
           </NuxtLink>
         </div>
       </div>
     </div>
+  </Teleport>
 
-    <!-- POPUP MODAL 2: STATUS & HASIL DOWNLOAD CHAPTER NOVEL -->
+  <!-- POPUP MODAL 2: STATUS & HASIL DOWNLOAD CHAPTER NOVEL -->
+  <Teleport to="body">
     <div 
       v-if="showDownloadModal" 
-      class="fixed inset-0 z-50 bg-background/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200"
+      class="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200"
       @click.self="!isDownloading && (showDownloadModal = false)"
     >
       <div class="bg-card border border-border rounded-3xl p-6 max-w-sm w-full shadow-2xl relative space-y-4 text-center">
@@ -239,7 +261,7 @@
         <div v-if="isDownloading" class="py-4 space-y-3">
           <div class="spinner w-12 h-12 border-4 border-primary border-r-transparent rounded-full animate-spin mx-auto"></div>
           <h3 class="text-sm font-bold text-foreground">Mengunduh Chapter Novel...</h3>
-          <p class="text-xs text-muted-foreground font-mono">{{ downloadStatusMessage }}</p>
+          <p class="text-xs text-muted-foreground font-mono leading-relaxed">{{ downloadStatusMessage }}</p>
         </div>
 
         <div v-else-if="downloadSuccessData" class="space-y-4">
@@ -252,7 +274,7 @@
             <p class="text-xs text-muted-foreground mt-1">{{ downloadStatusMessage }}</p>
           </div>
 
-          <div class="bg-background/80 border border-border rounded-2xl p-3 text-xs font-mono space-y-1">
+          <div class="bg-background/90 border border-border rounded-2xl p-3 text-xs font-mono space-y-1">
             <div class="flex justify-between text-muted-foreground">
               <span>Novel:</span>
               <span class="font-bold text-foreground truncate max-w-[180px]">{{ downloadSuccessData.title }}</span>
@@ -267,6 +289,7 @@
             <NuxtLink 
               :to="`/novels/${downloadSuccessData.slug}`" 
               class="w-full py-2.5 bg-primary hover:bg-primary/90 text-white font-bold rounded-xl text-xs shadow-md transition-all flex items-center justify-center gap-1"
+              @click="showDownloadModal = false"
             >
               <span>📖</span> Mulai Membaca Bab Terunduh
             </NuxtLink>
@@ -274,6 +297,7 @@
         </div>
       </div>
     </div>
+  </Teleport>
   </div>
 </template>
 
@@ -296,6 +320,7 @@ const isLoadingDetail = ref(false)
 const detailTab = ref('synopsis')
 const chapterFilter = ref('all') // 'all' or specific chapter file name
 
+const isAddingLibrary = ref(false)
 const showAddedModal = ref(false)
 const addedNovelData = ref<any>(null)
 
@@ -376,6 +401,7 @@ const addToLibrary = async (novel: NovelExternal) => {
     return
   }
   
+  isAddingLibrary.value = true
   try {
     const result = await novelStore.importFromSource(selectedSource.value, novel.slug)
     if (result.success) {
@@ -397,6 +423,8 @@ const addToLibrary = async (novel: NovelExternal) => {
   } catch (e: any) {
     console.error('Import error:', e)
     error('Terjadi error saat mengimpor novel')
+  } finally {
+    isAddingLibrary.value = false
   }
 }
 
