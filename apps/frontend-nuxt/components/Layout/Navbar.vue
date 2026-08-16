@@ -12,6 +12,7 @@
         <NuxtLink to="/novel-browser" class="px-3 py-1.5 rounded-lg text-gray-300 hover:text-white hover:bg-gray-800/60 transition-all">🌐 Browser</NuxtLink>
         <NuxtLink to="/share" class="px-3 py-1.5 rounded-lg text-gray-300 hover:text-white hover:bg-gray-800/60 transition-all">📤 Share</NuxtLink>
         <NuxtLink to="/downloader" class="px-3 py-1.5 rounded-lg text-gray-300 hover:text-white hover:bg-gray-800/60 transition-all">⚡ Downloader</NuxtLink>
+        <NuxtLink to="/gdrive-pool" class="px-3 py-1.5 rounded-lg text-gray-300 hover:text-white hover:bg-gray-800/60 transition-all">☁️ Drive Pool</NuxtLink>
       </nav>
     </div>
 

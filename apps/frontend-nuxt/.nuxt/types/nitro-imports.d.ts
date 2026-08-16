@@ -44,17 +44,21 @@ declare global {
   const defineWebSocketHandler: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').defineWebSocketHandler
   const deleteCookie: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').deleteCookie
   const deleteDownloadTask: typeof import('../../server/utils/downloader').deleteDownloadTask
+  const deleteFileFromGDrive: typeof import('../../server/utils/gdrive/gdrivePool').deleteFileFromGDrive
   const deleteSharedFile: typeof import('../../server/utils/sharedFiles').deleteSharedFile
   const detectSourceLanguage: typeof import('../../server/utils/novel/translator').detectSourceLanguage
   const downloadChapterToLocal: typeof import('../../server/utils/manga/online').downloadChapterToLocal
   const dynamicEventHandler: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').dynamicEventHandler
   const ensureYtDlpBinary: typeof import('../../server/utils/youtubeDownloader').ensureYtDlpBinary
   const eventHandler: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').eventHandler
+  const fetchAccountQuota: typeof import('../../server/utils/gdrive/gdrivePool').fetchAccountQuota
   const fetchWithEvent: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').fetchWithEvent
+  const formatBytes: typeof import('../../server/utils/gdrive/gdrivePool').formatBytes
   const formatFileSize: typeof import('../../server/utils/config').formatFileSize
   const fromNodeMiddleware: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').fromNodeMiddleware
   const fromPlainHandler: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').fromPlainHandler
   const fromWebHandler: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').fromWebHandler
+  const getAccessToken: typeof import('../../server/utils/gdrive/gdrivePool').getAccessToken
   const getCookie: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').getCookie
   const getDownloadTasks: typeof import('../../server/utils/downloader').getDownloadTasks
   const getFoldersByCategory: typeof import('../../server/utils/video').getFoldersByCategory
@@ -124,6 +128,8 @@ declare global {
   const listLocalManga: typeof import('../../server/utils/manga').listLocalManga
   const listLocalNovels: typeof import('../../server/utils/novel').listLocalNovels
   const listSharedFiles: typeof import('../../server/utils/sharedFiles').listSharedFiles
+  const loadAccounts: typeof import('../../server/utils/gdrive/gdrivePool').loadAccounts
+  const loadPooledFiles: typeof import('../../server/utils/gdrive/gdrivePool').loadPooledFiles
   const nitroPlugin: typeof import('../../../../node_modules/.pnpm/nitropack@2.13.4_oxc-parser_29676ebf26610b0896453b821c788422/node_modules/nitropack/dist/runtime/internal/plugin').nitroPlugin
   const novelServerRepo: typeof import('../../server/utils/novel').novelServerRepo
   const parseCookies: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').parseCookies
@@ -138,6 +144,8 @@ declare global {
   const runTask: typeof import('../../../../node_modules/.pnpm/nitropack@2.13.4_oxc-parser_29676ebf26610b0896453b821c788422/node_modules/nitropack/dist/runtime/internal/task').runTask
   const sanitizeStatusCode: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').sanitizeStatusCode
   const sanitizeStatusMessage: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').sanitizeStatusMessage
+  const saveAccounts: typeof import('../../server/utils/gdrive/gdrivePool').saveAccounts
+  const savePooledFiles: typeof import('../../server/utils/gdrive/gdrivePool').savePooledFiles
   const saveTasksToFile: typeof import('../../server/utils/downloader').saveTasksToFile
   const scanVideos: typeof import('../../server/utils/video').scanVideos
   const scrapeBacalightnovelCatalog: typeof import('../../server/utils/novel/catalogScraper').scrapeBacalightnovelCatalog
@@ -163,6 +171,7 @@ declare global {
   const searchUniversalManga: typeof import('../../server/utils/manga/online').searchUniversalManga
   const searchVideos: typeof import('../../server/utils/video').searchVideos
   const searchWestManga: typeof import('../../server/utils/manga/online').searchWestManga
+  const selectAccountForUpload: typeof import('../../server/utils/gdrive/gdrivePool').selectAccountForUpload
   const send: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').send
   const sendError: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').sendError
   const sendIterable: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').sendIterable
@@ -181,6 +190,7 @@ declare global {
   const setResponseStatus: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').setResponseStatus
   const splitCookiesString: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').splitCookiesString
   const startYoutubeDownload: typeof import('../../server/utils/youtubeDownloader').startYoutubeDownload
+  const syncAllAccountsQuota: typeof import('../../server/utils/gdrive/gdrivePool').syncAllAccountsQuota
   const toEventHandler: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').toEventHandler
   const toNodeListener: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').toNodeListener
   const toPlainHandler: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').toPlainHandler
@@ -193,6 +203,7 @@ declare global {
   const translateWithGemini: typeof import('../../server/utils/novel/translator').translateWithGemini
   const unsealSession: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').unsealSession
   const updateSession: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').updateSession
+  const uploadFileToGDrive: typeof import('../../server/utils/gdrive/gdrivePool').uploadFileToGDrive
   const useAppConfig: typeof import('../../../../node_modules/.pnpm/nitropack@2.13.4_oxc-parser_29676ebf26610b0896453b821c788422/node_modules/nitropack/dist/runtime/internal/config').useAppConfig
   const useBase: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').useBase
   const useEvent: typeof import('../../../../node_modules/.pnpm/nitropack@2.13.4_oxc-parser_29676ebf26610b0896453b821c788422/node_modules/nitropack/dist/runtime/internal/context').useEvent
@@ -210,6 +221,9 @@ declare global {
   // @ts-ignore
   export type { VideoCategoryConfig, VideoConfig, NovelConfig, MangaConfig, ServerConfig } from '../../server/utils/config'
   import('../../server/utils/config')
+  // @ts-ignore
+  export type { GDriveAccountConfig, GDrivePooledFileItem } from '../../server/utils/gdrive/gdrivePool'
+  import('../../server/utils/gdrive/gdrivePool')
   // @ts-ignore
   export type { MangaProviderType, OnlineMangaItem, OnlineMangaChapter } from '../../server/utils/manga/online'
   import('../../server/utils/manga/online')
@@ -251,6 +265,7 @@ export { buildAssetsURL as __buildAssetsURL, publicAssetsURL as __publicAssetsUR
 export { defineAppConfig } from 'D:/MyProject/NexEo/node_modules/.pnpm/@nuxt+nitro-server@3.21.11__ab6b34050c574ac4ae20c7ed2556094e/node_modules/@nuxt/nitro-server/dist/runtime/utils/config';
 export { serverConfig, formatFileSize } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/config';
 export { saveTasksToFile, getDownloadTasks, createDownloadTask, cancelDownloadTask, deleteDownloadTask } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/downloader';
+export { loadAccounts, saveAccounts, loadPooledFiles, savePooledFiles, formatBytes, getAccessToken, fetchAccountQuota, syncAllAccountsQuota, selectAccountForUpload, uploadFileToGDrive, deleteFileFromGDrive } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/gdrive/gdrivePool';
 export { getMangaDir, listLocalManga, getLocalMangaDetail, getLocalMangaChapters, getMangaChapterPages } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/manga';
 export { searchMangaDex, getMangaDexDetail, getMangaDexChapterPages, searchKomiku, getKomikuDetail, getKomikuChapterPages, searchMikoroku, getMikorokuDetail, getMikorokuChapterPages, searchWestManga, getWestMangaDetail, getWestMangaChapterPages, searchUniversalManga, getUniversalMangaDetail, getUniversalChapterPages, downloadChapterToLocal } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/manga/online';
 export { getLocalIP } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/network';

@@ -292,3 +292,23 @@
   - **Storage Usage Gauge**: Added 📊 live disk storage meter displaying accumulated total bytes and file counts.
   - **🔍 Pemindai Berkas Duplikat (Duplicate Finder)**: Scans shared files directory by file size & normalized name pattern, grouping duplicate copies with 1-click **"🗑️ Hapus Salinan Duplikat"** to free up disk space.
   - **🔒 Passcode Lock & Verification Suite**: Added 🔒 passcode lock modal allowing users to protect sensitive shared files with custom passphrases and verification download prompt modal.
+
+---
+
+## Feature 27: Google Drive Multi-Account Storage Pooling & Auto-Failover Engine ("NexEo Cloud Drive Pool")
+- **Files Modified**:
+  - `apps/frontend-nuxt/server/utils/gdrive/gdrivePool.ts`
+  - `apps/frontend-nuxt/server/api/gdrive/pool/accounts.get.ts`
+  - `apps/frontend-nuxt/server/api/gdrive/pool/accounts.post.ts`
+  - `apps/frontend-nuxt/server/api/gdrive/pool/accounts/[id].delete.ts`
+  - `apps/frontend-nuxt/server/api/gdrive/pool/upload.post.ts`
+  - `apps/frontend-nuxt/server/api/gdrive/pool/files.get.ts`
+  - `apps/frontend-nuxt/server/api/gdrive/pool/files/[id].delete.ts`
+  - `apps/frontend-nuxt/server/api/gdrive/pool/stream/[id].get.ts`
+  - `apps/frontend-nuxt/pages/gdrive-pool.vue`
+  - `apps/frontend-nuxt/components/Layout/Navbar.vue`
+- **Implementation Highlights**:
+  - **Multi-Account Storage Pooling Engine**: Connects multiple Google Drive accounts (via Client ID, Client Secret, Refresh Token) and sums their individual storage quotas (5 x 15GB = 75GB, 10 x 15GB = 150GB, etc.) into one unified virtual cloud drive.
+  - **Smart Auto-Failover / Overflow Router**: Automatically inspects account quotas before upload (`selectAccountForUpload(fileSizeBytes)`). When Account #1 reaches its storage limit, subsequent uploads automatically failover and switch to Account #2, Account #3, etc.
+  - **Unified Stream Proxy**: Serves files through `/api/gdrive/pool/stream/[id]` with HTTP Range headers for direct video/audio playback and 1-click downloads regardless of which underlying Google account holds the physical file.
+  - **Interactive Management UI**: Dashboard featuring total capacity progress banner, linked account cards with individual quota gauges, account connector modal, drag & drop uploader with auto-overflow indicator, and virtual file browser.

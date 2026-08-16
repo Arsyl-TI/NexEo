@@ -19,6 +19,25 @@ declare module "nitropack/types" {
     '/api/downloader/tasks/:id/cancel': {
       'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/downloader/tasks/[id]/cancel.post').default>>>>
     }
+    '/api/gdrive/pool/accounts': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/gdrive/pool/accounts.get').default>>>>
+      'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/gdrive/pool/accounts.post').default>>>>
+    }
+    '/api/gdrive/pool/accounts/:id': {
+      'delete': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/gdrive/pool/accounts/[id].delete').default>>>>
+    }
+    '/api/gdrive/pool/files': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/gdrive/pool/files.get').default>>>>
+    }
+    '/api/gdrive/pool/files/:id': {
+      'delete': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/gdrive/pool/files/[id].delete').default>>>>
+    }
+    '/api/gdrive/pool/stream/:id': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/gdrive/pool/stream/[id].get').default>>>>
+    }
+    '/api/gdrive/pool/upload': {
+      'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/gdrive/pool/upload.post').default>>>>
+    }
     '/api/info': {
       'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/info.get').default>>>>
     }
