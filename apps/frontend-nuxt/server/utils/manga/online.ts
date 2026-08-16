@@ -246,9 +246,14 @@ export async function getMangaDexChapterPages(chapterId: string): Promise<string
 }
 
 // -------------------------------------------------------------
-// 2. KOMIKU (KOMIKU.ORG / API.KOMIKU.ORG)
+// 2. KOMIKU (KOMIKU.ORG / KOMIKU.ID / KOMIKU.COM.ID)
 // -------------------------------------------------------------
-const KOMIKU_HOST = 'https://komiku.org'
+const KOMIKU_DOMAINS = [
+  'https://komiku.org',
+  'https://komiku.id',
+  'https://komiku.com.id'
+]
+const KOMIKU_HOST = KOMIKU_DOMAINS[0]
 
 export async function searchKomiku(query: string): Promise<OnlineMangaItem[]> {
   const cacheKey = `komiku_${query.trim().toLowerCase()}`
@@ -258,54 +263,81 @@ export async function searchKomiku(query: string): Promise<OnlineMangaItem[]> {
     if (cached.expiry > now) return cached.data
   }
 
-  try {
-    const searchUrl = query && query.trim()
-      ? `https://api.komiku.org/?s=${encodeURIComponent(query.trim())}`
-      : `https://komiku.org/pustaka/?orderby=date`
+  for (const domain of KOMIKU_DOMAINS) {
+    try {
+      const searchUrls = query && query.trim()
+        ? [
+            `${domain}/?post_type=manga&s=${encodeURIComponent(query.trim())}`,
+            `${domain}/?s=${encodeURIComponent(query.trim())}`,
+            `https://api.komiku.org/?s=${encodeURIComponent(query.trim())}`
+          ]
+        : [
+            `${domain}/other/hot/`,
+            `${domain}/pustaka/?orderby=date`,
+            `${domain}/manga/`
+          ]
 
-    const res = await axios.get(searchUrl, {
-      timeout: 12000,
-      headers: { ...DEFAULT_HEADERS, 'Referer': KOMIKU_HOST }
-    })
+      for (const searchUrl of searchUrls) {
+        try {
+          const res = await axios.get(searchUrl, {
+            timeout: 8000,
+            headers: { ...DEFAULT_HEADERS, 'Referer': `${domain}/` }
+          })
+          if (!res.data || typeof res.data !== 'string') continue
 
-    const $ = cheerio.load(res.data)
-    const results: OnlineMangaItem[] = []
+          const $ = cheerio.load(res.data)
+          const results: OnlineMangaItem[] = []
 
-    $('.bge, .bvl').each((_, el) => {
-      const a = $(el).find('.kan a, .bgei a, a').first()
-      let link = a.attr('href') || ''
-      const title = $(el).find('h3, .title').first().text().trim() || a.attr('title') || ''
-      const img = $(el).find('img').first()
-      const cover = img.attr('data-src') || img.attr('src') || null
-      const desc = $(el).find('p').first().text().trim() || 'Komik Bahasa Indonesia'
+          $('.bge, .bvl, .ls4, .ls23, .kan, .listupd > div, .bgei, article, .item').each((_, el) => {
+            const a = $(el).find('.kan a, .bgei a, h3 a, h4 a, a').first()
+            let link = a.attr('href') || ''
+            const title = $(el).find('h3, h4, .title, .kan h3').first().text().trim() || a.attr('title') || ''
+            const img = $(el).find('img').first()
+            const cover = img.attr('data-src') || img.attr('src') || img.attr('data-lazy-src') || null
+            const desc = $(el).find('p, .desc').first().text().trim() || 'Komik Bahasa Indonesia'
 
-      if (title && link) {
-        if (!link.startsWith('http')) link = `${KOMIKU_HOST}${link}`
-        const id = Buffer.from(link).toString('base64url')
-        const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || id
+            if (title && link && title.length > 1) {
+              if (!link.startsWith('http')) link = `${domain}${link}`
+              const id = Buffer.from(link).toString('base64url')
+              const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || id
 
-        results.push({
-          id,
-          title,
-          slug,
-          cover,
-          author: 'Komiku Author',
-          description: desc,
-          status: 'Ongoing',
-          tags: ['Manga', 'Komiku', 'Bahasa Indonesia'],
-          provider: 'komiku',
-          availableLanguages: ['id'],
-          url: link
-        })
+              if (!results.some(r => r.title === title || r.url === link)) {
+                results.push({
+                  id,
+                  title,
+                  slug,
+                  cover,
+                  author: 'Komiku Author',
+                  description: desc,
+                  status: 'Ongoing',
+                  tags: ['Manga', 'Komiku', 'Bahasa Indonesia'],
+                  provider: 'komiku',
+                  availableLanguages: ['id'],
+                  url: link
+                })
+              }
+            }
+          })
+
+          if (results.length > 0) {
+            searchCache.set(cacheKey, { data: results, expiry: now + CACHE_TTL })
+            return results
+          }
+        } catch {}
       }
-    })
-
-    searchCache.set(cacheKey, { data: results, expiry: now + CACHE_TTL })
-    return results
-  } catch (err: any) {
-    console.error('[Komiku Search Error]', err.message)
-    return []
+    } catch {}
   }
+
+  // Fallback: Query MangaDex & Mikoroku so the user ALWAYS gets results!
+  const fallbackResults = await searchMangaDex(query, 'id')
+  if (fallbackResults.length > 0) {
+    searchCache.set(cacheKey, { data: fallbackResults, expiry: now + CACHE_TTL })
+    return fallbackResults
+  }
+
+  const mikorokuResults = await searchMikoroku(query)
+  searchCache.set(cacheKey, { data: mikorokuResults, expiry: now + CACHE_TTL })
+  return mikorokuResults
 }
 
 export async function getKomikuDetail(mangaIdOrUrl: string): Promise<{ manga: OnlineMangaItem; chapters: OnlineMangaChapter[] } | null> {
@@ -593,12 +625,15 @@ export async function getMikorokuChapterPages(chapterId: string): Promise<string
 
 // -------------------------------------------------------------
 // 4. WESTMANGA MULTI-MIRROR PROVIDER
-// (westmanga.co, v1.westmanga.my, v1.westmanga.top)
+// (westmanga.info, westmanga.fun, westmanga.co, v1.westmanga.my, v1.westmanga.top, westmanga.me)
 // -------------------------------------------------------------
 const WESTMANGA_MIRRORS = [
+  'https://westmanga.info',
+  'https://westmanga.fun',
   'https://westmanga.co',
   'https://v1.westmanga.my',
-  'https://v1.westmanga.top'
+  'https://v1.westmanga.top',
+  'https://westmanga.me'
 ]
 
 export async function searchWestManga(query: string): Promise<OnlineMangaItem[]> {
@@ -611,55 +646,79 @@ export async function searchWestManga(query: string): Promise<OnlineMangaItem[]>
 
   for (const mirror of WESTMANGA_MIRRORS) {
     try {
-      const url = query && query.trim()
-        ? `${mirror}/contents?q=${encodeURIComponent(query.trim())}`
-        : `${mirror}/contents`
+      const urlsToTry = query && query.trim()
+        ? [
+            `${mirror}/?s=${encodeURIComponent(query.trim())}`,
+            `${mirror}/contents?q=${encodeURIComponent(query.trim())}`,
+            `${mirror}/search?s=${encodeURIComponent(query.trim())}`
+          ]
+        : [
+            `${mirror}/manga/?order=latest`,
+            `${mirror}/manga/?page=1`,
+            `${mirror}/project-list/`,
+            `${mirror}/contents`
+          ]
 
-      const res = await axios.get(url, {
-        timeout: 8000,
-        headers: { ...DEFAULT_HEADERS, 'Referer': `${mirror}/` }
-      })
-
-      const $ = cheerio.load(res.data)
-      const results: OnlineMangaItem[] = []
-
-      $('article, .card, .grid > div, .bs, .bsx, .listupd > div').each((_, el) => {
-        const a = $(el).find('a').first()
-        let link = a.attr('href') || ''
-        const title = $(el).find('h2, h3, h4, .tt, .title').first().text().trim() || a.attr('title') || ''
-        const img = $(el).find('img').first()
-        const cover = img.attr('data-src') || img.attr('src') || null
-
-        if (title && link) {
-          if (!link.startsWith('http')) link = `${mirror}${link}`
-          const id = Buffer.from(link).toString('base64url')
-          const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || id
-
-          results.push({
-            id,
-            title,
-            slug,
-            cover,
-            author: 'WestManga',
-            description: 'Komik Manhwa/Manga Bahasa Indonesia dari WestManga.',
-            status: 'Ongoing',
-            tags: ['Manhwa', 'WestManga', 'Bahasa Indonesia'],
-            provider: 'westmanga',
-            availableLanguages: ['id'],
-            url: link
+      for (const url of urlsToTry) {
+        try {
+          const res = await axios.get(url, {
+            timeout: 7000,
+            headers: { ...DEFAULT_HEADERS, 'Referer': `${mirror}/` }
           })
-        }
-      })
+          if (!res.data || typeof res.data !== 'string') continue
 
-      if (results.length > 0) {
-        searchCache.set(cacheKey, { data: results, expiry: now + CACHE_TTL })
-        return results
+          const $ = cheerio.load(res.data)
+          const results: OnlineMangaItem[] = []
+
+          $('article, .card, .grid > div, .bs, .bsx, .listupd > div, .utao, .uta, .animepos, .post-item').each((_, el) => {
+            const a = $(el).find('a').first()
+            let link = a.attr('href') || ''
+            const title = $(el).find('h2, h3, h4, .tt, .title').first().text().trim() || a.attr('title') || ''
+            const img = $(el).find('img').first()
+            const cover = img.attr('data-src') || img.attr('src') || img.attr('data-lazy-src') || null
+
+            if (title && link && title.length > 1) {
+              if (!link.startsWith('http')) link = `${mirror}${link}`
+              const id = Buffer.from(link).toString('base64url')
+              const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || id
+
+              if (!results.some(r => r.title === title || r.url === link)) {
+                results.push({
+                  id,
+                  title,
+                  slug,
+                  cover,
+                  author: 'WestManga',
+                  description: 'Komik Manhwa/Manga Bahasa Indonesia dari WestManga.',
+                  status: 'Ongoing',
+                  tags: ['Manhwa', 'WestManga', 'Bahasa Indonesia'],
+                  provider: 'westmanga',
+                  availableLanguages: ['id'],
+                  url: link
+                })
+              }
+            }
+          })
+
+          if (results.length > 0) {
+            searchCache.set(cacheKey, { data: results, expiry: now + CACHE_TTL })
+            return results
+          }
+        } catch {}
       }
     } catch {}
   }
 
-  // Fallback: If SPA returns initial skeleton, query Komiku database
-  return searchKomiku(query)
+  // Fallback: If WestManga mirrors fail, return MangaDex / Mikoroku results so the user ALWAYS gets results!
+  const fallbackResults = await searchMangaDex(query, 'id')
+  if (fallbackResults.length > 0) {
+    searchCache.set(cacheKey, { data: fallbackResults, expiry: now + CACHE_TTL })
+    return fallbackResults
+  }
+
+  const mikorokuResults = await searchMikoroku(query)
+  searchCache.set(cacheKey, { data: mikorokuResults, expiry: now + CACHE_TTL })
+  return mikorokuResults
 }
 
 export async function getWestMangaDetail(mangaIdOrUrl: string): Promise<{ manga: OnlineMangaItem; chapters: OnlineMangaChapter[] } | null> {

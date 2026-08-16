@@ -632,13 +632,44 @@ export async function scrapeMeionovelCatalog(): Promise<CatalogNovel[]> {
 
 export async function scrapeMeionovelDetail(slug: string): Promise<CatalogNovel & { chapters: Array<{ title: string; url: string; file: string; contentHtml?: string }> }> {
   const baseUrl = 'https://meionovels.com'
-  const headers = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
-  const sourceUrl = `${baseUrl}/novel/${slug}/`
+  const headers = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36' }
+  const urlsToTry = [
+    `${baseUrl}/novel/${slug}/`,
+    `${baseUrl}/${slug}/`,
+    `${baseUrl}/series/${slug}/`
+  ]
 
-  const res = await axios.get(sourceUrl, { headers, timeout: 20000 })
-  const $ = cheerio.load(res.data)
+  let htmlData = ''
+  let finalSourceUrl = `${baseUrl}/novel/${slug}/`
 
-  const title = $('h1').first().text().trim() || slug
+  for (const url of urlsToTry) {
+    try {
+      const res = await axios.get(url, { headers, timeout: 15000 })
+      if (res.data && typeof res.data === 'string') {
+        htmlData = res.data
+        finalSourceUrl = url
+        break
+      }
+    } catch {}
+  }
+
+  if (!htmlData) {
+    return {
+      id: slug,
+      slug,
+      title: slug.replace(/-/g, ' '),
+      author: 'Meionovel',
+      description: `Novel Meionovel: ${slug}`,
+      cover: undefined,
+      tags: ['Meionovel', 'Bahasa Indonesia'],
+      sourceUrl: finalSourceUrl,
+      chapters: []
+    }
+  }
+
+  const $ = cheerio.load(htmlData)
+
+  const title = $('h1').first().text().trim() || slug.replace(/-/g, ' ')
   const desc = $('.entry-content p, .sinopsis p, .desc p').first().text().trim() || `Novel Meionovel: ${title}`
   const cover = $('.thumb img, .summary_image img').attr('src') || undefined
 
@@ -663,7 +694,7 @@ export async function scrapeMeionovelDetail(slug: string): Promise<CatalogNovel 
     description: desc,
     cover,
     tags: ['Meionovel', 'Bahasa Indonesia'],
-    sourceUrl,
+    sourceUrl: finalSourceUrl,
     chapters
   }
 }
