@@ -325,14 +325,7 @@ export async function searchKomiku(query: string): Promise<OnlineMangaItem[]> {
     } catch {}
   }
 
-  // Backup fallback: Use Mikoroku catalog items tagged strictly with provider: 'komiku'
-  const mikorokuResults = await searchMikoroku(query)
-  const mappedResults = mikorokuResults.map(item => ({
-    ...item,
-    provider: 'komiku' as const
-  }))
-  searchCache.set(cacheKey, { data: mappedResults, expiry: now + CACHE_TTL })
-  return mappedResults
+  return []
 }
 
 export async function getKomikuDetail(mangaIdOrUrl: string): Promise<{ manga: OnlineMangaItem; chapters: OnlineMangaChapter[] } | null> {
@@ -745,14 +738,12 @@ export async function searchWestManga(query: string): Promise<OnlineMangaItem[]>
     } catch {}
   }
 
-  // Backup fallback: Use Mikoroku catalog items tagged strictly with provider: 'westmanga'
-  const mikorokuResults = await searchMikoroku(query)
-  const mappedResults = mikorokuResults.map(item => ({
+  // Backup fallback: Use MangaDex Indonesian translated titles tagged as westmanga
+  const mangaDexResults = await searchMangaDex(query, 'id')
+  return mangaDexResults.map(item => ({
     ...item,
     provider: 'westmanga' as const
   }))
-  searchCache.set(cacheKey, { data: mappedResults, expiry: now + CACHE_TTL })
-  return mappedResults
 }
 
 export async function getWestMangaDetail(mangaIdOrUrl: string): Promise<{ manga: OnlineMangaItem; chapters: OnlineMangaChapter[] } | null> {
@@ -766,11 +757,10 @@ export async function getWestMangaDetail(mangaIdOrUrl: string): Promise<{ manga:
   }
 
   if (!url.startsWith('http')) {
-    // Delegate to Mikoroku detail for non-HTTP fallback IDs
-    const mikorokuDetail = await getMikorokuDetail(mangaIdOrUrl)
-    if (mikorokuDetail) {
-      mikorokuDetail.manga.provider = 'westmanga'
-      return mikorokuDetail
+    const mdDetail = await getMangaDexDetail(mangaIdOrUrl, 'id')
+    if (mdDetail) {
+      mdDetail.manga.provider = 'westmanga'
+      return mdDetail
     }
   }
 
@@ -837,11 +827,10 @@ export async function getWestMangaDetail(mangaIdOrUrl: string): Promise<{ manga:
     } catch {}
   }
 
-  // Backup fallback to Mikoroku detail tagged with westmanga
-  const mikorokuDetail = await getMikorokuDetail(mangaIdOrUrl)
-  if (mikorokuDetail) {
-    mikorokuDetail.manga.provider = 'westmanga'
-    return mikorokuDetail
+  const mdDetail = await getMangaDexDetail(mangaIdOrUrl, 'id')
+  if (mdDetail) {
+    mdDetail.manga.provider = 'westmanga'
+    return mdDetail
   }
   return null
 }
