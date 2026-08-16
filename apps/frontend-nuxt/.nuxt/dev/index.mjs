@@ -2147,16 +2147,16 @@ _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw
 const assets = {
   "/index.mjs": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"4e852-lszJY7Bnz6SxDHSl9U6h7Deybx4\"",
-    "mtime": "2026-08-16T11:58:33.129Z",
-    "size": 321618,
+    "etag": "\"4e8a4-xjtw527YvQxwoWp+axWhlhWfZOM\"",
+    "mtime": "2026-08-16T12:37:18.031Z",
+    "size": 321700,
     "path": "index.mjs"
   },
   "/index.mjs.map": {
     "type": "application/json",
-    "etag": "\"1254bd-RnInktDtVlfwJt0JGn+utXnBIiE\"",
-    "mtime": "2026-08-16T11:58:33.129Z",
-    "size": 1201341,
+    "etag": "\"1252e3-d3EyEkkXAkB+IzV0BfRIgSqvMes\"",
+    "mtime": "2026-08-16T12:37:18.031Z",
+    "size": 1200867,
     "path": "index.mjs.map"
   }
 };
@@ -5055,60 +5055,56 @@ async function searchKomiku(query) {
     const cached = searchCache.get(cacheKey);
     if (cached.expiry > now) return cached.data;
   }
-  for (const domain of KOMIKU_DOMAINS) {
+  const q = query.trim();
+  const searchUrls = q ? [
+    `https://api.komiku.org/?post_type=manga&s=${encodeURIComponent(q)}`,
+    `https://api.komiku.org/?s=${encodeURIComponent(q)}`,
+    `https://komiku.id/?post_type=manga&s=${encodeURIComponent(q)}`
+  ] : [
+    `https://api.komiku.org/pustaka/`,
+    `https://api.komiku.org/other/hot/`,
+    `https://komiku.id/pustaka/?orderby=date`
+  ];
+  for (const searchUrl of searchUrls) {
     try {
-      const searchUrls = query && query.trim() ? [
-        `${domain}/?post_type=manga&s=${encodeURIComponent(query.trim())}`,
-        `${domain}/?s=${encodeURIComponent(query.trim())}`,
-        `https://api.komiku.org/?s=${encodeURIComponent(query.trim())}`
-      ] : [
-        `${domain}/other/hot/`,
-        `${domain}/pustaka/?orderby=date`,
-        `${domain}/manga/`
-      ];
-      for (const searchUrl of searchUrls) {
-        try {
-          const res = await axios.get(searchUrl, {
-            timeout: 8e3,
-            headers: { ...DEFAULT_HEADERS, "Referer": `${domain}/` }
-          });
-          if (!res.data || typeof res.data !== "string") continue;
-          const $ = cheerio.load(res.data);
-          const results = [];
-          $(".bge, .bvl, .ls4, .ls23, .kan, .listupd > div, .bgei, article, .item").each((_, el) => {
-            const a = $(el).find(".kan a, .bgei a, h3 a, h4 a, a").first();
-            let link = a.attr("href") || "";
-            const title = $(el).find("h3, h4, .title, .kan h3").first().text().trim() || a.attr("title") || "";
-            const img = $(el).find("img").first();
-            const cover = img.attr("data-src") || img.attr("src") || img.attr("data-lazy-src") || null;
-            const desc = $(el).find("p, .desc").first().text().trim() || "Komik Bahasa Indonesia";
-            if (title && link && title.length > 1) {
-              if (!link.startsWith("http")) link = `${domain}${link}`;
-              const id = Buffer.from(link).toString("base64url");
-              const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || id;
-              if (!results.some((r) => r.title === title || r.url === link)) {
-                results.push({
-                  id,
-                  title,
-                  slug,
-                  cover,
-                  author: "Komiku Author",
-                  description: desc,
-                  status: "Ongoing",
-                  tags: ["Manga", "Komiku", "Bahasa Indonesia"],
-                  provider: "komiku",
-                  availableLanguages: ["id"],
-                  url: link
-                });
-              }
-            }
-          });
-          if (results.length > 0) {
-            searchCache.set(cacheKey, { data: results, expiry: now + CACHE_TTL });
-            return results;
+      const res = await axios.get(searchUrl, {
+        timeout: 8e3,
+        headers: { ...DEFAULT_HEADERS, "Referer": "https://komiku.id/" }
+      });
+      if (!res.data || typeof res.data !== "string") continue;
+      const $ = cheerio.load(res.data);
+      const results = [];
+      $(".bge, .bvl, .ls4, .ls23, .kan, .listupd > div, .bgei, article, .item").each((_, el) => {
+        const a = $(el).find(".kan a, .bgei a, h3 a, h4 a, a").first();
+        let link = a.attr("href") || "";
+        const title = $(el).find("h3, h4, .title, .kan h3").first().text().trim() || a.attr("title") || "";
+        const img = $(el).find("img").first();
+        const cover = img.attr("data-src") || img.attr("src") || img.attr("data-lazy-src") || null;
+        const desc = $(el).find("p, .desc").first().text().trim() || "Komik Bahasa Indonesia";
+        if (title && link && title.length > 1) {
+          if (!link.startsWith("http")) link = `https://komiku.id${link}`;
+          const id = Buffer.from(link).toString("base64url");
+          const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || id;
+          if (!results.some((r) => r.title === title || r.url === link)) {
+            results.push({
+              id,
+              title,
+              slug,
+              cover,
+              author: "Komiku Author",
+              description: desc,
+              status: "Ongoing",
+              tags: ["Manga", "Komiku", "Bahasa Indonesia"],
+              provider: "komiku",
+              availableLanguages: ["id"],
+              url: link
+            });
           }
-        } catch {
         }
+      });
+      if (results.length > 0) {
+        searchCache.set(cacheKey, { data: results, expiry: now + CACHE_TTL });
+        return results;
       }
     } catch {
     }
@@ -5300,7 +5296,7 @@ async function searchMikoroku(query) {
   }
 }
 async function getMikorokuDetail(slug) {
-  var _a, _b;
+  var _a, _b, _c, _d, _e, _f, _g;
   const cacheKey = `mikoroku_detail_${slug}`;
   const now = Date.now();
   if (detailCache.has(cacheKey)) {
@@ -5319,26 +5315,44 @@ async function getMikorokuDetail(slug) {
     if (cover && !cover.startsWith("http")) {
       cover = `https://mikoroku.com/${cover}`;
     }
-    const feedUrl = `https://www.mikoroku.top/feeds/posts/default?alt=json&max-results=200&q=${encodeURIComponent(title)}`;
-    const feedRes = await axios.get(feedUrl, { timeout: 1e4 });
-    const entries = ((_b = (_a = feedRes.data) == null ? void 0 : _a.feed) == null ? void 0 : _b.entry) || [];
-    const chapters = entries.map((e, idx) => {
-      var _a2, _b2, _c, _d, _e;
-      const chTitle = ((_a2 = e.title) == null ? void 0 : _a2.$t) || `Chapter ${idx + 1}`;
-      const contentHtml = ((_b2 = e.content) == null ? void 0 : _b2.$t) || ((_c = e.summary) == null ? void 0 : _c.$t) || "";
-      const numMatch = chTitle.match(/chapter\s*(\d+(\.\d+)?)/i) || chTitle.match(/\bch\b\.?\s*(\d+(\.\d+)?)/i) || chTitle.match(/\d+/);
-      const chapterNum = numMatch ? numMatch[1] || numMatch[0] : String(idx + 1);
-      const chPayload = JSON.stringify({ title: chTitle, html: contentHtml });
-      const chId = Buffer.from(chPayload).toString("base64url");
-      return {
-        id: chId,
-        chapter: chapterNum,
-        title: chTitle,
-        language: "id",
-        publishDate: ((_d = e.published) == null ? void 0 : _d.$t) || ((_e = e.updated) == null ? void 0 : _e.$t),
-        scanlationGroup: "Mikoroku"
-      };
-    });
+    const cleanTitle = title.split("~")[0].split(":")[0].trim();
+    const searchTerms = Array.from(/* @__PURE__ */ new Set([cleanTitle, title])).filter(Boolean);
+    const endpoints = [
+      "https://www.mikodrive.my.id/feeds/posts/default",
+      "https://www.yomidays.my.id/feeds/posts/default",
+      "https://www.mikoroku.top/feeds/posts/default"
+    ];
+    const chaptersMap = /* @__PURE__ */ new Map();
+    for (const ep of endpoints) {
+      for (const st of searchTerms) {
+        try {
+          const feedUrl = `${ep}?alt=json&max-results=500&q=${encodeURIComponent(st)}`;
+          const feedRes = await axios.get(feedUrl, { timeout: 8e3 });
+          const entries = ((_b = (_a = feedRes.data) == null ? void 0 : _a.feed) == null ? void 0 : _b.entry) || [];
+          for (const e of entries) {
+            const chTitle = ((_c = e.title) == null ? void 0 : _c.$t) || "";
+            if (!chTitle) continue;
+            const contentHtml = ((_d = e.content) == null ? void 0 : _d.$t) || ((_e = e.summary) == null ? void 0 : _e.$t) || "";
+            const numMatch = chTitle.match(/chapter\s*(\d+(\.\d+)?)/i) || chTitle.match(/\bch\b\.?\s*(\d+(\.\d+)?)/i) || chTitle.match(/\d+/);
+            const chapterNum = numMatch ? numMatch[1] || numMatch[0] : "";
+            if (!chaptersMap.has(chTitle)) {
+              const chPayload = JSON.stringify({ title: chTitle, html: contentHtml });
+              const chId = Buffer.from(chPayload).toString("base64url");
+              chaptersMap.set(chTitle, {
+                id: chId,
+                chapter: chapterNum,
+                title: chTitle,
+                language: "id",
+                publishDate: ((_f = e.published) == null ? void 0 : _f.$t) || ((_g = e.updated) == null ? void 0 : _g.$t),
+                scanlationGroup: "Mikoroku"
+              });
+            }
+          }
+        } catch {
+        }
+      }
+    }
+    const chapters = Array.from(chaptersMap.values());
     chapters.sort((a, b) => parseFloat(a.chapter || "0") - parseFloat(b.chapter || "0"));
     const manga = {
       id: slug,

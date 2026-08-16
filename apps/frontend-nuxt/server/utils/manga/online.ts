@@ -263,67 +263,64 @@ export async function searchKomiku(query: string): Promise<OnlineMangaItem[]> {
     if (cached.expiry > now) return cached.data
   }
 
-  for (const domain of KOMIKU_DOMAINS) {
+  const q = query.trim()
+  const searchUrls = q
+    ? [
+        `https://api.komiku.org/?post_type=manga&s=${encodeURIComponent(q)}`,
+        `https://api.komiku.org/?s=${encodeURIComponent(q)}`,
+        `https://komiku.id/?post_type=manga&s=${encodeURIComponent(q)}`
+      ]
+    : [
+        `https://api.komiku.org/pustaka/`,
+        `https://api.komiku.org/other/hot/`,
+        `https://komiku.id/pustaka/?orderby=date`
+      ]
+
+  for (const searchUrl of searchUrls) {
     try {
-      const searchUrls = query && query.trim()
-        ? [
-            `${domain}/?post_type=manga&s=${encodeURIComponent(query.trim())}`,
-            `${domain}/?s=${encodeURIComponent(query.trim())}`,
-            `https://api.komiku.org/?s=${encodeURIComponent(query.trim())}`
-          ]
-        : [
-            `${domain}/other/hot/`,
-            `${domain}/pustaka/?orderby=date`,
-            `${domain}/manga/`
-          ]
+      const res = await axios.get(searchUrl, {
+        timeout: 8000,
+        headers: { ...DEFAULT_HEADERS, 'Referer': 'https://komiku.id/' }
+      })
+      if (!res.data || typeof res.data !== 'string') continue
 
-      for (const searchUrl of searchUrls) {
-        try {
-          const res = await axios.get(searchUrl, {
-            timeout: 8000,
-            headers: { ...DEFAULT_HEADERS, 'Referer': `${domain}/` }
-          })
-          if (!res.data || typeof res.data !== 'string') continue
+      const $ = cheerio.load(res.data)
+      const results: OnlineMangaItem[] = []
 
-          const $ = cheerio.load(res.data)
-          const results: OnlineMangaItem[] = []
+      $('.bge, .bvl, .ls4, .ls23, .kan, .listupd > div, .bgei, article, .item').each((_, el) => {
+        const a = $(el).find('.kan a, .bgei a, h3 a, h4 a, a').first()
+        let link = a.attr('href') || ''
+        const title = $(el).find('h3, h4, .title, .kan h3').first().text().trim() || a.attr('title') || ''
+        const img = $(el).find('img').first()
+        const cover = img.attr('data-src') || img.attr('src') || img.attr('data-lazy-src') || null
+        const desc = $(el).find('p, .desc').first().text().trim() || 'Komik Bahasa Indonesia'
 
-          $('.bge, .bvl, .ls4, .ls23, .kan, .listupd > div, .bgei, article, .item').each((_, el) => {
-            const a = $(el).find('.kan a, .bgei a, h3 a, h4 a, a').first()
-            let link = a.attr('href') || ''
-            const title = $(el).find('h3, h4, .title, .kan h3').first().text().trim() || a.attr('title') || ''
-            const img = $(el).find('img').first()
-            const cover = img.attr('data-src') || img.attr('src') || img.attr('data-lazy-src') || null
-            const desc = $(el).find('p, .desc').first().text().trim() || 'Komik Bahasa Indonesia'
+        if (title && link && title.length > 1) {
+          if (!link.startsWith('http')) link = `https://komiku.id${link}`
+          const id = Buffer.from(link).toString('base64url')
+          const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || id
 
-            if (title && link && title.length > 1) {
-              if (!link.startsWith('http')) link = `${domain}${link}`
-              const id = Buffer.from(link).toString('base64url')
-              const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || id
-
-              if (!results.some(r => r.title === title || r.url === link)) {
-                results.push({
-                  id,
-                  title,
-                  slug,
-                  cover,
-                  author: 'Komiku Author',
-                  description: desc,
-                  status: 'Ongoing',
-                  tags: ['Manga', 'Komiku', 'Bahasa Indonesia'],
-                  provider: 'komiku',
-                  availableLanguages: ['id'],
-                  url: link
-                })
-              }
-            }
-          })
-
-          if (results.length > 0) {
-            searchCache.set(cacheKey, { data: results, expiry: now + CACHE_TTL })
-            return results
+          if (!results.some(r => r.title === title || r.url === link)) {
+            results.push({
+              id,
+              title,
+              slug,
+              cover,
+              author: 'Komiku Author',
+              description: desc,
+              status: 'Ongoing',
+              tags: ['Manga', 'Komiku', 'Bahasa Indonesia'],
+              provider: 'komiku',
+              availableLanguages: ['id'],
+              url: link
+            })
           }
-        } catch {}
+        }
+      })
+
+      if (results.length > 0) {
+        searchCache.set(cacheKey, { data: results, expiry: now + CACHE_TTL })
+        return results
       }
     } catch {}
   }
@@ -568,29 +565,51 @@ export async function getMikorokuDetail(slug: string): Promise<{ manga: OnlineMa
       cover = `https://mikoroku.com/${cover}`
     }
 
-    const feedUrl = `https://www.mikoroku.top/feeds/posts/default?alt=json&max-results=200&q=${encodeURIComponent(title)}`
-    const feedRes = await axios.get(feedUrl, { timeout: 10000 })
-    const entries = feedRes.data?.feed?.entry || []
+    const cleanTitle = title.split('~')[0].split(':')[0].trim()
+    const searchTerms = Array.from(new Set([cleanTitle, title])).filter(Boolean)
 
-    const chapters: OnlineMangaChapter[] = entries.map((e: any, idx: number) => {
-      const chTitle = e.title?.$t || `Chapter ${idx + 1}`
-      const contentHtml = e.content?.$t || e.summary?.$t || ''
-      const numMatch = chTitle.match(/chapter\s*(\d+(\.\d+)?)/i) || chTitle.match(/\bch\b\.?\s*(\d+(\.\d+)?)/i) || chTitle.match(/\d+/)
-      const chapterNum = numMatch ? numMatch[1] || numMatch[0] : String(idx + 1)
+    const endpoints = [
+      'https://www.mikodrive.my.id/feeds/posts/default',
+      'https://www.yomidays.my.id/feeds/posts/default',
+      'https://www.mikoroku.top/feeds/posts/default'
+    ]
 
-      const chPayload = JSON.stringify({ title: chTitle, html: contentHtml })
-      const chId = Buffer.from(chPayload).toString('base64url')
+    const chaptersMap = new Map<string, OnlineMangaChapter>()
 
-      return {
-        id: chId,
-        chapter: chapterNum,
-        title: chTitle,
-        language: 'id',
-        publishDate: e.published?.$t || e.updated?.$t,
-        scanlationGroup: 'Mikoroku'
+    for (const ep of endpoints) {
+      for (const st of searchTerms) {
+        try {
+          const feedUrl = `${ep}?alt=json&max-results=500&q=${encodeURIComponent(st)}`
+          const feedRes = await axios.get(feedUrl, { timeout: 8000 })
+          const entries = feedRes.data?.feed?.entry || []
+
+          for (const e of entries) {
+            const chTitle = e.title?.$t || ''
+            if (!chTitle) continue
+
+            const contentHtml = e.content?.$t || e.summary?.$t || ''
+            const numMatch = chTitle.match(/chapter\s*(\d+(\.\d+)?)/i) || chTitle.match(/\bch\b\.?\s*(\d+(\.\d+)?)/i) || chTitle.match(/\d+/)
+            const chapterNum = numMatch ? numMatch[1] || numMatch[0] : ''
+
+            if (!chaptersMap.has(chTitle)) {
+              const chPayload = JSON.stringify({ title: chTitle, html: contentHtml })
+              const chId = Buffer.from(chPayload).toString('base64url')
+
+              chaptersMap.set(chTitle, {
+                id: chId,
+                chapter: chapterNum,
+                title: chTitle,
+                language: 'id',
+                publishDate: e.published?.$t || e.updated?.$t,
+                scanlationGroup: 'Mikoroku'
+              })
+            }
+          }
+        } catch {}
       }
-    })
+    }
 
+    const chapters = Array.from(chaptersMap.values())
     chapters.sort((a, b) => parseFloat(a.chapter || '0') - parseFloat(b.chapter || '0'))
 
     const manga: OnlineMangaItem = {
