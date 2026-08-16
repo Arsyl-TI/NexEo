@@ -349,3 +349,13 @@
 - **Implementation Highlights**:
   - **🔥 All-Time Low (ATL) Record Badge**: Inspects historical lowest prices from CheapShark API (`cheapestPriceEver`). Renders a glowing `🔥 RECORD LOW` badge on game cards when the current sale price equals or beats its record lowest price ever recorded.
   - **Deal Lookup API (`GET /api/games/lookup?dealID=...`)**: Fetches detailed price history for specific deal items.
+
+---
+
+## Feature 31: Personal Game Deals Wishlist Price Drop Alert & Web Notification Engine
+- **Files Modified**:
+  - `apps/frontend-nuxt/pages/game-deals.vue`
+- **Implementation Highlights**:
+  - **🔔 Set Target Price Modal**: 1-click modal on game cards allowing users to specify a maximum target price threshold in USD or IDR.
+  - **HTML5 Desktop Browser Notifications**: Requests `Notification.requestPermission()` and triggers OS/browser notifications automatically when a target price threshold is reached or exceeded during deal checks.
+  - **🔔 Notifikasi Diskon Drawer Manager**: Dedicated drawer modal in toolbar listing active price alerts with 1-click removal and notification permission status.

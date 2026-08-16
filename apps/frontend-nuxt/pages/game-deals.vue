@@ -139,6 +139,14 @@
             <span>📌</span>
             <span>Wishlist ({{ wishlist.length }})</span>
           </button>
+
+          <button 
+            @click="showAlertsManagerModal = true"
+            class="px-3 py-1 rounded-lg text-xs font-semibold transition-all border border-amber-500/40 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 flex items-center gap-1 shadow-sm"
+          >
+            <span>🔔</span>
+            <span>Alert Diskon {{ priceAlerts.length > 0 ? `(${priceAlerts.length})` : '' }}</span>
+          </button>
         </div>
       </div>
 
@@ -219,6 +227,14 @@
                 {{ isWishlisted(deal.id) ? '❤️' : '🤍' }}
               </button>
 
+              <button 
+                @click="openSetAlertModal(deal)" 
+                class="p-2 bg-amber-500/10 text-amber-300 border border-amber-500/30 rounded-xl hover:bg-amber-500/20 transition-all text-xs"
+                title="Set Notifikasi Target Harga"
+              >
+                🔔
+              </button>
+
               <a 
                 :href="deal.dealLink" 
                 target="_blank" 
@@ -232,6 +248,97 @@
         </div>
       </div>
 
+    </div>
+
+    <!-- Set Target Price Alert Modal -->
+    <div 
+      v-if="showSetAlertModal && dealForAlert" 
+      class="fixed inset-0 z-50 bg-background/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200"
+      @click.self="showSetAlertModal = false"
+    >
+      <div class="bg-card border border-border rounded-3xl p-6 max-w-sm w-full shadow-2xl relative space-y-4">
+        <button @click="showSetAlertModal = false" class="absolute top-4 right-4 text-muted-foreground hover:text-foreground text-sm p-1 rounded-lg">✕</button>
+
+        <h3 class="text-base font-bold text-foreground flex items-center gap-2">
+          <span>🔔</span> Notifikasi Target Diskon Harga
+        </h3>
+        <p class="text-xs text-muted-foreground">
+          Beri tahu saya ketika harga <span class="font-bold text-foreground">{{ dealForAlert.title }}</span> turun di bawah target!
+        </p>
+
+        <div class="bg-background border border-border rounded-xl p-3 space-y-1 text-xs font-mono">
+          <div class="flex justify-between text-muted-foreground">
+            <span>Harga Promo Saat Ini:</span>
+            <span class="font-bold text-amber-400">{{ formatPrice(dealForAlert.salePrice) }}</span>
+          </div>
+          <div class="flex justify-between text-muted-foreground">
+            <span>Harga Normal:</span>
+            <span class="line-through text-rose-400">{{ formatPrice(dealForAlert.normalPrice) }}</span>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-muted-foreground mb-1">Target Harga Maksimal ({{ selectedCurrency === 'IDR' ? 'Rp' : '$' }}):</label>
+          <input 
+            v-model.number="targetAlertPrice" 
+            type="number" 
+            :placeholder="selectedCurrency === 'IDR' ? 'Contoh: 150000' : 'Contoh: 10'" 
+            class="w-full bg-background border border-border rounded-xl px-4 py-2 text-sm font-mono text-foreground focus:outline-none focus:border-primary"
+            autofocus
+          />
+          <p class="text-[10px] text-muted-foreground mt-1">Notifikasi browser desktop akan muncul saat harga mencapai atau lebih murah dari target ini.</p>
+        </div>
+
+        <button @click="savePriceAlert" class="w-full py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-xl text-xs shadow-md transition-all">
+          🔔 Simpan Target Notifikasi
+        </button>
+      </div>
+    </div>
+
+    <!-- Active Price Alerts Manager Drawer -->
+    <div 
+      v-if="showAlertsManagerModal" 
+      class="fixed inset-0 z-50 bg-background/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200"
+      @click.self="showAlertsManagerModal = false"
+    >
+      <div class="bg-card border border-border rounded-3xl p-6 max-w-lg w-full shadow-2xl relative space-y-4">
+        <button @click="showAlertsManagerModal = false" class="absolute top-4 right-4 text-muted-foreground hover:text-foreground text-sm p-1 rounded-lg">✕</button>
+
+        <div class="flex items-center justify-between pr-6">
+          <h3 class="text-base font-bold text-foreground flex items-center gap-2">
+            <span>🔔</span> Pengelola Notifikasi Target Diskon ({{ priceAlerts.length }})
+          </h3>
+          <button @click="requestNotificationPermission" class="text-[11px] font-semibold text-primary hover:underline">
+            🔑 Izin Notifikasi Browser
+          </button>
+        </div>
+
+        <div v-if="priceAlerts.length === 0" class="py-8 text-center text-muted-foreground text-xs">
+          <span class="text-3xl block mb-2">🔔</span>
+          Belum ada notifikasi target harga diset. Klik ikon 🔔 pada kartu game untuk memasang target!
+        </div>
+
+        <div v-else class="space-y-2.5 max-h-[50vh] overflow-y-auto pr-1">
+          <div 
+            v-for="alertItem in priceAlerts" 
+            :key="alertItem.id"
+            class="bg-background border border-border rounded-2xl p-3 flex items-center justify-between gap-3 text-xs"
+          >
+            <div class="truncate">
+              <h4 class="font-bold text-foreground truncate">{{ alertItem.title }}</h4>
+              <p class="text-[11px] font-mono text-muted-foreground">
+                Target: <span class="text-emerald-400 font-bold">{{ alertItem.currency === 'IDR' ? `Rp ${alertItem.targetPrice.toLocaleString('id-ID')}` : `$${alertItem.targetPrice}` }}</span> (Store: {{ alertItem.storeName }})
+              </p>
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0">
+              <button @click="removePriceAlert(alertItem.id)" class="p-1.5 text-muted-foreground hover:text-rose-400 hover:bg-rose-500/10 rounded-lg">
+                ✕
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -263,6 +370,103 @@ const wishlist = ref<any[]>([])
 
 const selectedCurrency = ref<'IDR' | 'USD'>('IDR')
 const USD_TO_IDR = 15800
+
+interface GamePriceAlert {
+  id: string
+  title: string
+  targetPrice: number
+  currency: 'IDR' | 'USD'
+  storeName: string
+  dealLink: string
+  createdAt: string
+}
+
+const priceAlerts = ref<GamePriceAlert[]>([])
+const showSetAlertModal = ref(false)
+const showAlertsManagerModal = ref(false)
+const dealForAlert = ref<any>(null)
+const targetAlertPrice = ref<number>(0)
+
+function openSetAlertModal(deal: any) {
+  dealForAlert.value = deal
+  const priceNum = parseFloat(deal.salePrice.replace(/[^0-9.]/g, '')) || 10
+  if (selectedCurrency.value === 'IDR') {
+    targetAlertPrice.value = Math.round(priceNum * USD_TO_IDR)
+  } else {
+    targetAlertPrice.value = priceNum
+  }
+  showSetAlertModal.value = true
+}
+
+function savePriceAlert() {
+  if (!dealForAlert.value || !targetAlertPrice.value) return
+  
+  const alertItem: GamePriceAlert = {
+    id: `alert_${dealForAlert.value.id}_${Date.now()}`,
+    title: dealForAlert.value.title,
+    targetPrice: targetAlertPrice.value,
+    currency: selectedCurrency.value,
+    storeName: dealForAlert.value.storeName,
+    dealLink: dealForAlert.value.dealLink,
+    createdAt: new Date().toISOString()
+  }
+
+  priceAlerts.value.push(alertItem)
+  savePriceAlerts()
+  showSetAlertModal.value = false
+  success(`Notifikasi target harga untuk "${dealForAlert.value.title}" berhasil dipasang!`)
+  requestNotificationPermission()
+}
+
+function removePriceAlert(id: string) {
+  priceAlerts.value = priceAlerts.value.filter(a => a.id !== id)
+  savePriceAlerts()
+  success('Target notifikasi diskon berhasil dihapus.')
+}
+
+function savePriceAlerts() {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('game_price_alerts', JSON.stringify(priceAlerts.value))
+  }
+}
+
+function loadPriceAlerts() {
+  if (typeof window !== 'undefined') {
+    const raw = localStorage.getItem('game_price_alerts')
+    if (raw) {
+      try { priceAlerts.value = JSON.parse(raw) } catch {}
+    }
+  }
+}
+
+function requestNotificationPermission() {
+  if (typeof window !== 'undefined' && 'Notification' in window) {
+    if (Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+      Notification.requestPermission()
+    }
+  }
+}
+
+function checkPriceAlerts(dealsList: any[]) {
+  if (typeof window === 'undefined' || priceAlerts.value.length === 0) return
+
+  priceAlerts.value.forEach(alertItem => {
+    const matchedDeal = dealsList.find(d => d.title.toLowerCase().includes(alertItem.title.toLowerCase()))
+    if (matchedDeal) {
+      const currentUsd = parseFloat(matchedDeal.salePrice.replace(/[^0-9.]/g, '')) || 0
+      const currentPriceInAlertCurrency = alertItem.currency === 'IDR' ? currentUsd * USD_TO_IDR : currentUsd
+
+      if (currentPriceInAlertCurrency <= alertItem.targetPrice && currentPriceInAlertCurrency > 0) {
+        if ('Notification' in window && Notification.permission === 'granted') {
+          new Notification(`🎉 TARGET DISKON TERCAPAI: ${matchedDeal.title}!`, {
+            body: `Harga turun menjadi ${formatPrice(matchedDeal.salePrice)} di ${matchedDeal.storeName}! Klik untuk klaim.`,
+            icon: matchedDeal.thumb
+          })
+        }
+      }
+    }
+  })
+}
 
 function formatPrice(priceStr: string | undefined): string {
   if (!priceStr) return 'GRATIS'
@@ -296,6 +500,7 @@ async function fetchDeals() {
     const res = await api.get<{ success?: boolean; data?: any[] }>(`/games/deals${queryStr}`)
     if (res?.data) {
       deals.value = res.data
+      checkPriceAlerts(res.data)
     }
   } catch (e: any) {
     console.error('Failed to load deals', e)
@@ -353,6 +558,7 @@ function loadWishlist() {
 
 onMounted(() => {
   loadWishlist()
+  loadPriceAlerts()
   void fetchFreebies()
   void fetchDeals()
 })
