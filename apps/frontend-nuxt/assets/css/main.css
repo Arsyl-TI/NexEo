@@ -37,10 +37,10 @@ body {
   overflow-x: hidden;
 }
 
-/* Custom Scrollbar */
+/* Custom Scrollbar - Optimized for smooth dragging */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
@@ -48,20 +48,29 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
-  border-radius: 4px;
+  background: #27354a;
+  border-radius: 6px;
+  border: 2px solid #0b0f19;
+  transition: background-color 0.2s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: #8b5cf6;
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: #a78bfa;
 }
 
 .sidebar {
   @apply fixed inset-y-0 left-0 w-64 bg-card/90 backdrop-blur-xl border-r border-border z-40 transition-transform duration-300;
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 .main-content {
   @apply flex flex-col min-h-screen transition-all duration-300;
+  transform: translateZ(0);
 }
 
 @media (min-width: 768px) {
@@ -72,6 +81,8 @@ body {
 
 .topbar {
   @apply sticky top-0 z-20 bg-background/80 backdrop-blur-xl border-b border-border;
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 .page-shell {
@@ -80,10 +91,12 @@ body {
 
 .glass-card {
   @apply bg-card/60 backdrop-blur-xl border border-border/80 rounded-2xl shadow-xl transition-all duration-300;
+  transform: translateZ(0);
 }
 
 .glass-card-hover {
   @apply bg-card/60 backdrop-blur-xl border border-border/80 rounded-2xl shadow-xl transition-all duration-300 hover:border-primary/50 hover:shadow-primary/10 hover:shadow-2xl hover:-translate-y-0.5;
+  transform: translateZ(0);
 }
 
 .btn-base {
