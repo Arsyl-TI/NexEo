@@ -1,12 +1,12 @@
-# Technical Execution Plan: Module 3 - Manga & Webtoon Reader Suite
+# Technical Execution Plan: Module 4 - Shared Files & Storage Management Suite
 
 ## Goal
-Implement Module 3 upgrades for the Manga Reader (`apps/frontend-nuxt/pages/manga/[slug]/[chapter].vue`):
-1. **Interactive Zoom Slider & Loupe Magnifier Glass**: Zoom range slider (50% to 250%) and floating loupe magnifier lens for reading tiny speech bubble text.
-2. **Smart Inverted Dark-Mode Scanner Filter**: Night reading inverted contrast CSS filter turning white manga scans into dark background pages.
+Implement Module 4 upgrades for Shared Files (`apps/frontend-nuxt/pages/share.vue`):
+1. **Password-Protected Share Links & Expiry Timers**: Passcode protection and expiration countdowns (1h, 24h, 7d) on shared files.
+2. **Storage Analytics & Duplicate File Finder**: Disk space usage bar and 1-click duplicate file finder to clean up server storage.
 
 ## Files to Modify:
-- `apps/frontend-nuxt/pages/manga/[slug]/[chapter].vue`
+- `apps/frontend-nuxt/pages/share.vue`
 
 ## Verification:
 - Monorepo typecheck: `pnpm turbo run typecheck`

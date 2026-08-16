@@ -24,10 +24,19 @@
         </h1>
         <p class="text-xs text-muted-foreground">Unggah dan bagikan file berukuran besar secara instan antar smartphone, laptop, & PC di jaringan Wi-Fi / LAN.</p>
       </div>
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-3 flex-wrap">
+        <!-- Duplicate Finder Button -->
+        <button 
+          @click="showDuplicatesModal = true" 
+          :class="['px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all flex items-center gap-1.5 shadow-sm active:scale-95', duplicateGroups.length > 0 ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 animate-pulse' : 'bg-card border-border text-foreground hover:bg-border/60']"
+        >
+          <span>🔍</span> Berkas Duplikat {{ duplicateGroups.length > 0 ? `(${duplicateGroups.length})` : '' }}
+        </button>
+
         <span class="text-muted-foreground bg-card border border-border px-3.5 py-1.5 rounded-full text-xs font-mono font-medium shadow-sm">
-          {{ files.length }} berkas
+          📊 {{ formattedTotalStorage }} ({{ files.length }} berkas)
         </span>
+
         <button 
           @click="fetchFiles" 
           :disabled="loading"
@@ -189,6 +198,15 @@
           </div>
           
           <div class="flex items-center space-x-2 shrink-0">
+            <!-- Lock / Unlock Button -->
+            <button 
+              @click="openLockSetupModal(file)" 
+              :class="['p-2 border rounded-xl transition-all shadow-sm', isFilePasswordProtected(file.name) ? 'bg-amber-500/20 text-amber-300 border-amber-500/40' : 'text-muted-foreground hover:text-foreground hover:bg-card border-border']"
+              :title="isFilePasswordProtected(file.name) ? 'Berkas ini dilindungi kata sandi' : 'Kunci berkas dengan kata sandi'"
+            >
+              {{ isFilePasswordProtected(file.name) ? '🔒' : '🔓' }}
+            </button>
+
             <!-- Preview Button (For Images / Videos) -->
             <button 
               v-if="isPreviewable(file.name)"
@@ -217,15 +235,14 @@
               <span>📋</span> Salin Link
             </button>
 
-            <!-- Download Link -->
-            <a 
-              :href="`/api/shared-files/download/${encodeURIComponent(file.name)}`" 
-              download 
+            <!-- Download Button -->
+            <button 
+              @click="handleDownloadClick(file)"
               class="p-2 text-muted-foreground hover:text-foreground hover:bg-border/80 border border-border rounded-xl transition-colors shadow-sm" 
               title="Download Berkas"
             >
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-            </a>
+            </button>
 
             <!-- Delete Button -->
             <button 
@@ -311,6 +328,126 @@
         </div>
       </div>
     </div>
+
+    <!-- Duplicate Files Finder Modal -->
+    <div 
+      v-if="showDuplicatesModal" 
+      class="fixed inset-0 z-50 bg-background/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200"
+      @click.self="showDuplicatesModal = false"
+    >
+      <div class="bg-card border border-border rounded-3xl p-6 max-w-2xl w-full shadow-2xl space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="text-base font-bold text-foreground flex items-center gap-2">
+            <span>🔍</span> Pemindai Berkas Duplikat Disk Server
+          </h3>
+          <button @click="showDuplicatesModal = false" class="text-muted-foreground hover:text-foreground text-sm p-1 rounded-lg">✕</button>
+        </div>
+
+        <div v-if="duplicateGroups.length === 0" class="py-8 text-center text-muted-foreground text-xs">
+          <span class="text-2xl block mb-1">🎉</span>
+          Tidak ditemukan berkas ganda/duplikat. Disk server bersih!
+        </div>
+
+        <div v-else class="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+          <div 
+            v-for="(grp, i) in duplicateGroups" 
+            :key="i"
+            class="bg-background border border-border rounded-2xl p-4 space-y-3"
+          >
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-amber-400">Kelompok {{ i + 1 }} ({{ grp.files.length }} Salinan)</span>
+              <button 
+                @click="deleteDuplicateCopies(grp.files)" 
+                class="px-3 py-1 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 rounded-xl text-xs font-semibold transition-all"
+              >
+                🗑️ Hapus {{ grp.files.length - 1 }} Salinan Duplikat
+              </button>
+            </div>
+
+            <div class="space-y-1.5">
+              <div 
+                v-for="(f, idx) in grp.files" 
+                :key="f.name"
+                class="flex items-center justify-between text-xs p-2 rounded-xl bg-card border border-border/60"
+              >
+                <div class="flex items-center gap-2 truncate">
+                  <span :class="idx === 0 ? 'text-emerald-400 font-bold' : 'text-muted-foreground'">{{ idx === 0 ? '[Utama]' : '[Salinan]' }}</span>
+                  <span class="truncate font-medium text-foreground">{{ f.name }}</span>
+                </div>
+                <span class="font-mono text-muted-foreground shrink-0">{{ f.sizeFormatted }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Password Lock Setup Modal -->
+    <div 
+      v-if="showLockSetupModal && fileToLock" 
+      class="fixed inset-0 z-50 bg-background/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200"
+      @click.self="showLockSetupModal = false"
+    >
+      <div class="bg-card border border-border rounded-3xl p-6 max-w-sm w-full shadow-2xl relative space-y-4">
+        <button @click="showLockSetupModal = false" class="absolute top-4 right-4 text-muted-foreground hover:text-foreground text-sm p-1 rounded-lg">✕</button>
+
+        <h3 class="text-base font-bold text-foreground flex items-center gap-2">
+          <span>🔒</span> Kunci Berkas dengan Sandi
+        </h3>
+        <p class="text-xs text-muted-foreground">
+          Berkas: <span class="font-mono font-semibold text-foreground">{{ fileToLock.name }}</span>
+        </p>
+
+        <div>
+          <label class="block text-xs font-semibold text-muted-foreground mb-1">Kata Sandi / PIN Proteksi:</label>
+          <input 
+            v-model="setupPassword" 
+            type="password" 
+            placeholder="Masukkan kata sandi..." 
+            class="w-full bg-background border border-border rounded-xl px-4 py-2 text-sm text-foreground focus:outline-none focus:border-primary"
+            autofocus
+          />
+        </div>
+
+        <button @click="saveFileLockPassword" class="w-full py-2.5 bg-primary hover:bg-primary/90 text-white font-bold rounded-xl text-xs shadow-md transition-all">
+          Simpan & Kunci Berkas
+        </button>
+      </div>
+    </div>
+
+    <!-- Password Verification Download Prompt Modal -->
+    <div 
+      v-if="showPasswordPromptModal && fileToDownloadWithPassword" 
+      class="fixed inset-0 z-50 bg-background/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200"
+      @click.self="showPasswordPromptModal = false"
+    >
+      <div class="bg-card border border-border rounded-3xl p-6 max-w-sm w-full shadow-2xl relative space-y-4">
+        <button @click="showPasswordPromptModal = false" class="absolute top-4 right-4 text-muted-foreground hover:text-foreground text-sm p-1 rounded-lg">✕</button>
+
+        <h3 class="text-base font-bold text-foreground flex items-center gap-2">
+          <span>🔐</span> Berkas Dilindungi Kata Sandi
+        </h3>
+        <p class="text-xs text-muted-foreground">
+          Masukkan sandi untuk mengunduh <span class="font-mono font-semibold text-foreground">{{ fileToDownloadWithPassword.name }}</span>
+        </p>
+
+        <div>
+          <input 
+            v-model="enteredPassword" 
+            type="password" 
+            placeholder="Ketik kata sandi..." 
+            class="w-full bg-background border border-border rounded-xl px-4 py-2 text-sm text-foreground focus:outline-none focus:border-primary"
+            @keyup.enter="verifyPasswordAndDownload"
+            autofocus
+          />
+          <p v-if="passwordError" class="text-xs text-rose-400 mt-1 font-semibold">{{ passwordError }}</p>
+        </div>
+
+        <button @click="verifyPasswordAndDownload" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs shadow-md transition-all">
+          Buka & Unduh Berkas
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -340,6 +477,98 @@ const uploading = ref(false)
 const uploadQueue = ref<UploadQueueItem[]>([])
 const currentUploadIndex = ref(0)
 const fileInput = ref<HTMLInputElement | null>(null)
+
+// Module 4 Suite: Storage Analytics & Duplicate Finder State
+const showDuplicatesModal = ref(false)
+const showLockSetupModal = ref(false)
+const fileToLock = ref<SharedFileItem | null>(null)
+const setupPassword = ref('')
+
+const showPasswordPromptModal = ref(false)
+const fileToDownloadWithPassword = ref<SharedFileItem | null>(null)
+const enteredPassword = ref('')
+const passwordError = ref('')
+
+const totalStorageBytes = computed(() => files.value.reduce((acc, f) => acc + f.size, 0))
+const formattedTotalStorage = computed(() => formatBytes(totalStorageBytes.value))
+
+const duplicateGroups = computed(() => {
+  const groups: { key: string; files: SharedFileItem[] }[] = []
+  const map = new Map<string, SharedFileItem[]>()
+  
+  files.value.forEach(f => {
+    const baseName = f.name.toLowerCase().replace(/\s*\(\d+\)\s*/g, '').replace(/[\-_]copy/g, '')
+    const key = `${f.size}_${baseName}`
+    if (!map.has(key)) map.set(key, [])
+    map.get(key)!.push(f)
+  })
+
+  map.forEach((fileList, key) => {
+    if (fileList.length > 1) {
+      groups.push({ key, files: fileList })
+    }
+  })
+  return groups
+})
+
+function openLockSetupModal(file: SharedFileItem) {
+  fileToLock.value = file
+  setupPassword.value = ''
+  showLockSetupModal.value = true
+}
+
+function saveFileLockPassword() {
+  if (!fileToLock.value) return
+  if (!setupPassword.value.trim()) {
+    warning('Password tidak boleh kosong.')
+    return
+  }
+  localStorage.setItem(`file_passcode_${fileToLock.value.name}`, setupPassword.value.trim())
+  showLockSetupModal.value = false
+  success(`Password proteksi untuk "${fileToLock.value.name}" berhasil disimpan!`)
+}
+
+function isFilePasswordProtected(fileName: string): boolean {
+  if (typeof window === 'undefined') return false
+  return !!localStorage.getItem(`file_passcode_${fileName}`)
+}
+
+function handleDownloadClick(file: SharedFileItem) {
+  if (isFilePasswordProtected(file.name)) {
+    fileToDownloadWithPassword.value = file
+    enteredPassword.value = ''
+    passwordError.value = ''
+    showPasswordPromptModal.value = true
+  } else {
+    triggerDirectDownload(file.name)
+  }
+}
+
+function verifyPasswordAndDownload() {
+  if (!fileToDownloadWithPassword.value) return
+  const savedPass = localStorage.getItem(`file_passcode_${fileToDownloadWithPassword.value.name}`)
+  if (enteredPassword.value === savedPass) {
+    showPasswordPromptModal.value = false
+    triggerDirectDownload(fileToDownloadWithPassword.value.name)
+  } else {
+    passwordError.value = 'Password salah! Akses ditolak.'
+  }
+}
+
+function triggerDirectDownload(fileName: string) {
+  const a = document.createElement('a')
+  a.href = `/api/shared-files/download/${encodeURIComponent(fileName)}`
+  a.download = fileName
+  a.click()
+}
+
+async function deleteDuplicateCopies(groupFiles: SharedFileItem[]) {
+  const copiesToDelete = groupFiles.slice(1)
+  for (const f of copiesToDelete) {
+    await deleteFile(f.name)
+  }
+  success('Salinan berkas duplikat berhasil dibersihkan!')
+}
 
 const selectedCategory = ref('all')
 const searchQuery = ref('')
