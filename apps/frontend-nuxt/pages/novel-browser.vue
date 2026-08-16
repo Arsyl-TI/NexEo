@@ -194,6 +194,7 @@
       <p class="text-xs text-muted-foreground mt-1">{{ novel.author || 'Unknown' }}</p>
     </div>
   </div>
+</div>
 
   <!-- POPUP MODAL 1: NOVEL BERHASIL DITAMBAH KE PERPUSTAKAAN -->
   <Teleport to="body">
@@ -298,6 +299,7 @@
       </div>
     </div>
   </Teleport>
+  </div>
 </template>
 
 <script setup lang="ts">
