@@ -359,3 +359,12 @@
   - **🔔 Set Target Price Modal**: 1-click modal on game cards allowing users to specify a maximum target price threshold in USD or IDR.
   - **HTML5 Desktop Browser Notifications**: Requests `Notification.requestPermission()` and triggers OS/browser notifications automatically when a target price threshold is reached or exceeded during deal checks.
   - **🔔 Notifikasi Diskon Drawer Manager**: Dedicated drawer modal in toolbar listing active price alerts with 1-click removal and notification permission status.
+
+---
+
+## Feature 32: Novel Scraping & Chapter Download Success Popup Modals
+- **Files Modified**:
+  - `apps/frontend-nuxt/pages/novel-browser.vue`
+- **Implementation Highlights**:
+  - **🎉 Popup Berhasil Tambah Novel ke Perpustakaan**: Glassmorphic modal displaying novel artwork preview, title, author, and 2 action buttons (📖 **"Baca Sekarang"** and 📚 **"Perpustakaan"**).
+  - **📥 Popup Status & Hasil Download Chapter**: Interactive download progress modal showing live status message and completion summary with 1-click **"Mulai Membaca Bab Terunduh"** button.

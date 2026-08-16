@@ -177,6 +177,103 @@
         </div>
       </div>
     </div>
+
+    <!-- POPUP MODAL 1: NOVEL BERHASIL DITAMBAH KE PERPUSTAKAAN -->
+    <div 
+      v-if="showAddedModal && addedNovelData" 
+      class="fixed inset-0 z-50 bg-background/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200"
+      @click.self="showAddedModal = false"
+    >
+      <div class="bg-card border border-primary/40 rounded-3xl p-6 max-w-sm w-full shadow-2xl relative space-y-4 text-center">
+        <button @click="showAddedModal = false" class="absolute top-4 right-4 text-muted-foreground hover:text-foreground text-sm p-1 rounded-lg">✕</button>
+
+        <div class="w-16 h-16 bg-emerald-500/20 border border-emerald-500/40 rounded-full flex items-center justify-center text-3xl mx-auto animate-bounce">
+          🎉
+        </div>
+
+        <div>
+          <h3 class="text-base font-bold text-foreground">Novel Berhasil Ditambahkan!</h3>
+          <p class="text-xs text-muted-foreground mt-1">Novel telah tersimpan di perpustakaan lokal NexEo Anda.</p>
+        </div>
+
+        <div class="bg-background/80 border border-border rounded-2xl p-3 flex items-center gap-3 text-left">
+          <div class="w-12 h-16 rounded-lg overflow-hidden border border-border shrink-0 bg-card">
+            <img v-if="addedNovelData.cover" :src="addedNovelData.cover" class="w-full h-full object-cover">
+            <div v-else class="w-full h-full flex items-center justify-center text-xs">📖</div>
+          </div>
+          <div class="min-w-0 flex-1">
+            <h4 class="font-bold text-xs text-foreground truncate">{{ addedNovelData.title }}</h4>
+            <p class="text-[11px] text-muted-foreground">{{ addedNovelData.author || 'Penulis Unknown' }}</p>
+            <span class="inline-block mt-1 text-[10px] font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-500/30 px-2 py-0.5 rounded">
+              ✓ Tersimpan di Library
+            </span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 pt-2">
+          <NuxtLink 
+            :to="`/novels/${addedNovelData.slug}`" 
+            class="py-2.5 bg-primary hover:bg-primary/90 text-white font-bold rounded-xl text-xs shadow-md transition-all flex items-center justify-center gap-1"
+          >
+            <span>📖</span> Baca Sekarang
+          </NuxtLink>
+          <NuxtLink 
+            to="/library" 
+            class="py-2.5 bg-card border border-border hover:bg-border text-foreground font-semibold rounded-xl text-xs transition-all flex items-center justify-center gap-1"
+          >
+            <span>📚</span> Perpustakaan
+          </NuxtLink>
+        </div>
+      </div>
+    </div>
+
+    <!-- POPUP MODAL 2: STATUS & HASIL DOWNLOAD CHAPTER NOVEL -->
+    <div 
+      v-if="showDownloadModal" 
+      class="fixed inset-0 z-50 bg-background/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200"
+      @click.self="!isDownloading && (showDownloadModal = false)"
+    >
+      <div class="bg-card border border-border rounded-3xl p-6 max-w-sm w-full shadow-2xl relative space-y-4 text-center">
+        <button v-if="!isDownloading" @click="showDownloadModal = false" class="absolute top-4 right-4 text-muted-foreground hover:text-foreground text-sm p-1 rounded-lg">✕</button>
+
+        <div v-if="isDownloading" class="py-4 space-y-3">
+          <div class="spinner w-12 h-12 border-4 border-primary border-r-transparent rounded-full animate-spin mx-auto"></div>
+          <h3 class="text-sm font-bold text-foreground">Mengunduh Chapter Novel...</h3>
+          <p class="text-xs text-muted-foreground font-mono">{{ downloadStatusMessage }}</p>
+        </div>
+
+        <div v-else-if="downloadSuccessData" class="space-y-4">
+          <div class="w-16 h-16 bg-blue-500/20 border border-blue-500/40 rounded-full flex items-center justify-center text-3xl mx-auto">
+            📥
+          </div>
+
+          <div>
+            <h3 class="text-base font-bold text-foreground">Unduh Bab Selesai!</h3>
+            <p class="text-xs text-muted-foreground mt-1">{{ downloadStatusMessage }}</p>
+          </div>
+
+          <div class="bg-background/80 border border-border rounded-2xl p-3 text-xs font-mono space-y-1">
+            <div class="flex justify-between text-muted-foreground">
+              <span>Novel:</span>
+              <span class="font-bold text-foreground truncate max-w-[180px]">{{ downloadSuccessData.title }}</span>
+            </div>
+            <div class="flex justify-between text-muted-foreground">
+              <span>Total Diunduh:</span>
+              <span class="font-bold text-emerald-400">{{ downloadSuccessData.downloadedCount }} Bab</span>
+            </div>
+          </div>
+
+          <div class="pt-2">
+            <NuxtLink 
+              :to="`/novels/${downloadSuccessData.slug}`" 
+              class="w-full py-2.5 bg-primary hover:bg-primary/90 text-white font-bold rounded-xl text-xs shadow-md transition-all flex items-center justify-center gap-1"
+            >
+              <span>📖</span> Mulai Membaca Bab Terunduh
+            </NuxtLink>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -198,6 +295,14 @@ const selectedNovelDetail = ref<NovelDetail | null>(null)
 const isLoadingDetail = ref(false)
 const detailTab = ref('synopsis')
 const chapterFilter = ref('all') // 'all' or specific chapter file name
+
+const showAddedModal = ref(false)
+const addedNovelData = ref<any>(null)
+
+const showDownloadModal = ref(false)
+const isDownloading = ref(false)
+const downloadStatusMessage = ref('')
+const downloadSuccessData = ref<any>(null)
 
 const filteredNovels = computed(() => {
   const validNovels = novelList.value.filter(n => {
@@ -274,7 +379,15 @@ const addToLibrary = async (novel: NovelExternal) => {
   try {
     const result = await novelStore.importFromSource(selectedSource.value, novel.slug)
     if (result.success) {
-      success(`"${novel.title}" berhasil diimpor ke perpustakaan!`)
+      addedNovelData.value = {
+        title: novel.title,
+        cover: novel.cover,
+        slug: novel.slug,
+        author: novel.author,
+        chaptersCount: selectedNovelDetail.value?.chapters?.length || 0
+      }
+      showAddedModal.value = true
+      success(`"${novel.title}" berhasil ditambah ke perpustakaan!`)
       closeModal()
       await novelStore.fetchLibrary()
     } else {
@@ -292,18 +405,33 @@ const downloadAllChapters = async () => {
     error('Silakan pilih novel terlebih dahulu')
     return
   }
+
+  showDownloadModal.value = true
+  isDownloading.value = true
+  downloadStatusMessage.value = `Mengunduh semua bab untuk "${selectedNovel.value.title}"...`
   
   try {
     const result = await novelStore.importFromSource(selectedSource.value, selectedNovel.value.slug, 'all')
     if (result.success && 'data' in result) {
+      downloadSuccessData.value = {
+        title: selectedNovel.value.title,
+        slug: selectedNovel.value.slug,
+        downloadedCount: result.data?.downloaded || totalChaptersInDetail.value
+      }
+      isDownloading.value = false
+      downloadStatusMessage.value = `Berhasil mengunduh ${downloadSuccessData.value.downloadedCount} bab!`
       success(`Semua ${result.data?.downloaded || '?'} bab berhasil diunduh!`)
       await novelStore.fetchLibrary()
     } else {
+      isDownloading.value = false
       error(`Gagal mengunduh: ${result.error ?? 'Unknown error'}`)
+      showDownloadModal.value = false
     }
   } catch (e: any) {
     console.error('Download error:', e)
+    isDownloading.value = false
     error('Terjadi error saat mengunduh bab')
+    showDownloadModal.value = false
   }
 }
 
@@ -312,18 +440,33 @@ const downloadSelectedChapter = async () => {
     error('Pilih satu bab terlebih dahulu')
     return
   }
+
+  showDownloadModal.value = true
+  isDownloading.value = true
+  downloadStatusMessage.value = `Mengunduh bab pilihan untuk "${selectedNovel.value.title}"...`
   
   try {
     const result = await novelStore.importFromSource(selectedSource.value, selectedNovel.value.slug, chapterFilter.value)
     if (result.success) {
+      downloadSuccessData.value = {
+        title: selectedNovel.value.title,
+        slug: selectedNovel.value.slug,
+        downloadedCount: 1
+      }
+      isDownloading.value = false
+      downloadStatusMessage.value = 'Bab pilihan berhasil diunduh!'
       success('Bab berhasil diunduh!')
       await novelStore.fetchLibrary()
     } else {
+      isDownloading.value = false
       error(`Gagal mengunduh: ${result.error}`)
+      showDownloadModal.value = false
     }
   } catch (e: any) {
     console.error('Download error:', e)
+    isDownloading.value = false
     error('Terjadi error saat mengunduh bab')
+    showDownloadModal.value = false
   }
 }
 

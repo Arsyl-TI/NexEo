@@ -2812,6 +2812,7 @@ const _lazy_vyH4_j = () => Promise.resolve().then(function () { return _id__dele
 const _lazy_EY18Ms = () => Promise.resolve().then(function () { return cancel_post$1; });
 const _lazy_w4KFBg = () => Promise.resolve().then(function () { return deals_get$1; });
 const _lazy_rcV7tF = () => Promise.resolve().then(function () { return freebies_get$1; });
+const _lazy_GeMJk9 = () => Promise.resolve().then(function () { return lookup_get$1; });
 const _lazy_Z0N87f = () => Promise.resolve().then(function () { return stores_get$1; });
 const _lazy_aplgqS = () => Promise.resolve().then(function () { return accounts_get$1; });
 const _lazy_V3wS1c = () => Promise.resolve().then(function () { return accounts_post$1; });
@@ -2882,6 +2883,7 @@ const handlers = [
   { route: '/api/downloader/tasks/:id/cancel', handler: _lazy_EY18Ms, lazy: true, middleware: false, method: "post" },
   { route: '/api/games/deals', handler: _lazy_w4KFBg, lazy: true, middleware: false, method: "get" },
   { route: '/api/games/freebies', handler: _lazy_rcV7tF, lazy: true, middleware: false, method: "get" },
+  { route: '/api/games/lookup', handler: _lazy_GeMJk9, lazy: true, middleware: false, method: "get" },
   { route: '/api/games/stores', handler: _lazy_Z0N87f, lazy: true, middleware: false, method: "get" },
   { route: '/api/gdrive/pool/accounts', handler: _lazy_aplgqS, lazy: true, middleware: false, method: "get" },
   { route: '/api/gdrive/pool/accounts', handler: _lazy_V3wS1c, lazy: true, middleware: false, method: "post" },
@@ -3866,6 +3868,9 @@ async function fetchAllGameDeals(options) {
   if (!options.title && !options.storeID && cachedDeals.length > 0 && now - lastDealsFetchTime < CACHE_TTL_MS) {
     return filterAndSortDeals(cachedDeals, options);
   }
+  if (options.storeID === "eneba") {
+    return await fetchEnebaDeals(options.title);
+  }
   try {
     const params = {
       pageSize: 60,
@@ -3894,10 +3899,14 @@ async function fetchAllGameDeals(options) {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
       }
     });
+    let deals = [];
     if (Array.isArray(res.data)) {
-      const deals = res.data.map((item) => {
+      deals = res.data.map((item) => {
+        var _a;
         const savingsNum = Math.round(parseFloat(item.savings || "0"));
         const isFree = parseFloat(item.salePrice) === 0 || savingsNum === 100;
+        const cheapVal = ((_a = item.cheapestPriceEver) == null ? void 0 : _a.price) || item.cheapestPrice;
+        const isAtl = isFree || cheapVal && parseFloat(item.salePrice) <= parseFloat(cheapVal) || savingsNum >= 75;
         return {
           id: item.dealID || `deal_${Math.random()}`,
           title: item.title,
@@ -3914,19 +3923,60 @@ async function fetchAllGameDeals(options) {
           steamRatingPercent: item.steamRatingPercent !== "0" ? `${item.steamRatingPercent}%` : void 0,
           thumb: item.thumb || "https://via.placeholder.com/120x45",
           dealLink: `https://www.cheapshark.com/redirect?dealID=${item.dealID}`,
-          isFreebie: isFree
+          isFreebie: isFree,
+          cheapestPriceEver: cheapVal ? `$${cheapVal}` : void 0,
+          isAllTimeLow: isAtl
         };
       });
-      if (!options.title && (!options.storeID || options.storeID === "all")) {
-        cachedDeals = deals;
-        lastDealsFetchTime = now;
-      }
-      return filterAndSortDeals(deals, options);
     }
-    return [];
+    if (!options.storeID || options.storeID === "all") {
+      const enebaDeals = await fetchEnebaDeals(options.title);
+      deals = [...enebaDeals, ...deals];
+    }
+    if (!options.title && (!options.storeID || options.storeID === "all")) {
+      cachedDeals = deals;
+      lastDealsFetchTime = now;
+    }
+    return filterAndSortDeals(deals, options);
   } catch (err) {
     console.error("[GameDeals Error] Failed to fetch CheapShark deals:", err.message);
     return cachedDeals.length > 0 ? filterAndSortDeals(cachedDeals, options) : [];
+  }
+}
+async function fetchEnebaDeals(titleQuery = "") {
+  try {
+    const deals = [];
+    const enebaFeatured = [
+      { title: "Cyberpunk 2077: Phantom Liberty (Global Steam Key)", salePrice: "$24.99", normalPrice: "$39.99", savings: "38%", thumb: "https://images.eneba.com/resize_380x340/v1/content/products/VlQ5T3dIcFZoc0M1WnJybG1WOUtSZz09/Cyberpunk_2077_Phantom_Liberty.jpg", dealLink: "https://www.eneba.com/steam-cyberpunk-2077-phantom-liberty-dlc-pc-steam-key-global" },
+      { title: "Grand Theft Auto V: Premium Edition (PC Key)", salePrice: "$11.49", normalPrice: "$29.99", savings: "62%", thumb: "https://images.eneba.com/resize_380x340/v1/content/products/7o99s02r051515.jpg", dealLink: "https://www.eneba.com/rockstar_games_launcher-grand-theft-auto-v-premium-online-edition-rockstar-games-launcher-key-global" },
+      { title: "Elden Ring (Steam Key Global)", salePrice: "$34.50", normalPrice: "$59.99", savings: "42%", thumb: "https://images.eneba.com/resize_380x340/v1/content/products/fN37213824.jpg", dealLink: "https://www.eneba.com/steam-elden-ring-pc-steam-key-global" },
+      { title: "Red Dead Redemption 2 (PC Global)", salePrice: "$17.99", normalPrice: "$59.99", savings: "70%", thumb: "https://images.eneba.com/resize_380x340/v1/content/products/123145612.jpg", dealLink: "https://www.eneba.com/rockstar_games_launcher-red-dead-redemption-2-rockstar-games-launcher-key-global" },
+      { title: "Minecraft: Java & Bedrock Edition (PC)", salePrice: "$18.90", normalPrice: "$29.99", savings: "37%", thumb: "https://images.eneba.com/resize_380x340/v1/content/products/minecraft.jpg", dealLink: "https://www.eneba.com/microsoft_store-minecraft-java-bedrock-edition-pc-official-website-key-global" },
+      { title: "EA SPORTS FC 24 (PC EA App Key)", salePrice: "$19.99", normalPrice: "$69.99", savings: "71%", thumb: "https://images.eneba.com/resize_380x340/v1/content/products/FC24.jpg", dealLink: "https://www.eneba.com/origin-ea-sports-fc-24-ea-app-key-global" }
+    ];
+    enebaFeatured.forEach((item, idx) => {
+      if (!titleQuery || item.title.toLowerCase().includes(titleQuery.toLowerCase())) {
+        deals.push({
+          id: `eneba_${idx}`,
+          title: item.title,
+          dealID: `eneba_${idx}`,
+          storeID: "eneba",
+          storeName: "Eneba Marketplace",
+          gameID: `eneba_${idx}`,
+          salePrice: item.salePrice,
+          normalPrice: item.normalPrice,
+          savings: item.savings,
+          savingsPercent: parseInt(item.savings, 10) || 40,
+          thumb: item.thumb,
+          dealLink: item.dealLink,
+          isFreebie: false
+        });
+      }
+    });
+    return deals;
+  } catch (err) {
+    console.error("[Eneba Deals Error]:", err.message);
+    return [];
   }
 }
 async function fetchEpicFreebies() {
@@ -4042,12 +4092,37 @@ const freebies_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProp
   default: freebies_get
 }, Symbol.toStringTag, { value: 'Module' }));
 
+const lookup_get = defineEventHandler(async (event) => {
+  const query = getQuery$1(event);
+  const dealID = query.dealID;
+  if (!dealID) {
+    throw createError({ statusCode: 400, statusMessage: "Parameter dealID diperlukan." });
+  }
+  try {
+    const res = await axios.get(`https://www.cheapshark.com/api/1.0/deals?id=${dealID}`, {
+      timeout: 8e3
+    });
+    return {
+      success: true,
+      data: res.data
+    };
+  } catch (err) {
+    throw createError({ statusCode: 500, statusMessage: err.message });
+  }
+});
+
+const lookup_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: lookup_get
+}, Symbol.toStringTag, { value: 'Module' }));
+
 const stores_get = defineEventHandler(async () => {
   const stores = [
     { storeID: "all", storeName: "Semua Store", icon: "\u{1F6D2}" },
     { storeID: "1", storeName: "Steam Store", icon: "\u{1F3AE}" },
     { storeID: "25", storeName: "Epic Games Store", icon: "\u26A1" },
     { storeID: "11", storeName: "Ubisoft Store", icon: "\u{1F6E1}\uFE0F" },
+    { storeID: "eneba", storeName: "Eneba Marketplace", icon: "\u{1F6CD}\uFE0F" },
     { storeID: "7", storeName: "GOG.com", icon: "\u{1F4DC}" },
     { storeID: "15", storeName: "Fanatical / Microsoft", icon: "\u{1F7E9}" },
     { storeID: "3", storeName: "GreenManGaming", icon: "\u{1F7E2}" },
