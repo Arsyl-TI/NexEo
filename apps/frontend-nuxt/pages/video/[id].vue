@@ -321,36 +321,88 @@
     </div>
 
     <!-- Add Bookmark Popover / Modal -->
-    <div v-if="showAddBookmarkModal" @click.self="showAddBookmarkModal = false" class="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
-      <div class="bg-card border border-border rounded-3xl max-w-sm w-full p-6 shadow-2xl relative">
-        <button @click="showAddBookmarkModal = false" class="absolute top-4 right-4 text-muted-foreground hover:text-foreground text-sm p-1 rounded-lg">✕</button>
+    <Teleport to="body">
+      <div v-if="showAddBookmarkModal" @click.self="showAddBookmarkModal = false" class="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
+        <div class="bg-card border border-amber-500/40 rounded-3xl max-w-sm w-full p-6 shadow-2xl relative space-y-4">
+          <button @click="showAddBookmarkModal = false" class="absolute top-4 right-4 text-muted-foreground hover:text-foreground text-sm p-1 rounded-lg">✕</button>
 
-        <h3 class="text-base font-bold text-foreground mb-1 flex items-center gap-2">
-          <span>🔖</span> Tambah Bookmark Video
-        </h3>
-        <p class="text-xs text-muted-foreground mb-4">
-          Waktu: <span class="font-mono font-bold text-amber-300">{{ formatTime(currentTime) }}</span>
-        </p>
-
-        <form @submit.prevent="saveNewBookmark" class="space-y-4">
-          <div>
-            <label class="block text-xs font-medium text-muted-foreground mb-1.5">Catatan / Label Bookmark:</label>
-            <input 
-              v-model="newBookmarkLabel" 
-              type="text" 
-              placeholder="Contoh: Adegan penting, Penjelasan rumus, Momen lucu..." 
-              class="w-full bg-background border border-border rounded-xl px-3.5 py-2.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-amber-400 shadow-inner"
-              autofocus
-            />
+          <div class="w-14 h-14 bg-amber-500/20 border border-amber-500/40 rounded-2xl flex items-center justify-center text-2xl mx-auto shadow-inner">
+            🔖
           </div>
 
-          <div class="flex items-center justify-end gap-2 pt-2">
-            <button type="button" @click="showAddBookmarkModal = false" class="px-4 py-2 rounded-xl bg-card border border-border text-xs text-muted-foreground hover:text-foreground font-medium">Batal</button>
-            <button type="submit" class="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-bold text-xs shadow-md transition-all">Simpan Penanda</button>
+          <div class="text-center">
+            <h3 class="text-base font-bold text-foreground">Tambah Bookmark Video</h3>
+            <p class="text-xs text-muted-foreground mt-1">
+              Posisi Waktu: <span class="font-mono font-bold text-amber-300">{{ formatTime(currentTime) }}</span>
+            </p>
           </div>
-        </form>
+
+          <form @submit.prevent="saveNewBookmark" class="space-y-4 pt-2">
+            <div>
+              <label class="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Catatan / Label Bookmark</label>
+              <input 
+                v-model="newBookmarkLabel" 
+                type="text" 
+                placeholder="Contoh: Adegan penting, Penjelasan rumus, Momen lucu..." 
+                class="w-full bg-background border border-border rounded-xl px-3.5 py-2.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-amber-400 shadow-inner"
+                autofocus
+              />
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-2">
+              <button type="button" @click="showAddBookmarkModal = false" class="flex-1 py-2.5 rounded-xl bg-card border border-border text-xs text-muted-foreground hover:text-foreground font-semibold">Batal</button>
+              <button type="submit" class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-bold text-xs shadow-md transition-all">Simpan Penanda</button>
+            </div>
+          </form>
+        </div>
       </div>
-    </div>
+    </Teleport>
+
+    <!-- POPUP MODAL: SCREENSHOT FRAME SAVED -->
+    <Teleport to="body">
+      <div 
+        v-if="showScreenshotModal && capturedScreenshotData" 
+        class="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200"
+        @click.self="showScreenshotModal = false"
+      >
+        <div class="bg-card border border-sky-500/40 rounded-3xl p-6 max-w-md w-full shadow-2xl relative space-y-4 text-center">
+          <button @click="showScreenshotModal = false" class="absolute top-4 right-4 text-muted-foreground hover:text-foreground text-sm p-1 rounded-lg">✕</button>
+
+          <div class="w-14 h-14 bg-sky-500/20 border border-sky-500/40 rounded-2xl flex items-center justify-center text-2xl mx-auto shadow-inner">
+            📸
+          </div>
+
+          <div>
+            <h3 class="text-base font-bold text-foreground">Tangkapan Layar Berhasil!</h3>
+            <p class="text-xs text-muted-foreground mt-1">Frame video berhasil ditangkap pada posisi detik ini.</p>
+          </div>
+
+          <div class="rounded-2xl overflow-hidden border border-border bg-black aspect-video relative group">
+            <img :src="capturedScreenshotData.dataUrl" class="w-full h-full object-contain" />
+            <span class="absolute bottom-2 right-2 bg-black/80 text-amber-300 text-[10px] font-mono px-2 py-0.5 rounded border border-amber-500/40">
+              ⏱️ {{ capturedScreenshotData.timestamp }}
+            </span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 pt-2">
+            <a 
+              :href="capturedScreenshotData.dataUrl" 
+              :download="capturedScreenshotData.fileName" 
+              class="py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-xl text-xs shadow-md transition-all flex items-center justify-center gap-1.5"
+              @click="showScreenshotModal = false"
+            >
+              <span>📥</span> Unduh Gambar
+            </a>
+            <button 
+              @click="showScreenshotModal = false" 
+              class="py-2.5 bg-card border border-border hover:bg-border text-foreground font-semibold rounded-xl text-xs transition-all"
+            >
+              Tutup
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
 
     <!-- Web Audio API 5-Band Equalizer Modal -->
     <div v-if="showEqualizerModal" @click.self="showEqualizerModal = false" class="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
@@ -645,6 +697,9 @@ function stepFrame(frames: number) {
   videoElement.value.currentTime = Math.max(0, videoElement.value.currentTime + frames * 0.04)
 }
 
+const showScreenshotModal = ref(false)
+const capturedScreenshotData = ref<{ dataUrl: string; timestamp: string; fileName: string } | null>(null)
+
 function captureVideoScreenshot() {
   if (!videoElement.value) return
   try {
@@ -656,11 +711,16 @@ function captureVideoScreenshot() {
     ctx.drawImage(videoElement.value, 0, 0, canvas.width, canvas.height)
 
     const dataUrl = canvas.toDataURL('image/png')
-    const a = document.createElement('a')
-    a.href = dataUrl
-    a.download = `frame-${video.value?.name || 'video'}-${formatTime(videoElement.value.currentTime).replace(':', 'm')}s.png`
-    a.click()
-    success('Berhasil menyimpan tangkapan layar (frame screenshot)!')
+    const timestampStr = formatTime(videoElement.value.currentTime)
+    const fileNameStr = `frame-${video.value?.name || 'video'}-${timestampStr.replace(':', 'm')}s.png`
+    
+    capturedScreenshotData.value = {
+      dataUrl,
+      timestamp: timestampStr,
+      fileName: fileNameStr
+    }
+    showScreenshotModal.value = true
+    success('Tangkapan layar frame berhasil diambil!')
   } catch (e) {
     showError('Gagal mengambil tangkapan layar video.')
   }

@@ -258,196 +258,206 @@
     </div>
 
     <!-- QR Code LAN Modal -->
-    <div 
-      v-if="showQrModal && qrActiveFile" 
-      class="fixed inset-0 z-50 bg-background/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200"
-      @click.self="showQrModal = false"
-    >
-      <div class="bg-card border border-border rounded-3xl p-6 sm:p-8 max-w-sm w-full shadow-2xl text-center">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-base font-bold text-foreground flex items-center gap-2">
-            <span>📱</span> Pindai Unduh di HP
-          </h3>
-          <button @click="showQrModal = false" class="text-muted-foreground hover:text-foreground text-sm p-1 rounded-lg">✕</button>
+    <Teleport to="body">
+      <div 
+        v-if="showQrModal && qrActiveFile" 
+        class="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200"
+        @click.self="showQrModal = false"
+      >
+        <div class="bg-card border border-border rounded-3xl p-6 sm:p-8 max-w-sm w-full shadow-2xl text-center">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-base font-bold text-foreground flex items-center gap-2">
+              <span>📱</span> Pindai Unduh di HP
+            </h3>
+            <button @click="showQrModal = false" class="text-muted-foreground hover:text-foreground text-sm p-1 rounded-lg">✕</button>
+          </div>
+
+          <p class="text-xs text-muted-foreground mb-4 truncate font-medium" :title="qrActiveFile.name">
+            {{ qrActiveFile.name }}
+          </p>
+
+          <!-- QR Code Canvas / Image Container -->
+          <div class="bg-white p-4 rounded-2xl inline-block shadow-lg mb-4 border border-border">
+            <img 
+              :src="getQrCodeUrl(qrActiveFile.name)" 
+              alt="QR Code" 
+              class="w-48 h-48 mx-auto"
+            />
+          </div>
+
+          <p class="text-xs text-muted-foreground mb-4 leading-relaxed">
+            Hubungkan smartphone ke Wi-Fi yang sama, lalu buka kamera atau pemindai QR untuk mengunduh berkas langsung.
+          </p>
+
+          <button 
+            @click="copyDownloadLink(qrActiveFile.name)" 
+            class="w-full py-2.5 bg-primary hover:bg-primary/90 text-white rounded-xl text-xs font-semibold shadow-md transition-all flex items-center justify-center gap-2"
+          >
+            <span>📋</span> Salin URL LAN
+          </button>
         </div>
-
-        <p class="text-xs text-muted-foreground mb-4 truncate font-medium" :title="qrActiveFile.name">
-          {{ qrActiveFile.name }}
-        </p>
-
-        <!-- QR Code Canvas / Image Container -->
-        <div class="bg-white p-4 rounded-2xl inline-block shadow-lg mb-4 border border-border">
-          <img 
-            :src="getQrCodeUrl(qrActiveFile.name)" 
-            alt="QR Code" 
-            class="w-48 h-48 mx-auto"
-          />
-        </div>
-
-        <p class="text-xs text-muted-foreground mb-4 leading-relaxed">
-          Hubungkan smartphone ke Wi-Fi yang sama, lalu buka kamera atau pemindai QR untuk mengunduh berkas langsung.
-        </p>
-
-        <button 
-          @click="copyDownloadLink(qrActiveFile.name)" 
-          class="w-full py-2.5 bg-primary hover:bg-primary/90 text-white rounded-xl text-xs font-semibold shadow-md transition-all flex items-center justify-center gap-2"
-        >
-          <span>📋</span> Salin URL LAN
-        </button>
       </div>
-    </div>
+    </Teleport>
 
     <!-- Media Preview Modal -->
-    <div 
-      v-if="showPreviewModal && previewActiveFile" 
-      class="fixed inset-0 z-50 bg-background/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200"
-      @click.self="showPreviewModal = false"
-    >
-      <div class="bg-card border border-border rounded-3xl p-6 max-w-3xl w-full shadow-2xl">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-sm font-bold text-foreground truncate mr-4">
-            👁️ {{ previewActiveFile.name }}
-          </h3>
-          <button @click="showPreviewModal = false" class="text-muted-foreground hover:text-foreground text-sm p-1 rounded-lg">✕</button>
-        </div>
+    <Teleport to="body">
+      <div 
+        v-if="showPreviewModal && previewActiveFile" 
+        class="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200"
+        @click.self="showPreviewModal = false"
+      >
+        <div class="bg-card border border-border rounded-3xl p-6 max-w-3xl w-full shadow-2xl">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-bold text-foreground truncate mr-4">
+              👁️ {{ previewActiveFile.name }}
+            </h3>
+            <button @click="showPreviewModal = false" class="text-muted-foreground hover:text-foreground text-sm p-1 rounded-lg">✕</button>
+          </div>
 
-        <div class="flex items-center justify-center max-h-[70vh] overflow-hidden rounded-2xl bg-black/40 border border-border/50">
-          <img 
-            v-if="isImage(previewActiveFile.name)" 
-            :src="`/api/shared-files/download/${encodeURIComponent(previewActiveFile.name)}`" 
-            alt="Preview" 
-            class="max-h-[65vh] w-auto object-contain rounded-xl"
-          />
-          <video 
-            v-else-if="isVideo(previewActiveFile.name)" 
-            :src="`/api/shared-files/download/${encodeURIComponent(previewActiveFile.name)}`" 
-            controls 
-            autoplay 
-            class="max-h-[65vh] w-full rounded-xl"
-          ></video>
+          <div class="flex items-center justify-center max-h-[70vh] overflow-hidden rounded-2xl bg-black/40 border border-border/50">
+            <img 
+              v-if="isImage(previewActiveFile.name)" 
+              :src="`/api/shared-files/download/${encodeURIComponent(previewActiveFile.name)}`" 
+              alt="Preview" 
+              class="max-h-[65vh] w-auto object-contain rounded-xl"
+            />
+            <video 
+              v-else-if="isVideo(previewActiveFile.name)" 
+              :src="`/api/shared-files/download/${encodeURIComponent(previewActiveFile.name)}`" 
+              controls 
+              autoplay 
+              class="max-h-[65vh] w-full rounded-xl"
+            ></video>
+          </div>
         </div>
       </div>
-    </div>
+    </Teleport>
 
     <!-- Duplicate Files Finder Modal -->
-    <div 
-      v-if="showDuplicatesModal" 
-      class="fixed inset-0 z-50 bg-background/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200"
-      @click.self="showDuplicatesModal = false"
-    >
-      <div class="bg-card border border-border rounded-3xl p-6 max-w-2xl w-full shadow-2xl space-y-4">
-        <div class="flex items-center justify-between">
-          <h3 class="text-base font-bold text-foreground flex items-center gap-2">
-            <span>🔍</span> Pemindai Berkas Duplikat Disk Server
-          </h3>
-          <button @click="showDuplicatesModal = false" class="text-muted-foreground hover:text-foreground text-sm p-1 rounded-lg">✕</button>
-        </div>
+    <Teleport to="body">
+      <div 
+        v-if="showDuplicatesModal" 
+        class="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200"
+        @click.self="showDuplicatesModal = false"
+      >
+        <div class="bg-card border border-border rounded-3xl p-6 max-w-2xl w-full shadow-2xl space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-base font-bold text-foreground flex items-center gap-2">
+              <span>🔍</span> Pemindai Berkas Duplikat Disk Server
+            </h3>
+            <button @click="showDuplicatesModal = false" class="text-muted-foreground hover:text-foreground text-sm p-1 rounded-lg">✕</button>
+          </div>
 
-        <div v-if="duplicateGroups.length === 0" class="py-8 text-center text-muted-foreground text-xs">
-          <span class="text-2xl block mb-1">🎉</span>
-          Tidak ditemukan berkas ganda/duplikat. Disk server bersih!
-        </div>
+          <div v-if="duplicateGroups.length === 0" class="py-8 text-center text-muted-foreground text-xs">
+            <span class="text-2xl block mb-1">🎉</span>
+            Tidak ditemukan berkas ganda/duplikat. Disk server bersih!
+          </div>
 
-        <div v-else class="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
-          <div 
-            v-for="(grp, i) in duplicateGroups" 
-            :key="i"
-            class="bg-background border border-border rounded-2xl p-4 space-y-3"
-          >
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-amber-400">Kelompok {{ i + 1 }} ({{ grp.files.length }} Salinan)</span>
-              <button 
-                @click="deleteDuplicateCopies(grp.files)" 
-                class="px-3 py-1 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 rounded-xl text-xs font-semibold transition-all"
-              >
-                🗑️ Hapus {{ grp.files.length - 1 }} Salinan Duplikat
-              </button>
-            </div>
+          <div v-else class="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+            <div 
+              v-for="(grp, i) in duplicateGroups" 
+              :key="i"
+              class="bg-background border border-border rounded-2xl p-4 space-y-3"
+            >
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-amber-400">Kelompok {{ i + 1 }} ({{ grp.files.length }} Salinan)</span>
+                <button 
+                  @click="deleteDuplicateCopies(grp.files)" 
+                  class="px-3 py-1 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 rounded-xl text-xs font-semibold transition-all"
+                >
+                  🗑️ Hapus {{ grp.files.length - 1 }} Salinan Duplikat
+                </button>
+              </div>
 
-            <div class="space-y-1.5">
-              <div 
-                v-for="(f, idx) in grp.files" 
-                :key="f.name"
-                class="flex items-center justify-between text-xs p-2 rounded-xl bg-card border border-border/60"
-              >
-                <div class="flex items-center gap-2 truncate">
-                  <span :class="idx === 0 ? 'text-emerald-400 font-bold' : 'text-muted-foreground'">{{ idx === 0 ? '[Utama]' : '[Salinan]' }}</span>
-                  <span class="truncate font-medium text-foreground">{{ f.name }}</span>
+              <div class="space-y-1.5">
+                <div 
+                  v-for="(f, idx) in grp.files" 
+                  :key="f.name"
+                  class="flex items-center justify-between text-xs p-2 rounded-xl bg-card border border-border/60"
+                >
+                  <div class="flex items-center gap-2 truncate">
+                    <span :class="idx === 0 ? 'text-emerald-400 font-bold' : 'text-muted-foreground'">{{ idx === 0 ? '[Utama]' : '[Salinan]' }}</span>
+                    <span class="truncate font-medium text-foreground">{{ f.name }}</span>
+                  </div>
+                  <span class="font-mono text-muted-foreground shrink-0">{{ f.sizeFormatted }}</span>
                 </div>
-                <span class="font-mono text-muted-foreground shrink-0">{{ f.sizeFormatted }}</span>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </Teleport>
 
     <!-- Password Lock Setup Modal -->
-    <div 
-      v-if="showLockSetupModal && fileToLock" 
-      class="fixed inset-0 z-50 bg-background/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200"
-      @click.self="showLockSetupModal = false"
-    >
-      <div class="bg-card border border-border rounded-3xl p-6 max-w-sm w-full shadow-2xl relative space-y-4">
-        <button @click="showLockSetupModal = false" class="absolute top-4 right-4 text-muted-foreground hover:text-foreground text-sm p-1 rounded-lg">✕</button>
+    <Teleport to="body">
+      <div 
+        v-if="showLockSetupModal && fileToLock" 
+        class="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200"
+        @click.self="showLockSetupModal = false"
+      >
+        <div class="bg-card border border-border rounded-3xl p-6 max-w-sm w-full shadow-2xl relative space-y-4">
+          <button @click="showLockSetupModal = false" class="absolute top-4 right-4 text-muted-foreground hover:text-foreground text-sm p-1 rounded-lg">✕</button>
 
-        <h3 class="text-base font-bold text-foreground flex items-center gap-2">
-          <span>🔒</span> Kunci Berkas dengan Sandi
-        </h3>
-        <p class="text-xs text-muted-foreground">
-          Berkas: <span class="font-mono font-semibold text-foreground">{{ fileToLock.name }}</span>
-        </p>
+          <h3 class="text-base font-bold text-foreground flex items-center gap-2">
+            <span>🔒</span> Kunci Berkas dengan Sandi
+          </h3>
+          <p class="text-xs text-muted-foreground">
+            Berkas: <span class="font-mono font-semibold text-foreground">{{ fileToLock.name }}</span>
+          </p>
 
-        <div>
-          <label class="block text-xs font-semibold text-muted-foreground mb-1">Kata Sandi / PIN Proteksi:</label>
-          <input 
-            v-model="setupPassword" 
-            type="password" 
-            placeholder="Masukkan kata sandi..." 
-            class="w-full bg-background border border-border rounded-xl px-4 py-2 text-sm text-foreground focus:outline-none focus:border-primary"
-            autofocus
-          />
+          <div>
+            <label class="block text-xs font-semibold text-muted-foreground mb-1">Kata Sandi / PIN Proteksi:</label>
+            <input 
+              v-model="setupPassword" 
+              type="password" 
+              placeholder="Masukkan kata sandi..." 
+              class="w-full bg-background border border-border rounded-xl px-4 py-2 text-sm text-foreground focus:outline-none focus:border-primary"
+              autofocus
+            />
+          </div>
+
+          <button @click="saveFileLockPassword" class="w-full py-2.5 bg-primary hover:bg-primary/90 text-white font-bold rounded-xl text-xs shadow-md transition-all">
+            Simpan & Kunci Berkas
+          </button>
         </div>
-
-        <button @click="saveFileLockPassword" class="w-full py-2.5 bg-primary hover:bg-primary/90 text-white font-bold rounded-xl text-xs shadow-md transition-all">
-          Simpan & Kunci Berkas
-        </button>
       </div>
-    </div>
+    </Teleport>
 
     <!-- Password Verification Download Prompt Modal -->
-    <div 
-      v-if="showPasswordPromptModal && fileToDownloadWithPassword" 
-      class="fixed inset-0 z-50 bg-background/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200"
-      @click.self="showPasswordPromptModal = false"
-    >
-      <div class="bg-card border border-border rounded-3xl p-6 max-w-sm w-full shadow-2xl relative space-y-4">
-        <button @click="showPasswordPromptModal = false" class="absolute top-4 right-4 text-muted-foreground hover:text-foreground text-sm p-1 rounded-lg">✕</button>
+    <Teleport to="body">
+      <div 
+        v-if="showPasswordPromptModal && fileToDownloadWithPassword" 
+        class="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200"
+        @click.self="showPasswordPromptModal = false"
+      >
+        <div class="bg-card border border-border rounded-3xl p-6 max-w-sm w-full shadow-2xl relative space-y-4">
+          <button @click="showPasswordPromptModal = false" class="absolute top-4 right-4 text-muted-foreground hover:text-foreground text-sm p-1 rounded-lg">✕</button>
 
-        <h3 class="text-base font-bold text-foreground flex items-center gap-2">
-          <span>🔐</span> Berkas Dilindungi Kata Sandi
-        </h3>
-        <p class="text-xs text-muted-foreground">
-          Masukkan sandi untuk mengunduh <span class="font-mono font-semibold text-foreground">{{ fileToDownloadWithPassword.name }}</span>
-        </p>
+          <h3 class="text-base font-bold text-foreground flex items-center gap-2">
+            <span>🔐</span> Berkas Dilindungi Kata Sandi
+          </h3>
+          <p class="text-xs text-muted-foreground">
+            Masukkan sandi untuk mengunduh <span class="font-mono font-semibold text-foreground">{{ fileToDownloadWithPassword.name }}</span>
+          </p>
 
-        <div>
-          <input 
-            v-model="enteredPassword" 
-            type="password" 
-            placeholder="Ketik kata sandi..." 
-            class="w-full bg-background border border-border rounded-xl px-4 py-2 text-sm text-foreground focus:outline-none focus:border-primary"
-            @keyup.enter="verifyPasswordAndDownload"
-            autofocus
-          />
-          <p v-if="passwordError" class="text-xs text-rose-400 mt-1 font-semibold">{{ passwordError }}</p>
+          <div>
+            <input 
+              v-model="enteredPassword" 
+              type="password" 
+              placeholder="Ketik kata sandi..." 
+              class="w-full bg-background border border-border rounded-xl px-4 py-2 text-sm text-foreground focus:outline-none focus:border-primary"
+              @keyup.enter="verifyPasswordAndDownload"
+              autofocus
+            />
+            <p v-if="passwordError" class="text-xs text-rose-400 mt-1 font-semibold">{{ passwordError }}</p>
+          </div>
+
+          <button @click="verifyPasswordAndDownload" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs shadow-md transition-all">
+            Buka & Unduh Berkas
+          </button>
         </div>
-
-        <button @click="verifyPasswordAndDownload" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs shadow-md transition-all">
-          Buka & Unduh Berkas
-        </button>
       </div>
-    </div>
+    </Teleport>
   </div>
 </template>
 

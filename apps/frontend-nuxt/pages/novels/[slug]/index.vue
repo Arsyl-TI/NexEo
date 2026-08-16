@@ -75,24 +75,20 @@
               </button>
 
               <!-- Export Novel TXT Button -->
-              <a 
-                :href="`/api/novels/${slug}/export`" 
-                target="_blank" 
-                download 
+              <button 
+                @click="showTxtExportModal = true" 
                 class="w-full py-2.5 px-4 rounded-xl text-xs font-semibold bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/25 transition-all flex items-center justify-center gap-2"
               >
                 <span>📥</span> Unduh Seluruh Chapter (.txt)
-              </a>
+              </button>
 
               <!-- Export Novel EPUB Button -->
-              <a 
-                :href="`/api/novels/${slug}/export-epub`" 
-                target="_blank" 
-                download 
+              <button 
+                @click="showEpubExportModal = true" 
                 class="w-full py-2.5 px-4 rounded-xl text-xs font-semibold bg-sky-500/15 border border-sky-500/30 text-sky-300 hover:bg-sky-500/25 transition-all flex items-center justify-center gap-2 shadow-sm"
               >
                 <span>📚</span> Unduh E-Book (.epub)
-              </a>
+              </button>
 
               <!-- Source Link Button -->
               <a v-if="novel.sourceUrl" :href="novel.sourceUrl" target="_blank" class="w-full py-2.5 px-4 rounded-xl text-xs font-semibold bg-card/60 border border-border/80 text-muted-foreground hover:text-foreground hover:bg-border/60 transition-all flex items-center justify-center gap-2">
@@ -215,73 +211,162 @@
     </div>
 
     <!-- Permanent Batch Translation Modal -->
-    <div v-if="showBatchTransModal" @click.self="showBatchTransModal = false" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-      <div class="bg-card border border-border rounded-3xl max-w-md w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-        <button @click="showBatchTransModal = false" class="absolute top-4 right-4 text-muted-foreground hover:text-foreground text-xl">✕</button>
+    <Teleport to="body">
+      <div v-if="showBatchTransModal" @click.self="showBatchTransModal = false" class="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
+        <div class="bg-card border border-purple-500/40 rounded-3xl max-w-md w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto space-y-4">
+          <button @click="showBatchTransModal = false" class="absolute top-4 right-4 text-muted-foreground hover:text-foreground text-sm p-1 rounded-lg">✕</button>
 
-        <h2 class="text-xl font-bold text-foreground mb-1 flex items-center gap-2">
-          <span>🌐</span> Terjemahkan Semua Chapter
-        </h2>
-        <p class="text-xs text-muted-foreground mb-4">Terjemahan ini akan disimpan secara <strong>PERMANEN</strong> di disk server sehingga Anda dapat membacanya langsung kapan saja!</p>
-
-        <div class="space-y-4 mb-6">
-          <div>
-            <label class="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Bahasa Asal Novel</label>
-            <select v-model="transSourceLang" class="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:outline-none focus:border-primary mb-3">
-              <option value="auto">🤖 Deteksi Otomatis (Inggris / Korea / Jepang)</option>
-              <option value="en">🇬🇧 Bahasa Inggris (English)</option>
-              <option value="ko">🇰🇷 Bahasa Korea (Hangul)</option>
-              <option value="ja">🇯🇵 Bahasa Jepang (Kanji/Kana)</option>
-            </select>
+          <div class="w-14 h-14 bg-purple-500/20 border border-purple-500/40 rounded-2xl flex items-center justify-center text-2xl mx-auto shadow-inner">
+            🌐
           </div>
 
-          <div>
-            <label class="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Mesin Penerjemah AI</label>
-            <select v-model="transEngine" class="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:outline-none focus:border-primary">
-              <option value="google">🌐 Google Translate (Gratis/Bawaan)</option>
-              <option value="gemini">⚡ Gemini 1.5 Flash API (AI Disarankan)</option>
-              <option value="deepl">🎯 DeepL API (Kualitas Sastra)</option>
-              <option value="libre">🐳 LibreTranslate (Self-Hosted Docker)</option>
-            </select>
+          <div class="text-center">
+            <h2 class="text-lg font-bold text-foreground">Terjemahkan Semua Chapter</h2>
+            <p class="text-xs text-muted-foreground mt-1">Terjemahan ini akan disimpan secara <strong>PERMANEN</strong> ke dalam disk server NexEo Anda.</p>
           </div>
 
-          <div v-if="transEngine === 'gemini'">
-            <label class="block text-xs font-semibold text-muted-foreground mb-1">Gemini API Key</label>
-            <input v-model="transConfig.geminiApiKey" type="password" placeholder="Masukkan Gemini API Key..." class="w-full bg-background border border-border rounded-xl px-4 py-2 text-sm text-foreground focus:outline-none focus:border-primary" />
-          </div>
-
-          <div v-if="transEngine === 'deepl'">
-            <label class="block text-xs font-semibold text-muted-foreground mb-1">DeepL API Key</label>
-            <input v-model="transConfig.deeplApiKey" type="password" placeholder="Contoh: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx:fx" class="w-full bg-background border border-border rounded-xl px-4 py-2 text-sm text-foreground focus:outline-none focus:border-primary" />
-          </div>
-
-          <div v-if="transEngine === 'libre'" class="space-y-3">
+          <div class="space-y-4 pt-2">
             <div>
+              <label class="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Bahasa Asal Novel</label>
+              <select v-model="transSourceLang" class="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-xs text-foreground focus:outline-none focus:border-primary">
+                <option value="auto">🤖 Deteksi Otomatis (Inggris / Korea / Jepang)</option>
+                <option value="en">🇬🇧 Bahasa Inggris (English)</option>
+                <option value="ko">🇰🇷 Bahasa Korea (Hangul)</option>
+                <option value="ja">🇯🇵 Bahasa Jepang (Kanji/Kana)</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Mesin Penerjemah AI</label>
+              <select v-model="transEngine" class="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-xs text-foreground focus:outline-none focus:border-primary">
+                <option value="google">🌐 Google Translate (Gratis/Bawaan)</option>
+                <option value="gemini">⚡ Gemini 1.5 Flash API (AI Disarankan)</option>
+                <option value="deepl">🎯 DeepL API (Kualitas Sastra)</option>
+                <option value="libre">🐳 LibreTranslate (Self-Hosted Docker)</option>
+              </select>
+            </div>
+
+            <div v-if="transEngine === 'gemini'">
+              <label class="block text-xs font-semibold text-muted-foreground mb-1">Gemini API Key</label>
+              <input v-model="transConfig.geminiApiKey" type="password" placeholder="Masukkan Gemini API Key..." class="w-full bg-background border border-border rounded-xl px-4 py-2 text-xs text-foreground focus:outline-none focus:border-primary" />
+            </div>
+
+            <div v-if="transEngine === 'deepl'">
+              <label class="block text-xs font-semibold text-muted-foreground mb-1">DeepL API Key</label>
+              <input v-model="transConfig.deeplApiKey" type="password" placeholder="Contoh: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx:fx" class="w-full bg-background border border-border rounded-xl px-4 py-2 text-xs text-foreground focus:outline-none focus:border-primary" />
+            </div>
+
+            <div v-if="transEngine === 'libre'">
               <label class="block text-xs font-semibold text-muted-foreground mb-1">LibreTranslate Docker URL</label>
-              <input v-model="transConfig.libreUrl" type="text" placeholder="http://localhost:5000" class="w-full bg-background border border-border rounded-xl px-4 py-2 text-sm text-foreground focus:outline-none focus:border-primary" />
+              <input v-model="transConfig.libreUrl" type="text" placeholder="http://localhost:5000" class="w-full bg-background border border-border rounded-xl px-4 py-2 text-xs text-foreground focus:outline-none focus:border-primary" />
+            </div>
+
+            <div class="bg-purple-950/30 border border-purple-500/30 rounded-xl p-3 text-[11px] text-purple-300 leading-relaxed">
+              💡 Teks terjemahan akan ditulis langsung ke file disk <code>.txt</code> seluruh chapter novel.
             </div>
           </div>
 
-          <div class="bg-purple-950/30 border border-purple-500/30 rounded-xl p-3.5 text-xs text-purple-300 leading-relaxed">
-            💡 Teks terjemahan akan ditulis langsung ke file disk <code>.txt</code> seluruh chapter novel.
+          <div class="flex gap-2 pt-2">
+            <button @click="showBatchTransModal = false" class="flex-1 py-2.5 rounded-xl border border-border text-xs font-medium text-muted-foreground hover:text-foreground">
+              Batal
+            </button>
+            <button 
+              @click="executeBatchTranslation" 
+              :disabled="isBatchTranslating" 
+              class="flex-1 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-lg disabled:opacity-50"
+            >
+              <span v-if="isBatchTranslating" class="spinner border-2 w-3.5 h-3.5 border-r-transparent rounded-full animate-spin"></span>
+              <span>{{ isBatchTranslating ? 'Menerjemahkan...' : 'Mulai Terjemahkan' }}</span>
+            </button>
           </div>
         </div>
+      </div>
+    </Teleport>
 
-        <div class="flex gap-3">
-          <button @click="showBatchTransModal = false" class="flex-1 px-4 py-2.5 rounded-xl border border-border text-xs font-medium text-muted-foreground hover:text-foreground">
-            Batal
-          </button>
-          <button 
-            @click="executeBatchTranslation" 
-            :disabled="isBatchTranslating" 
-            class="flex-1 btn-primary py-2.5 text-xs font-bold flex items-center justify-center gap-2 shadow-lg disabled:opacity-50"
-          >
-            <span v-if="isBatchTranslating" class="spinner border-2 w-3.5 h-3.5"></span>
-            <span>{{ isBatchTranslating ? 'Menerjemahkan...' : 'Mulai Terjemahkan Permanen' }}</span>
-          </button>
+    <!-- POPUP MODAL: UNDUH SELURUH CHAPTER TXT -->
+    <Teleport to="body">
+      <div 
+        v-if="showTxtExportModal" 
+        class="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200"
+        @click.self="showTxtExportModal = false"
+      >
+        <div class="bg-card border border-emerald-500/40 rounded-3xl p-6 max-w-sm w-full shadow-2xl relative space-y-4 text-center">
+          <button @click="showTxtExportModal = false" class="absolute top-4 right-4 text-muted-foreground hover:text-foreground text-sm p-1 rounded-lg">✕</button>
+
+          <div class="w-16 h-16 bg-emerald-500/20 border border-emerald-500/40 rounded-full flex items-center justify-center text-3xl mx-auto animate-bounce">
+            📥
+          </div>
+
+          <div>
+            <h3 class="text-base font-bold text-foreground">Unduh Seluruh Chapter (.txt)</h3>
+            <p class="text-xs text-muted-foreground mt-1">Gabungkan semua bab novel menjadi 1 file teks formatted.</p>
+          </div>
+
+          <div class="bg-background/90 border border-border rounded-2xl p-3 text-left space-y-1">
+            <h4 class="font-bold text-xs text-foreground truncate">{{ novel?.title }}</h4>
+            <p class="text-[11px] text-emerald-400 font-mono">
+              ✓ Total: <span class="font-bold">{{ chapters.length }} Chapter Bundled</span>
+            </p>
+          </div>
+
+          <div class="pt-2">
+            <a 
+              :href="`/api/novels/${slug}/export`" 
+              target="_blank" 
+              download 
+              class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs shadow-md transition-all flex items-center justify-center gap-1.5"
+              @click="showTxtExportModal = false"
+            >
+              <span>📥</span> Unduh File TXT Sekarang
+            </a>
+          </div>
         </div>
       </div>
-    </div>
+    </Teleport>
+
+    <!-- POPUP MODAL: UNDUH E-BOOK EPUB -->
+    <Teleport to="body">
+      <div 
+        v-if="showEpubExportModal" 
+        class="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200"
+        @click.self="showEpubExportModal = false"
+      >
+        <div class="bg-card border border-sky-500/40 rounded-3xl p-6 max-w-sm w-full shadow-2xl relative space-y-4 text-center">
+          <button @click="showEpubExportModal = false" class="absolute top-4 right-4 text-muted-foreground hover:text-foreground text-sm p-1 rounded-lg">✕</button>
+
+          <div class="w-16 h-16 bg-sky-500/20 border border-sky-500/40 rounded-full flex items-center justify-center text-3xl mx-auto animate-bounce">
+            📚
+          </div>
+
+          <div>
+            <h3 class="text-base font-bold text-foreground">Unduh E-Book (.epub)</h3>
+            <p class="text-xs text-muted-foreground mt-1">Ekspor e-book EPUB 3 lengkap dengan sampul & daftar isi.</p>
+          </div>
+
+          <div class="bg-background/90 border border-border rounded-2xl p-3 text-left space-y-1">
+            <h4 class="font-bold text-xs text-foreground truncate">{{ novel?.title }}</h4>
+            <p class="text-[11px] text-sky-400 font-mono">
+              ✓ Format: <span class="font-bold">EPUB 3 Standard E-Book</span>
+            </p>
+            <p class="text-[11px] text-muted-foreground font-mono">
+              ✓ Total: <span class="font-bold text-foreground">{{ chapters.length }} Bab</span>
+            </p>
+          </div>
+
+          <div class="pt-2">
+            <a 
+              :href="`/api/novels/${slug}/export-epub`" 
+              target="_blank" 
+              download 
+              class="w-full py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-xl text-xs shadow-md transition-all flex items-center justify-center gap-1.5"
+              @click="showEpubExportModal = false"
+            >
+              <span>📚</span> Unduh File EPUB Sekarang
+            </a>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -320,8 +405,10 @@ const activeTab = ref<'chapters' | 'synopsis'>('chapters')
 const chapterSearch = ref('')
 const chapterSort = ref<'asc' | 'desc'>('asc')
 
-// Permanent Batch Translation Modal State
+// Permanent Batch Translation & Export Modals State
 const showBatchTransModal = ref(false)
+const showTxtExportModal = ref(false)
+const showEpubExportModal = ref(false)
 const isBatchTranslating = ref(false)
 const transEngine = ref<'google' | 'gemini' | 'deepl' | 'libre'>('google')
 const transSourceLang = ref<'auto' | 'en' | 'ko' | 'ja'>('auto')
