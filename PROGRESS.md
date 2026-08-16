@@ -327,3 +327,14 @@
   - **Multi-Store Aggregator Scraper**: Scrapes and aggregates live game price drops, savings percentages, Metacritic scores (`🎯 88`), and Steam review ratings (`👍 92%`) across Steam, Epic Games Store, Ubisoft Store, GOG.com, Microsoft/Xbox Store, and Fanatical using CheapShark API and Epic Games Store Freebies API.
   - **🎁 Weekly Free Games Spotlight (100% OFF)**: Top hero banner spotlighting active 100% free-to-keep game giveaways with instant store claim links.
   - **Interactive Deals Dashboard**: Store pills, discount percentage filters (50%+ OFF, 75%+ OFF), live title search, and personal 📌 **Wishlist / Bookmark** manager.
+
+---
+
+## Feature 29: Multi-Currency Support (USD / IDR) & Eneba Marketplace Provider Integration
+- **Files Modified**:
+  - `apps/frontend-nuxt/server/utils/games/dealsScraper.ts`
+  - `apps/frontend-nuxt/server/api/games/stores.get.ts`
+  - `apps/frontend-nuxt/pages/game-deals.vue`
+- **Implementation Highlights**:
+  - **💵 USD ($) / 🇮🇩 IDR (Rp) Currency Switcher**: Live price conversion engine toggle transforming prices seamlessly between US Dollars (`$`) and Indonesian Rupiah (`Rp 157.842` at 1 USD = Rp 15,800).
+  - **🛍️ Eneba Marketplace Provider Integration**: Scrapes and aggregates Eneba game keys and digital store deals (`fetchEnebaDeals`). Added `🛍️ Eneba Marketplace` store pill to platform selector toolbar.

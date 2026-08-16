@@ -65,7 +65,7 @@
                 {{ item.title }}
               </h3>
               <p class="text-xs text-muted-foreground mt-0.5 font-mono">
-                Harga Normal: <span class="line-through text-rose-400">{{ item.normalPrice }}</span> ➔ <span class="text-emerald-400 font-bold">GRATIS KLAIM</span>
+                Harga Normal: <span class="line-through text-rose-400">{{ formatPrice(item.normalPrice) }}</span> ➔ <span class="text-emerald-400 font-bold">GRATIS KLAIM</span>
               </p>
             </div>
 
@@ -99,8 +99,24 @@
           </button>
         </div>
 
-        <!-- Discount Percentage Pills & Wishlist Switcher -->
-        <div class="flex items-center gap-2 shrink-0">
+        <!-- Discount Percentage Pills, Currency Switcher, & Wishlist Switcher -->
+        <div class="flex items-center gap-2 shrink-0 flex-wrap">
+          <!-- Currency Switcher Toggle -->
+          <div class="flex items-center bg-card border border-border rounded-xl p-0.5 shadow-sm">
+            <button 
+              @click="selectedCurrency = 'IDR'" 
+              :class="['px-2.5 py-1 rounded-lg text-xs font-bold transition-all', selectedCurrency === 'IDR' ? 'bg-primary text-white shadow-md' : 'text-muted-foreground hover:text-foreground']"
+            >
+              🇮🇩 IDR (Rp)
+            </button>
+            <button 
+              @click="selectedCurrency = 'USD'" 
+              :class="['px-2.5 py-1 rounded-lg text-xs font-bold transition-all', selectedCurrency === 'USD' ? 'bg-primary text-white shadow-md' : 'text-muted-foreground hover:text-foreground']"
+            >
+              💵 USD ($)
+            </button>
+          </div>
+
           <button 
             v-for="disc in [0, 50, 75]" 
             :key="disc"
@@ -180,8 +196,8 @@
               </h3>
 
               <div class="flex items-baseline justify-between mt-2 pt-2 border-t border-border/40">
-                <span class="text-xs text-muted-foreground line-through font-mono">{{ deal.normalPrice }}</span>
-                <span class="text-sm font-bold text-amber-400 font-mono">{{ deal.salePrice }}</span>
+                <span class="text-xs text-muted-foreground line-through font-mono">{{ formatPrice(deal.normalPrice) }}</span>
+                <span class="text-sm font-bold text-amber-400 font-mono">{{ formatPrice(deal.salePrice) }}</span>
               </div>
             </div>
 
@@ -226,6 +242,7 @@ const stores = [
   { storeID: '1', storeName: 'Steam', icon: '🎮' },
   { storeID: '25', storeName: 'Epic Games', icon: '⚡' },
   { storeID: '11', storeName: 'Ubisoft', icon: '🛡️' },
+  { storeID: 'eneba', storeName: 'Eneba Marketplace', icon: '🛍️' },
   { storeID: '7', storeName: 'GOG.com', icon: '📜' },
   { storeID: '15', storeName: 'Fanatical / Microsoft', icon: '🟩' }
 ]
@@ -238,6 +255,26 @@ const minDiscount = ref(0)
 const searchQuery = ref('')
 const showWishlistOnly = ref(false)
 const wishlist = ref<any[]>([])
+
+const selectedCurrency = ref<'IDR' | 'USD'>('IDR')
+const USD_TO_IDR = 15800
+
+function formatPrice(priceStr: string | undefined): string {
+  if (!priceStr) return 'GRATIS'
+  if (priceStr.toUpperCase().includes('GRATIS') || priceStr.toUpperCase().includes('FREE') || priceStr === '$0' || priceStr === '$0.00') {
+    return 'GRATIS'
+  }
+
+  const num = parseFloat(priceStr.replace(/[^0-9.]/g, ''))
+  if (isNaN(num) || num === 0) return 'GRATIS'
+
+  if (selectedCurrency.value === 'IDR') {
+    const idr = Math.round(num * USD_TO_IDR)
+    return `Rp ${idr.toLocaleString('id-ID')}`
+  } else {
+    return `$${num.toFixed(2)}`
+  }
+}
 
 const displayedDeals = computed(() => {
   if (showWishlistOnly.value) {

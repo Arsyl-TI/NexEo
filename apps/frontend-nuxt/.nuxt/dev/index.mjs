@@ -3878,11 +3878,21 @@ async function fetchAllGameDeals(options) {
       params.title = options.title;
     }
     if (options.sortBy) {
-      params.sortBy = options.sortBy;
+      const s = options.sortBy.toLowerCase();
+      if (s === "price") params.sortBy = "Price";
+      else if (s === "title") params.sortBy = "Title";
+      else if (s === "metacritic") params.sortBy = "Metacritic";
+      else if (s === "reviews") params.sortBy = "Reviews";
+      else params.sortBy = "Savings";
+    } else {
+      params.sortBy = "Savings";
     }
     const res = await axios.get("https://www.cheapshark.com/api/1.0/deals", {
       params,
-      timeout: 8e3
+      timeout: 1e4,
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+      }
     });
     if (Array.isArray(res.data)) {
       const deals = res.data.map((item) => {
@@ -3984,7 +3994,7 @@ const deals_get = defineEventHandler(async (event) => {
   const query = getQuery$1(event);
   const storeID = query.storeID || "all";
   const title = query.title || "";
-  const sortBy = query.sortBy || "savings";
+  const sortBy = query.sortBy || "Savings";
   const minDiscount = query.minDiscount ? parseInt(query.minDiscount, 10) : 0;
   try {
     const deals = await fetchAllGameDeals({

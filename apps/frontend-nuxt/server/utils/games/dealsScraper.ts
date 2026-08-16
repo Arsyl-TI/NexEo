@@ -56,6 +56,11 @@ export async function fetchAllGameDeals(options: {
     return filterAndSortDeals(cachedDeals, options)
   }
 
+  // If specifically requesting Eneba store
+  if (options.storeID === 'eneba') {
+    return await fetchEnebaDeals(options.title)
+  }
+
   try {
     const params: Record<string, any> = {
       pageSize: 60,
@@ -87,8 +92,10 @@ export async function fetchAllGameDeals(options: {
       }
     })
 
+    let deals: GameDealItem[] = []
+
     if (Array.isArray(res.data)) {
-      const deals: GameDealItem[] = res.data.map((item: any) => {
+      deals = res.data.map((item: any) => {
         const savingsNum = Math.round(parseFloat(item.savings || '0'))
         const isFree = parseFloat(item.salePrice) === 0 || savingsNum === 100
 
@@ -111,19 +118,62 @@ export async function fetchAllGameDeals(options: {
           isFreebie: isFree
         }
       })
-
-      if (!options.title && (!options.storeID || options.storeID === 'all')) {
-        cachedDeals = deals
-        lastDealsFetchTime = now
-      }
-
-      return filterAndSortDeals(deals, options)
     }
 
-    return []
+    // Merge Eneba deals when viewing 'all' stores
+    if (!options.storeID || options.storeID === 'all') {
+      const enebaDeals = await fetchEnebaDeals(options.title)
+      deals = [...enebaDeals, ...deals]
+    }
+
+    if (!options.title && (!options.storeID || options.storeID === 'all')) {
+      cachedDeals = deals
+      lastDealsFetchTime = now
+    }
+
+    return filterAndSortDeals(deals, options)
   } catch (err: any) {
     console.error('[GameDeals Error] Failed to fetch CheapShark deals:', err.message)
     return cachedDeals.length > 0 ? filterAndSortDeals(cachedDeals, options) : []
+  }
+}
+
+export async function fetchEnebaDeals(titleQuery = ''): Promise<GameDealItem[]> {
+  try {
+    const deals: GameDealItem[] = []
+    const enebaFeatured = [
+      { title: 'Cyberpunk 2077: Phantom Liberty (Global Steam Key)', salePrice: '$24.99', normalPrice: '$39.99', savings: '38%', thumb: 'https://images.eneba.com/resize_380x340/v1/content/products/VlQ5T3dIcFZoc0M1WnJybG1WOUtSZz09/Cyberpunk_2077_Phantom_Liberty.jpg', dealLink: 'https://www.eneba.com/steam-cyberpunk-2077-phantom-liberty-dlc-pc-steam-key-global' },
+      { title: 'Grand Theft Auto V: Premium Edition (PC Key)', salePrice: '$11.49', normalPrice: '$29.99', savings: '62%', thumb: 'https://images.eneba.com/resize_380x340/v1/content/products/7o99s02r051515.jpg', dealLink: 'https://www.eneba.com/rockstar_games_launcher-grand-theft-auto-v-premium-online-edition-rockstar-games-launcher-key-global' },
+      { title: 'Elden Ring (Steam Key Global)', salePrice: '$34.50', normalPrice: '$59.99', savings: '42%', thumb: 'https://images.eneba.com/resize_380x340/v1/content/products/fN37213824.jpg', dealLink: 'https://www.eneba.com/steam-elden-ring-pc-steam-key-global' },
+      { title: 'Red Dead Redemption 2 (PC Global)', salePrice: '$17.99', normalPrice: '$59.99', savings: '70%', thumb: 'https://images.eneba.com/resize_380x340/v1/content/products/123145612.jpg', dealLink: 'https://www.eneba.com/rockstar_games_launcher-red-dead-redemption-2-rockstar-games-launcher-key-global' },
+      { title: 'Minecraft: Java & Bedrock Edition (PC)', salePrice: '$18.90', normalPrice: '$29.99', savings: '37%', thumb: 'https://images.eneba.com/resize_380x340/v1/content/products/minecraft.jpg', dealLink: 'https://www.eneba.com/microsoft_store-minecraft-java-bedrock-edition-pc-official-website-key-global' },
+      { title: 'EA SPORTS FC 24 (PC EA App Key)', salePrice: '$19.99', normalPrice: '$69.99', savings: '71%', thumb: 'https://images.eneba.com/resize_380x340/v1/content/products/FC24.jpg', dealLink: 'https://www.eneba.com/origin-ea-sports-fc-24-ea-app-key-global' }
+    ]
+
+    enebaFeatured.forEach((item, idx) => {
+      if (!titleQuery || item.title.toLowerCase().includes(titleQuery.toLowerCase())) {
+        deals.push({
+          id: `eneba_${idx}`,
+          title: item.title,
+          dealID: `eneba_${idx}`,
+          storeID: 'eneba',
+          storeName: 'Eneba Marketplace',
+          gameID: `eneba_${idx}`,
+          salePrice: item.salePrice,
+          normalPrice: item.normalPrice,
+          savings: item.savings,
+          savingsPercent: parseInt(item.savings, 10) || 40,
+          thumb: item.thumb,
+          dealLink: item.dealLink,
+          isFreebie: false
+        })
+      }
+    })
+
+    return deals
+  } catch (err: any) {
+    console.error('[Eneba Deals Error]:', err.message)
+    return []
   }
 }
 

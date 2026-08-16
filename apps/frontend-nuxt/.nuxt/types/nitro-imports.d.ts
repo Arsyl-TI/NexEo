@@ -53,6 +53,7 @@ declare global {
   const eventHandler: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').eventHandler
   const fetchAccountQuota: typeof import('../../server/utils/gdrive/gdrivePool').fetchAccountQuota
   const fetchAllGameDeals: typeof import('../../server/utils/games/dealsScraper').fetchAllGameDeals
+  const fetchEnebaDeals: typeof import('../../server/utils/games/dealsScraper').fetchEnebaDeals
   const fetchEpicFreebies: typeof import('../../server/utils/games/dealsScraper').fetchEpicFreebies
   const fetchWithEvent: typeof import('../../../../node_modules/.pnpm/h3@1.15.11/node_modules/h3').fetchWithEvent
   const formatBytes: typeof import('../../server/utils/gdrive/gdrivePool').formatBytes
@@ -270,7 +271,7 @@ export { buildAssetsURL as __buildAssetsURL, publicAssetsURL as __publicAssetsUR
 export { defineAppConfig } from 'D:/MyProject/NexEo/node_modules/.pnpm/@nuxt+nitro-server@3.21.11__ab6b34050c574ac4ae20c7ed2556094e/node_modules/@nuxt/nitro-server/dist/runtime/utils/config';
 export { serverConfig, formatFileSize } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/config';
 export { saveTasksToFile, getDownloadTasks, createDownloadTask, cancelDownloadTask, deleteDownloadTask } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/downloader';
-export { fetchAllGameDeals, fetchEpicFreebies } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/games/dealsScraper';
+export { fetchAllGameDeals, fetchEnebaDeals, fetchEpicFreebies } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/games/dealsScraper';
 export { loadAccounts, saveAccounts, loadPooledFiles, savePooledFiles, formatBytes, getAccessToken, fetchAccountQuota, syncAllAccountsQuota, selectAccountForUpload, uploadFileToGDrive, deleteFileFromGDrive } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/gdrive/gdrivePool';
 export { getMangaDir, listLocalManga, getLocalMangaDetail, getLocalMangaChapters, getMangaChapterPages } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/manga';
 export { searchMangaDex, getMangaDexDetail, getMangaDexChapterPages, searchKomiku, getKomikuDetail, getKomikuChapterPages, searchMikoroku, getMikorokuDetail, getMikorokuChapterPages, searchWestManga, getWestMangaDetail, getWestMangaChapterPages, searchUniversalManga, getUniversalMangaDetail, getUniversalChapterPages, downloadChapterToLocal } from 'D:/MyProject/NexEo/apps/frontend-nuxt/server/utils/manga/online';
