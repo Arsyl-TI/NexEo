@@ -252,3 +252,13 @@
     4. 📜 **BacaLightNovel.co**: Category & chapter scraper.
     5. 📚 **NovelBookId.id**: Catalog & chapter scraper.
   - **Universal Importer Dropdown**: All 5 new sources are added to `NOVEL_SOURCES` in the Online Novel Importer.
+
+---
+
+## Feature 23 (Module 1 Upgrade): Novel Reader Suite Overhaul (TTS Auto-Scroll & Highlighting, Typography & Theme Customizer Engine, Offline Caching)
+- **Files Modified**:
+  - `apps/frontend-nuxt/pages/novels/[slug]/[chapter].vue`
+- **Implementation Highlights**:
+  - **TTS Sentence/Paragraph Live Highlighting & Auto-scroll**: Paragraphs are tagged with `id="para-X"`. When TTS reads, the active paragraph is styled with glowing amber borders & luminous fill (`.tts-active-paragraph`), and automatically scrolled into middle view (`scrollIntoView({ behavior: 'smooth', block: 'center' })`).
+  - **Typography & Theme Engine Customizer**: Added 🎨 **Font & Tampilan** modal with font options (`System Sans`, `Georgia Serif`, `OpenDyslexic`, `Monospace`), line-height slider (`1.2` - `2.4`), content max-width slider (`600px` - `1200px`), and 4 themes (`Paper White`, `Warm Sepia`, `Solarized Green`, `Midnight Dark`).
+  - **1-Click Offline Chapter Caching**: Added 💾 **Simpan Offline** button storing chapter data in browser `localStorage` with `✓ Offline` status badge for 100% offline reading without internet.

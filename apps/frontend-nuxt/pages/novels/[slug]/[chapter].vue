@@ -36,6 +36,20 @@
           <span>⏱️</span> {{ timerActive ? formatTimerDisplay(timerRemaining) : 'Timer' }}
         </button>
 
+        <!-- Typography & Theme Customizer Modal Trigger -->
+        <button @click="showReaderSettingsModal = true" class="px-3 py-1.5 rounded-full text-xs font-semibold transition-colors bg-card border border-border text-foreground hover:bg-border/60 flex items-center gap-1.5">
+          <span>🎨</span> Font & Tampilan
+        </button>
+
+        <!-- Offline Chapter Cache Button -->
+        <button 
+          @click="toggleOfflineCache" 
+          :class="['px-3 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5 shadow-md active:scale-95', isOfflineCached ? 'bg-emerald-600 text-white font-bold' : 'bg-card border border-border text-foreground hover:bg-border/60']"
+          :title="isOfflineCached ? 'Bab tersimpan offline' : 'Simpan bab ini untuk dibaca offline'"
+        >
+          <span>{{ isOfflineCached ? '✓ Offline' : '💾 Simpan Offline' }}</span>
+        </button>
+
         <!-- In-Chapter Search Button -->
         <button @click="showTextSearch = !showTextSearch" class="px-3 py-1.5 rounded-full text-xs font-semibold transition-colors bg-card border border-border text-foreground hover:bg-border/60 flex items-center gap-1.5">
           <span>🔍</span> Cari Teks
@@ -44,16 +58,6 @@
         <!-- Translate Button -->
         <button @click="showTranslateModal = true" class="px-3 py-1.5 rounded-full text-xs font-semibold transition-all bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white flex items-center gap-1.5 shadow-md active:scale-95">
           <span>🌐</span> Terjemahkan Bab
-        </button>
-
-        <div class="flex items-center gap-1 bg-card border border-border rounded-full px-2.5 py-1">
-          <button @click="decreaseFontSize" class="text-xs font-bold px-1 text-muted-foreground hover:text-foreground">A-</button>
-          <span class="text-xs px-1 font-mono text-foreground">{{ uiStore.readerFontSize }}px</span>
-          <button @click="increaseFontSize" class="text-xs font-bold px-1 text-muted-foreground hover:text-foreground">A+</button>
-        </div>
-
-        <button class="px-3 py-1.5 rounded-full text-xs font-semibold transition-colors" :class="themeClasses.textBtn" @click="cycleTheme">
-          Tema: {{ uiStore.readerTheme }}
         </button>
 
         <button class="px-3 py-1.5 rounded-full text-xs font-semibold transition-colors" :class="themeClasses.textBtn" @click="immersive = !immersive">
@@ -346,11 +350,94 @@
       </div>
     </div>
 
+    <!-- Typography & Theme Customizer Engine Modal -->
+    <div v-if="showReaderSettingsModal" @click.self="showReaderSettingsModal = false" class="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
+      <div class="bg-card border border-border rounded-3xl max-w-md w-full p-6 shadow-2xl relative space-y-5">
+        <button @click="showReaderSettingsModal = false" class="absolute top-4 right-4 text-muted-foreground hover:text-foreground text-sm p-1 rounded-lg">✕</button>
+
+        <h2 class="text-base font-bold text-foreground flex items-center gap-2">
+          <span>🎨</span> Pengaturan Tampilan & Tipografi Novel
+        </h2>
+
+        <!-- Font Family Selector -->
+        <div>
+          <label class="block text-xs font-semibold text-muted-foreground mb-2">Jenis Font (Typography):</label>
+          <div class="grid grid-cols-2 gap-2">
+            <button 
+              v-for="f in fontOptions" 
+              :key="f.id"
+              @click="readerFont = f.id as any"
+              :class="['p-2.5 rounded-xl border text-xs font-semibold transition-all flex items-center justify-center gap-1.5', readerFont === f.id ? 'bg-primary text-white border-primary shadow-md' : 'bg-background border-border text-foreground hover:bg-border/60']"
+            >
+              <span>{{ f.icon }}</span>
+              <span :class="f.className">{{ f.name }}</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Color Theme Selector -->
+        <div>
+          <label class="block text-xs font-semibold text-muted-foreground mb-2">Tema Latar Warna (Theme):</label>
+          <div class="grid grid-cols-2 gap-2">
+            <button 
+              v-for="t in themeOptions" 
+              :key="t.id"
+              @click="readerTheme = t.id as any"
+              :class="['p-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-between shadow-sm', t.btnClass, readerTheme === t.id ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : '']"
+            >
+              <span>{{ t.name }}</span>
+              <span class="text-sm">{{ t.icon }}</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Font Size & Line Height Sliders -->
+        <div class="space-y-3 pt-2 border-t border-border/50">
+          <div>
+            <div class="flex justify-between text-xs mb-1 font-medium">
+              <span class="text-muted-foreground">Ukuran Teks (Font Size):</span>
+              <span class="font-mono font-bold text-primary">{{ uiStore.readerFontSize }}px</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button @click="uiStore.setReaderFontSize(Math.max(12, uiStore.readerFontSize - 1))" class="px-2.5 py-1 bg-background border border-border rounded-lg text-xs font-bold">-</button>
+              <input type="range" min="12" max="32" v-model.number="uiStore.readerFontSize" class="w-full h-1.5 bg-background rounded-lg appearance-none cursor-pointer accent-primary" />
+              <button @click="uiStore.setReaderFontSize(Math.min(32, uiStore.readerFontSize + 1))" class="px-2.5 py-1 bg-background border border-border rounded-lg text-xs font-bold">+</button>
+            </div>
+          </div>
+
+          <div>
+            <div class="flex justify-between text-xs mb-1 font-medium">
+              <span class="text-muted-foreground">Jarak Baris (Line Height):</span>
+              <span class="font-mono font-bold text-primary">{{ readerLineHeight.toFixed(1) }}x</span>
+            </div>
+            <input type="range" min="1.2" max="2.4" step="0.1" v-model.number="readerLineHeight" class="w-full h-1.5 bg-background rounded-lg appearance-none cursor-pointer accent-primary" />
+          </div>
+
+          <div>
+            <div class="flex justify-between text-xs mb-1 font-medium">
+              <span class="text-muted-foreground">Lebar Halaman Maksimal:</span>
+              <span class="font-mono font-bold text-primary">{{ readerMaxWidth }}px</span>
+            </div>
+            <input type="range" min="600" max="1200" step="32" v-model.number="readerMaxWidth" class="w-full h-1.5 bg-background rounded-lg appearance-none cursor-pointer accent-primary" />
+          </div>
+        </div>
+
+        <button @click="showReaderSettingsModal = false" class="w-full py-2.5 bg-primary hover:bg-primary/90 text-white rounded-xl text-xs font-bold shadow-lg transition-all">
+          Simpan Pengaturan Tampilan
+        </button>
+      </div>
+    </div>
+
     <!-- Chapter Content Reader -->
-    <main class="max-w-5xl mx-auto px-3 sm:px-4 pb-24">
+    <main class="max-w-7xl mx-auto px-3 sm:px-4 pb-24">
       <div v-if="loading" class="py-20 flex justify-center"><div class="spinner"></div></div>
       <div v-else-if="!chapterContent" class="py-20 text-center text-muted-foreground">Bab tidak ditemukan.</div>
-      <article v-else :class="['prose max-w-none rounded-2xl p-4 sm:p-8 md:p-12 border shadow-lg leading-relaxed', themeClasses.reader]" :style="{ fontSize: `${uiStore.readerFontSize}px` }" v-html="renderedHtml"></article>
+      <article 
+        v-else 
+        :class="['prose max-w-none rounded-2xl p-4 sm:p-8 md:p-12 border shadow-xl transition-all duration-300 leading-relaxed', activeFontClass, activeThemeClasses.readerBg]" 
+        :style="{ fontSize: `${uiStore.readerFontSize}px`, lineHeight: readerLineHeight, maxWidth: `${readerMaxWidth}px`, margin: '0 auto' }" 
+        v-html="renderedHtml"
+      ></article>
 
       <!-- Bottom Chapter Navigation Toolbar (Previous / Next Chapter) -->
       <div v-if="!loading && chapterContent" class="mt-8 flex items-center justify-between gap-3 p-3 rounded-2xl border backdrop-blur-md shadow-md" :class="[themeClasses.headerBg, themeClasses.border]">
@@ -413,6 +500,75 @@ const isPaused = ref(false)
 const currentParagraphIndex = ref(0)
 const speechRate = ref(1.0)
 let synth: SpeechSynthesis | null = null
+
+// Typography & Theme Engine Customizer State
+const showReaderSettingsModal = ref(false)
+const readerFont = ref<'sans' | 'serif' | 'dyslexic' | 'mono'>('sans')
+const readerLineHeight = ref(1.8)
+const readerMaxWidth = ref(896)
+const readerTheme = ref<'paper' | 'sepia' | 'solarized' | 'dark'>('dark')
+const isOfflineCached = ref(false)
+
+const fontOptions = [
+  { id: 'sans', name: 'System Sans', icon: '🅰️', className: 'font-sans' },
+  { id: 'serif', name: 'Georgia Serif', icon: '📖', className: 'font-serif' },
+  { id: 'dyslexic', name: 'OpenDyslexic', icon: '👁️', className: 'font-mono' },
+  { id: 'mono', name: 'Monospace', icon: '💻', className: 'font-mono' }
+]
+
+const themeOptions = [
+  { id: 'paper', name: 'Paper White', icon: '☀️', btnClass: 'bg-white text-slate-900 border-slate-300' },
+  { id: 'sepia', name: 'Warm Sepia', icon: '📜', btnClass: 'bg-[#fbf0d9] text-[#432818] border-[#e6d5b8]' },
+  { id: 'solarized', name: 'Solarized', icon: '🌿', btnClass: 'bg-[#eee8d5] text-[#002b36] border-[#d3cbb7]' },
+  { id: 'dark', name: 'Midnight Dark', icon: '🌙', btnClass: 'bg-slate-900 text-slate-100 border-slate-700' }
+]
+
+const activeFontClass = computed(() => {
+  const map: Record<string, string> = {
+    sans: 'font-sans',
+    serif: 'font-serif',
+    dyslexic: 'font-mono tracking-wide',
+    mono: 'font-mono'
+  }
+  return map[readerFont.value] || 'font-sans'
+})
+
+const activeThemeClasses = computed(() => {
+  const map: Record<string, { bg: string; text: string; border: string; readerBg: string }> = {
+    paper: { bg: 'bg-slate-100', text: 'text-slate-900', border: 'border-slate-300', readerBg: 'bg-white text-slate-900 border-slate-300 shadow-md' },
+    sepia: { bg: 'bg-[#fbf0d9]', text: 'text-[#432818]', border: 'border-[#e6d5b8]', readerBg: 'bg-[#f6e6c7] text-[#432818] border-[#e6d5b8] shadow-md' },
+    solarized: { bg: 'bg-[#fdf6e3]', text: 'text-[#002b36]', border: 'border-[#eee8d5]', readerBg: 'bg-[#eee8d5] text-[#073642] border-[#d3cbb7] shadow-md' },
+    dark: { bg: 'bg-slate-950', text: 'text-slate-100', border: 'border-slate-800', readerBg: 'bg-slate-900 text-slate-100 border-slate-800 shadow-xl' }
+  }
+  return map[readerTheme.value] || map.dark
+})
+
+function checkOfflineCache() {
+  if (typeof window === 'undefined') return
+  const key = `novel_cache_${slug}_ch_${chapter}`
+  isOfflineCached.value = !!localStorage.getItem(key)
+}
+
+function toggleOfflineCache() {
+  if (typeof window === 'undefined') return
+  const key = `novel_cache_${slug}_ch_${chapter}`
+  if (isOfflineCached.value) {
+    localStorage.removeItem(key)
+    isOfflineCached.value = false
+    success('Bab ini telah dihapus dari simpanan offline browser.')
+  } else {
+    if (chapterContent.value) {
+      localStorage.setItem(key, JSON.stringify({
+        slug,
+        chapter,
+        content: chapterContent.value,
+        savedAt: new Date().toISOString()
+      }))
+      isOfflineCached.value = true
+      success('Berhasil menyimpan bab ini untuk dibaca 100% offline!')
+    }
+  }
+}
 
 // Translation Modal State
 const showTranslateModal = ref(false)
@@ -842,6 +998,14 @@ function startSpeakingParagraph(index: number) {
   utterance.onstart = () => {
     isSpeaking.value = true
     isPaused.value = false
+
+    // Highlight & auto-scroll active paragraph into middle view
+    if (typeof document !== 'undefined') {
+      const activeEl = document.getElementById(`para-${index}`)
+      if (activeEl) {
+        activeEl.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }
+    }
   }
 
   utterance.onend = () => {
@@ -996,23 +1160,40 @@ const rawRenderedHtml = computed(() => {
   const contentToRender = translatedContent.value || chapterContent.value
   if (!contentToRender) return '<p>Konten bab ini belum tersedia.</p>'
 
-  if (typeof contentToRender === 'string') return contentToRender
+  if (typeof contentToRender === 'string') {
+    let pIdx = 0
+    return contentToRender.replace(/<p\b([^>]*)>/gi, (match, attrs) => {
+      const isCurrent = isSpeaking.value && currentParagraphIndex.value === pIdx
+      const cls = `tts-paragraph ${isCurrent ? 'tts-active-paragraph' : ''}`
+      const res = `<p id="para-${pIdx}" class="${cls}" ${attrs}>`
+      pIdx++
+      return res
+    })
+  }
 
   if (Array.isArray(contentToRender)) {
+    let pIdx = 0
     return contentToRender.map(item => {
       if (item.type === 'image') {
         return `<div class="my-6 text-center"><img src="/_novels/${slug}/${item.value}" class="rounded-xl max-h-[600px] mx-auto shadow-md" loading="lazy" /></div>`
       }
-      return `<p class="mb-4 leading-relaxed">${item.value}</p>`
+      const isCurrent = isSpeaking.value && currentParagraphIndex.value === pIdx
+      const html = `<p id="para-${pIdx}" class="mb-4 leading-relaxed tts-paragraph ${isCurrent ? 'tts-active-paragraph' : ''}">${item.value}</p>`
+      pIdx++
+      return html
     }).join('')
   }
 
   if (contentToRender.content && Array.isArray(contentToRender.content)) {
+    let pIdx = 0
     return contentToRender.content.map((item: any) => {
       if (item.type === 'image') {
         return `<div class="my-6 text-center"><img src="/_novels/${slug}/${item.value}" class="rounded-xl max-h-[600px] mx-auto shadow-md" loading="lazy" /></div>`
       }
-      return `<p class="mb-4 leading-relaxed">${item.value}</p>`
+      const isCurrent = isSpeaking.value && currentParagraphIndex.value === pIdx
+      const html = `<p id="para-${pIdx}" class="mb-4 leading-relaxed tts-paragraph ${isCurrent ? 'tts-active-paragraph' : ''}">${item.value}</p>`
+      pIdx++
+      return html
     }).join('')
   }
 
@@ -1144,6 +1325,7 @@ async function loadChapter() {
 
 onMounted(() => {
   uiStore.initPreferences()
+  checkOfflineCache()
   void loadChapter()
   if (typeof window !== 'undefined') {
     window.addEventListener('scroll', handleScroll)
@@ -1161,12 +1343,17 @@ onBeforeUnmount(() => {
   }
 })
 
-watch(() => route.params.chapter, (next) => { if (typeof next === 'string') void loadChapter() })
+watch(() => route.params.chapter, (next) => { 
+  if (typeof next === 'string') {
+    checkOfflineCache()
+    void loadChapter() 
+  }
+})
 </script>
 
 <style scoped>
 .spinner { width: 1.5rem; height: 1.5rem; border: 3px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin .8s linear infinite; }
-.prose :deep(p) { margin-bottom: 1.25rem; line-height: 1.8; }
+.prose :deep(p) { margin-bottom: 1.25rem; transition: all 0.25s ease; }
 .prose :deep(p:last-child) { margin-bottom: 0; }
 .prose :deep(.search-highlight) {
   background-color: rgba(245, 158, 11, 0.3);
@@ -1182,6 +1369,15 @@ watch(() => route.params.chapter, (next) => { if (typeof next === 'string') void
   font-weight: bold;
   box-shadow: 0 0 12px rgba(245, 158, 11, 0.9);
   border-radius: 4px;
+}
+.prose :deep(.tts-active-paragraph) {
+  background-color: rgba(245, 158, 11, 0.15) !important;
+  border-left: 4px solid #f59e0b !important;
+  padding-left: 0.75rem !important;
+  border-radius: 0 8px 8px 0 !important;
+  box-shadow: 0 0 15px rgba(245, 158, 11, 0.2) !important;
+  color: #fbbf24 !important;
+  font-weight: 500;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 </style>
