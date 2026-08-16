@@ -116,6 +116,56 @@
         </div>
       </div>
 
+      <!-- Module 2 Suite: A-B Loop Repeat, Frame Stepping, Screenshot & Equalizer Toolbar -->
+      <div class="bg-card/70 border border-border/70 p-3.5 rounded-2xl shadow-lg backdrop-blur-xl mb-4 flex flex-wrap items-center justify-between gap-3">
+        <!-- A-B Loop Controls -->
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="text-xs text-muted-foreground font-semibold">🔁 A-B Loop:</span>
+          <button 
+            @click="setABPointA" 
+            :class="['px-2.5 py-1 rounded-xl text-xs font-mono font-bold border transition-all', abPointA !== null ? 'bg-amber-500/20 text-amber-300 border-amber-500/40' : 'bg-background border-border text-foreground hover:bg-card']"
+          >
+            🅰️ {{ abPointA !== null ? formatTime(abPointA) : 'Point A' }}
+          </button>
+          <button 
+            @click="setABPointB" 
+            :class="['px-2.5 py-1 rounded-xl text-xs font-mono font-bold border transition-all', abPointB !== null ? 'bg-amber-500/20 text-amber-300 border-amber-500/40' : 'bg-background border-border text-foreground hover:bg-card']"
+          >
+            🅱️ {{ abPointB !== null ? formatTime(abPointB) : 'Point B' }}
+          </button>
+          <button 
+            v-if="abPointA !== null || abPointB !== null" 
+            @click="clearABLoop" 
+            class="px-2 py-1 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-medium hover:bg-rose-500/20"
+          >
+            ✕ Clear Loop
+          </button>
+        </div>
+
+        <!-- Frame Stepping & Screenshot & Equalizer Actions -->
+        <div class="flex items-center gap-2 flex-wrap">
+          <!-- Frame Stepping -->
+          <div class="flex items-center gap-1 bg-background border border-border rounded-xl p-1">
+            <button @click="stepFrame(-1)" class="px-2 py-0.5 rounded text-xs font-mono text-muted-foreground hover:text-foreground hover:bg-card" title="Mundur 1 Frame (0.04s) [Hotkey: ,] ">
+              ⏮ Frame-
+            </button>
+            <button @click="stepFrame(1)" class="px-2 py-0.5 rounded text-xs font-mono text-muted-foreground hover:text-foreground hover:bg-card" title="Maju 1 Frame (0.04s) [Hotkey: .] ">
+              Frame+ ⏭
+            </button>
+          </div>
+
+          <!-- Screenshot Button -->
+          <button @click="captureVideoScreenshot" class="px-3 py-1.5 rounded-xl bg-sky-500/10 text-sky-300 border border-sky-500/30 hover:bg-sky-500/20 text-xs font-semibold flex items-center gap-1.5 shadow-sm active:scale-95">
+            <span>📸</span> Screenshot Frame
+          </button>
+
+          <!-- Equalizer Button -->
+          <button @click="showEqualizerModal = true" class="px-3 py-1.5 rounded-xl bg-purple-500/10 text-purple-300 border border-purple-500/30 hover:bg-purple-500/20 text-xs font-semibold flex items-center gap-1.5 shadow-sm active:scale-95">
+            <span>🎛️</span> Equalizer Audio 5-Band
+          </button>
+        </div>
+      </div>
+
       <!-- Subtitle Sync & Custom Subtitle Loader Toolbar -->
       <div class="bg-card/60 border border-border/60 p-4 rounded-2xl shadow-lg backdrop-blur-xl mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <!-- Subtitle Loader -->
@@ -302,6 +352,95 @@
       </div>
     </div>
 
+    <!-- Web Audio API 5-Band Equalizer Modal -->
+    <div v-if="showEqualizerModal" @click.self="showEqualizerModal = false" class="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
+      <div class="bg-card border border-border rounded-3xl max-w-md w-full p-6 shadow-2xl relative space-y-5">
+        <button @click="showEqualizerModal = false" class="absolute top-4 right-4 text-muted-foreground hover:text-foreground text-sm p-1 rounded-lg">✕</button>
+
+        <h3 class="text-base font-bold text-foreground flex items-center gap-2">
+          <span>🎛️</span> Equalizer Audio 5-Band (Web Audio API)
+        </h3>
+
+        <!-- Presets Pills -->
+        <div>
+          <label class="block text-xs font-semibold text-muted-foreground mb-2">Preset Equalizer:</label>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <button 
+              @click="applyEqPreset('flat')" 
+              :class="['py-2 px-3 rounded-xl text-xs font-bold border transition-all text-center', eqPreset === 'flat' ? 'bg-primary text-white border-primary shadow-md' : 'bg-background border-border text-foreground hover:bg-card']"
+            >
+              Flat
+            </button>
+            <button 
+              @click="applyEqPreset('vocal')" 
+              :class="['py-2 px-3 rounded-xl text-xs font-bold border transition-all text-center', eqPreset === 'vocal' ? 'bg-primary text-white border-primary shadow-md' : 'bg-background border-border text-foreground hover:bg-card']"
+            >
+              🗣️ Vocal Boost
+            </button>
+            <button 
+              @click="applyEqPreset('bass')" 
+              :class="['py-2 px-3 rounded-xl text-xs font-bold border transition-all text-center', eqPreset === 'bass' ? 'bg-primary text-white border-primary shadow-md' : 'bg-background border-border text-foreground hover:bg-card']"
+            >
+              🔊 Bass Boost
+            </button>
+            <button 
+              @click="applyEqPreset('cinema')" 
+              :class="['py-2 px-3 rounded-xl text-xs font-bold border transition-all text-center', eqPreset === 'cinema' ? 'bg-primary text-white border-primary shadow-md' : 'bg-background border-border text-foreground hover:bg-card']"
+            >
+              🎬 Cinema
+            </button>
+          </div>
+        </div>
+
+        <!-- 5 Frequency Sliders -->
+        <div class="space-y-4 pt-2 border-t border-border/50">
+          <div>
+            <div class="flex justify-between text-xs mb-1">
+              <span class="text-muted-foreground font-semibold">Sub Bass (60 Hz):</span>
+              <span class="font-mono font-bold text-primary">{{ eqBands.b60 > 0 ? `+${eqBands.b60}` : eqBands.b60 }} dB</span>
+            </div>
+            <input type="range" min="-12" max="12" step="1" v-model.number="eqBands.b60" @input="updateEqualizer" class="w-full h-1.5 bg-background rounded-lg appearance-none cursor-pointer accent-primary" />
+          </div>
+
+          <div>
+            <div class="flex justify-between text-xs mb-1">
+              <span class="text-muted-foreground font-semibold">Bass (250 Hz):</span>
+              <span class="font-mono font-bold text-primary">{{ eqBands.b250 > 0 ? `+${eqBands.b250}` : eqBands.b250 }} dB</span>
+            </div>
+            <input type="range" min="-12" max="12" step="1" v-model.number="eqBands.b250" @input="updateEqualizer" class="w-full h-1.5 bg-background rounded-lg appearance-none cursor-pointer accent-primary" />
+          </div>
+
+          <div>
+            <div class="flex justify-between text-xs mb-1">
+              <span class="text-muted-foreground font-semibold">Midrange (1 kHz):</span>
+              <span class="font-mono font-bold text-primary">{{ eqBands.b1000 > 0 ? `+${eqBands.b1000}` : eqBands.b1000 }} dB</span>
+            </div>
+            <input type="range" min="-12" max="12" step="1" v-model.number="eqBands.b1000" @input="updateEqualizer" class="w-full h-1.5 bg-background rounded-lg appearance-none cursor-pointer accent-primary" />
+          </div>
+
+          <div>
+            <div class="flex justify-between text-xs mb-1">
+              <span class="text-muted-foreground font-semibold">Presence / Vocal (4 kHz):</span>
+              <span class="font-mono font-bold text-primary">{{ eqBands.b4000 > 0 ? `+${eqBands.b4000}` : eqBands.b4000 }} dB</span>
+            </div>
+            <input type="range" min="-12" max="12" step="1" v-model.number="eqBands.b4000" @input="updateEqualizer" class="w-full h-1.5 bg-background rounded-lg appearance-none cursor-pointer accent-primary" />
+          </div>
+
+          <div>
+            <div class="flex justify-between text-xs mb-1">
+              <span class="text-muted-foreground font-semibold">Treble (12 kHz):</span>
+              <span class="font-mono font-bold text-primary">{{ eqBands.b12000 > 0 ? `+${eqBands.b12000}` : eqBands.b12000 }} dB</span>
+            </div>
+            <input type="range" min="-12" max="12" step="1" v-model.number="eqBands.b12000" @input="updateEqualizer" class="w-full h-1.5 bg-background rounded-lg appearance-none cursor-pointer accent-primary" />
+          </div>
+        </div>
+
+        <button @click="showEqualizerModal = false" class="w-full py-2.5 bg-primary hover:bg-primary/90 text-white rounded-xl text-xs font-bold shadow-lg transition-all">
+          Selesai & Terapkan
+        </button>
+      </div>
+    </div>
+
     <!-- Keyboard Shortcuts Modal -->
     <div v-if="showShortcutsModal" @click.self="showShortcutsModal = false" class="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
       <div class="bg-card border border-border rounded-3xl max-w-sm w-full p-6 shadow-2xl relative">
@@ -402,6 +541,130 @@ const customSubtitleUrl = ref<string | null>(null)
 const customSubtitleLabel = ref<string | null>(null)
 const subtitleDelay = ref(0)
 let rawVttContent = ''
+
+// Module 2 Suite: A-B Loop State
+const abPointA = ref<number | null>(null)
+const abPointB = ref<number | null>(null)
+
+// Module 2 Suite: Equalizer 5-Band State
+const showEqualizerModal = ref(false)
+const eqPreset = ref<'flat' | 'vocal' | 'bass' | 'cinema'>('flat')
+const eqBands = ref({
+  b60: 0,
+  b250: 0,
+  b1000: 0,
+  b4000: 0,
+  b12000: 0
+})
+
+let audioCtx: AudioContext | null = null
+let eqFilters: BiquadFilterNode[] = []
+
+function initEqualizer() {
+  if (!videoElement.value || audioCtx) return
+  try {
+    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext
+    audioCtx = new AudioCtx()
+    const source = audioCtx.createMediaElementSource(videoElement.value)
+
+    const freqs = [60, 250, 1000, 4000, 12000]
+    eqFilters = freqs.map(f => {
+      const filter = audioCtx!.createBiquadFilter()
+      filter.type = f <= 60 ? 'lowshelf' : f >= 12000 ? 'highshelf' : 'peaking'
+      filter.frequency.value = f
+      filter.gain.value = 0
+      return filter
+    })
+
+    source.connect(eqFilters[0])
+    for (let i = 0; i < eqFilters.length - 1; i++) {
+      eqFilters[i].connect(eqFilters[i + 1])
+    }
+    eqFilters[eqFilters.length - 1].connect(audioCtx.destination)
+  } catch (e) {
+    console.error('Equalizer init failed:', e)
+  }
+}
+
+function updateEqualizer() {
+  if (!audioCtx) initEqualizer()
+  if (eqFilters.length === 5) {
+    eqFilters[0].gain.value = eqBands.value.b60
+    eqFilters[1].gain.value = eqBands.value.b250
+    eqFilters[2].gain.value = eqBands.value.b1000
+    eqFilters[3].gain.value = eqBands.value.b4000
+    eqFilters[4].gain.value = eqBands.value.b12000
+  }
+}
+
+function applyEqPreset(preset: 'flat' | 'vocal' | 'bass' | 'cinema') {
+  eqPreset.value = preset
+  if (preset === 'flat') {
+    eqBands.value = { b60: 0, b250: 0, b1000: 0, b4000: 0, b12000: 0 }
+  } else if (preset === 'vocal') {
+    eqBands.value = { b60: -3, b250: 0, b1000: 4, b4000: 6, b12000: 2 }
+  } else if (preset === 'bass') {
+    eqBands.value = { b60: 7, b250: 5, b1000: 0, b4000: -2, b12000: -3 }
+  } else if (preset === 'cinema') {
+    eqBands.value = { b60: 4, b250: 2, b1000: -1, b4000: 3, b12000: 5 }
+  }
+  updateEqualizer()
+}
+
+function setABPointA() {
+  if (!videoElement.value) return
+  abPointA.value = videoElement.value.currentTime
+  if (abPointB.value !== null && abPointB.value <= abPointA.value) {
+    abPointB.value = null
+  }
+  success(`Titik A diatur di ${formatTime(abPointA.value)}`)
+}
+
+function setABPointB() {
+  if (!videoElement.value) return
+  if (abPointA.value === null) {
+    showError('Atur Titik A terlebih dahulu sebelum Titik B.')
+    return
+  }
+  if (videoElement.value.currentTime <= abPointA.value) {
+    showError('Titik B harus setelah Titik A.')
+    return
+  }
+  abPointB.value = videoElement.value.currentTime
+  success(`Titik B diatur di ${formatTime(abPointB.value)}. Loop aktif!`)
+}
+
+function clearABLoop() {
+  abPointA.value = null
+  abPointB.value = null
+  success('A-B Loop dinonaktifkan.')
+}
+
+function stepFrame(frames: number) {
+  if (!videoElement.value) return
+  videoElement.value.currentTime = Math.max(0, videoElement.value.currentTime + frames * 0.04)
+}
+
+function captureVideoScreenshot() {
+  if (!videoElement.value) return
+  try {
+    const canvas = document.createElement('canvas')
+    canvas.width = videoElement.value.videoWidth || 1280
+    canvas.height = videoElement.value.videoHeight || 720
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+    ctx.drawImage(videoElement.value, 0, 0, canvas.width, canvas.height)
+
+    const dataUrl = canvas.toDataURL('image/png')
+    const a = document.createElement('a')
+    a.href = dataUrl
+    a.download = `frame-${video.value?.name || 'video'}-${formatTime(videoElement.value.currentTime).replace(':', 'm')}s.png`
+    a.click()
+    success('Berhasil menyimpan tangkapan layar (frame screenshot)!')
+  } catch (e) {
+    showError('Gagal mengambil tangkapan layar video.')
+  }
+}
 
 const mimeType = computed(() => {
   if (!video.value) return 'video/mp4'
@@ -529,6 +792,12 @@ function onTimeUpdate() {
   const dur = videoElement.value.duration || 0
   currentTime.value = cur
   videoDuration.value = dur
+
+  // Check A-B Loop Repeat
+  if (abPointA.value !== null && abPointB.value !== null && cur >= abPointB.value) {
+    videoElement.value.currentTime = abPointA.value
+    return
+  }
 
   if (cur > 5) {
     localStorage.setItem(`video_resume_${videoId.value}`, String(cur))
@@ -719,6 +988,10 @@ function handleGlobalKeydown(e: KeyboardEvent) {
     togglePictureInPicture()
   } else if (e.key === 'b' || e.key === 'B') {
     openAddBookmarkModal()
+  } else if (e.key === ',') {
+    stepFrame(-1)
+  } else if (e.key === '.') {
+    stepFrame(1)
   }
 }
 

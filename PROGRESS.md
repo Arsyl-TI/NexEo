@@ -262,3 +262,13 @@
   - **TTS Sentence/Paragraph Live Highlighting & Auto-scroll**: Paragraphs are tagged with `id="para-X"`. When TTS reads, the active paragraph is styled with glowing amber borders & luminous fill (`.tts-active-paragraph`), and automatically scrolled into middle view (`scrollIntoView({ behavior: 'smooth', block: 'center' })`).
   - **Typography & Theme Engine Customizer**: Added 🎨 **Font & Tampilan** modal with font options (`System Sans`, `Georgia Serif`, `OpenDyslexic`, `Monospace`), line-height slider (`1.2` - `2.4`), content max-width slider (`600px` - `1200px`), and 4 themes (`Paper White`, `Warm Sepia`, `Solarized Green`, `Midnight Dark`).
   - **1-Click Offline Chapter Caching**: Added 💾 **Simpan Offline** button storing chapter data in browser `localStorage` with `✓ Offline` status badge for 100% offline reading without internet.
+
+---
+
+## Feature 24 (Module 2 Upgrade): Video Player & Streaming Suite Overhaul (Frame Screenshot Exporter, A-B Loop Repeat & Frame Stepping, Web Audio 5-Band Equalizer)
+- **Files Modified**:
+  - `apps/frontend-nuxt/pages/video/[id].vue`
+- **Implementation Highlights**:
+  - **1-Click Frame Screenshot Exporter**: Added 📸 **Screenshot Frame** button capturing current video frame on canvas and saving as PNG image download.
+  - **A-B Loop Repeat & Frame Stepping**: Added 🅰️ **Point A** & 🅱️ **Point B** loop markers with auto-seek loop repeat, plus ⏮ `,` / `.` ⏭ frame-by-frame precision stepping (0.04s per frame).
+  - **Web Audio API 5-Band Equalizer Suite**: Integrated 5 Biquad Filter audio chain (60Hz, 250Hz, 1kHz, 4kHz, 12kHz) with 🗣️ `Vocal Boost`, 🔊 `Bass Boost`, 🎬 `Cinema`, and `Flat` presets.

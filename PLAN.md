@@ -1,13 +1,13 @@
-# Technical Execution Plan: Module 1 - Novel & Reader Engine Suite
+# Technical Execution Plan: Module 2 - Video Player & Streaming Suite
 
 ## Goal
-Implement Module 1 upgrades for the Novel Reader (`pages/novels/[slug]/[chapter].vue`):
-1. **TTS Real-time Sentence/Paragraph Highlighting & Smooth Auto-Scroll**: Highlight active paragraph during TTS reading and auto-scroll into center view.
-2. **Typography & Theme Engine Customizer**: Add font switcher (Sans, Serif, OpenDyslexic, Monospace), line-height slider (1.2-2.5), content width adjuster, and 4 color themes (Paper White, Warm Sepia, Solarized, Midnight Dark).
-3. **Offline Chapter Caching Suite**: 1-click offline caching of chapter content to browser storage with offline indicator.
+Implement Module 2 upgrades for the Video Player (`apps/frontend-nuxt/pages/video/[id].vue`):
+1. **Video Screenshot & Frame Capture**: 1-click 📸 screenshot button to save current video frame as PNG.
+2. **A/B Loop Repeat & Frame-by-Frame Navigation**: Set Point A and Point B for continuous loop playback, plus `,` / `.` frame-by-frame stepping buttons.
+3. **Web Audio API 5-Band Equalizer Suite**: Integrated 5-band Biquad filter audio chain (60Hz, 250Hz, 1kHz, 4kHz, 12kHz) with Vocal Boost, Bass Boost, Cinema, and Flat presets.
 
 ## Files to Modify:
-- `apps/frontend-nuxt/pages/novels/[slug]/[chapter].vue`
+- `apps/frontend-nuxt/pages/video/[id].vue`
 
 ## Verification:
 - Monorepo typecheck: `pnpm turbo run typecheck`
